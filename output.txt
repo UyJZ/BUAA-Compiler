@@ -1,6 +1,26 @@
-PLUS +
-PLUS +
-PLUS +
-PLUS +
-PLUS +
-INTCON 66
+INTTK int
+MAINTK main
+LPARENT (
+RPARENT )
+LBRACE {
+IDENFR x
+<LVal>
+ASSIGN =
+GETINTTK getint
+RPARENT )
+SEMICN ;
+<Stmt>
+RETURNTK return
+INTCON 0
+<Number>
+<PrimaryExp>
+<UnaryExp>
+<MulExp>
+<AddExp>
+<Exp>
+SEMICN ;
+<Stmt>
+RBRACE }
+<Block>
+<MainFuncDef>
+<CompUnit>

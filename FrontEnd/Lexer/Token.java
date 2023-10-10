@@ -1,4 +1,6 @@
-package FrontEnd.lexer;
+package FrontEnd.Lexer;
+
+import Enums.tokenType;
 
 public class Token {
 
@@ -11,8 +13,16 @@ public class Token {
         this.type = type;
     }
 
+    public tokenType getType() {
+        return type;
+    }
+
     @Override
     public String toString() {
-        return  type.toString() + " " + value;
+        return type.toString() + " " + value;
+    }
+
+    public String typeString() {
+        return type.toString();
     }
 }

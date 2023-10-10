@@ -1,3 +1,5 @@
-                    ++++
-
-                       +66
+int main()
+{
+    x = getint();
+    return 0;
+}
