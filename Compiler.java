@@ -1,5 +1,8 @@
-import FrontEnd.lexer.Lexer;
-import FrontEnd.lexer.Token;
+import FrontEnd.Lexer.Lexer;
+import FrontEnd.Lexer.Token;
+import FrontEnd.Nodes.Node;
+import FrontEnd.Parser.ParserController;
+import FrontEnd.WordList;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -8,14 +11,16 @@ public class Compiler {
     public static void main(String[] args) throws IOException {
         StringBuilder stringBuilder = readFile("./testfile.txt");
         Lexer lexer = new Lexer(stringBuilder);
-        ArrayList<Token> tokens = lexer.analysisLexer();
-        FileWriter fileWriter = new FileWriter("./output.txt");
-        PrintWriter printWriter = new PrintWriter(fileWriter);
-        for (Token token : tokens) {
-            printWriter.println(token);
-        }
-        printWriter.close();
-        fileWriter.close();
+        lexer.analysisLexer();
+        //ArrayList<Token> tokens = lexer.analysisLexer();
+        //hw2 LexerAnalysis:
+        //LexerAnalysis(stringBuilder, tokens);
+        //hw3 ParserAnalysis:
+        FileOutputStream fos = new FileOutputStream("output.txt");
+        PrintStream ps = new PrintStream(fos);
+        ParserController parserController = new ParserController(lexer.getTokenStream());
+        Node c = parserController.parse();
+        c.print(ps);
     }
 
     private static StringBuilder readFile(String filePath) throws FileNotFoundException {
@@ -33,5 +38,25 @@ public class Compiler {
             e.printStackTrace();
         }
         return stringBuffer;
+    }
+
+    public static void LexerAnalysis(StringBuilder stringBuilder, ArrayList<Token> tokens) throws IOException {
+        FileWriter fileWriter = new FileWriter("./output.txt");
+        PrintWriter printWriter = new PrintWriter(fileWriter);
+        for (Token token : tokens) {
+            printWriter.println(token);
+        }
+        printWriter.close();
+        fileWriter.close();
+    }
+
+    public static void ParserAnalysis(StringBuilder stringBuilder, ArrayList<Token> tokens) throws IOException {
+        FileWriter fileWriter = new FileWriter("./output.txt");
+        PrintWriter printWriter = new PrintWriter(fileWriter);
+        for (Token token : tokens) {
+            printWriter.println(token);
+        }
+        printWriter.close();
+        fileWriter.close();
     }
 }

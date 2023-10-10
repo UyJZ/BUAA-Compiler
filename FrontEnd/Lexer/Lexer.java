@@ -1,4 +1,6 @@
-package FrontEnd.lexer;
+package FrontEnd.Lexer;
+
+import Enums.tokenType;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -11,6 +13,8 @@ public class Lexer {
     private static final String spaces = "\0\n\t ";
 
     private final ArrayList<Token> tokens;
+
+    private final TokenStream tokenStream;
 
     private static final Map<String, tokenType> OPERATOR_MAP = new LinkedHashMap<>();
 
@@ -47,6 +51,7 @@ public class Lexer {
         pos = 0;
         lines = 0;
         tokens = new ArrayList<>();
+        tokenStream = new TokenStream(new ArrayList<>());
     }
 
     private int lines;
@@ -197,15 +202,23 @@ public class Lexer {
         return null;
     }
 
-    public ArrayList<Token> analysisLexer() {
+    public void analysisLexer() {
         while (true) {
             Token token = nextToken();
             if (token == null) {
                 break;
             }
             tokens.add(token);
+            tokenStream.addToken(token);
         }
+    }
+
+    public ArrayList<Token> getTokens() {
         return tokens;
+    }
+
+    public TokenStream getTokenStream() {
+        return tokenStream;
     }
 
 }

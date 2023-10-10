@@ -1,4 +1,4 @@
-package FrontEnd.lexer;
+package Enums;
 
 public enum tokenType {
     IDENFR, INTCON, STRCON, MAINTK, CONSTTK, INTTK, BREAKTK, CONTINUETK, IFTK, ELSETK, NOT, AND, OR, FORTK,
