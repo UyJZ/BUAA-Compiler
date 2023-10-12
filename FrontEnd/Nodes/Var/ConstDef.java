@@ -5,8 +5,8 @@ import FrontEnd.Nodes.Node;
 
 import java.util.ArrayList;
 
-public class ConsrDef extends Node {
-    public ConsrDef(SyntaxVarType type, ArrayList<Node> children) {
+public class ConstDef extends Node {
+    public ConstDef(SyntaxVarType type, ArrayList<Node> children) {
         super(type, children);
     }
 }
