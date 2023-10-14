@@ -8,4 +8,9 @@ public class Decl extends Node{
     public Decl(SyntaxVarType type, ArrayList<Node> children){
         super(type, children);
     }
+
+    @Override
+    public void checkError() {
+
+    }
 }

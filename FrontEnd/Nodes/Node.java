@@ -12,33 +12,31 @@ public class Node {
     protected int startPos;
     protected int endPos;
     protected HashSet<SyntaxVarType> set;
-    protected HashSet<SyntaxVarType> leftSet;
+
+    protected int startLine;
+
+    protected int endLine;
 
     public Node(SyntaxVarType type, ArrayList<Node> children) {
         this.type = type;
         this.children = children;
         set = new HashSet<>();
-        leftSet = new HashSet<>();
         set.add(SyntaxVarType.TOKEN);
         set.add(SyntaxVarType.ILLEGAL);
         set.add(SyntaxVarType.BlockItem);
         set.add(SyntaxVarType.Decl);
         set.add(SyntaxVarType.BType);
-        set.add(SyntaxVarType.Ident);
-        set.add(SyntaxVarType.FormatString);
         set.add(SyntaxVarType.IntConst);
-        leftSet.add(SyntaxVarType.AddExp);
-        leftSet.add(SyntaxVarType.MulExp);
-        leftSet.add(SyntaxVarType.RelExp);
-        leftSet.add(SyntaxVarType.EqExp);
-        leftSet.add(SyntaxVarType.LAndExp);
-        leftSet.add(SyntaxVarType.LOrExp);
         if (children.size() == 0) {
             this.startPos = this.endPos = -1;
             return;
         }
         this.startPos = children.get(0).startPos;
         this.endPos = children.get(children.size() - 1).endPos;
+        if (type != SyntaxVarType.TOKEN) {
+            this.startLine = children.get(0).startLine;
+            this.endLine = children.get(children.size() - 1).endLine;
+        }
     }
 
     public int getSize() {
@@ -61,5 +59,17 @@ public class Node {
         if (!set.contains(type))
             printWriter.println("<" + type.toString() + ">");
         else if (type == SyntaxVarType.TOKEN) printWriter.println(children.get(0).toString());
+    }
+
+    public int getStartLine() {
+        return startLine;
+    }
+
+    public int getEndLine() {
+        return endLine;
+    }
+
+    public void checkError() {
+        for (Node child : children) child.checkError();
     }
 }

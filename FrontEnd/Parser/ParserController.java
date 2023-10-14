@@ -1,7 +1,10 @@
 package FrontEnd.Parser;
 
+import Enums.ErrorType;
 import Enums.SyntaxVarType;
 import Enums.tokenType;
+import FrontEnd.ErrorManager.Error;
+import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Lexer.Token;
 import FrontEnd.Lexer.TokenStream;
 import FrontEnd.Nodes.Node;
@@ -102,6 +105,7 @@ public class ParserController {
         read();
         if (curToken.getType() != tokenType.RPARENT) {
             unread();
+            ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         Node block = Parse_Block();
@@ -179,7 +183,8 @@ public class ParserController {
         read();
         if (curToken.getType() != tokenType.SEMICN) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.l));
+            return NodeGenerator.generateNode(SyntaxVarType.ConstDecl, children);
         } else {
             children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             return NodeGenerator.generateNode(SyntaxVarType.ConstDecl, children);
@@ -194,12 +199,14 @@ public class ParserController {
             unread(bType.getSize());
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
         }
+        int defNum = 0;
         Node varDef = Parse_VarDef();
         if (varDef.getType() != SyntaxVarType.ILLEGAL) children.add(varDef);
         else {
             unread(varDef.getSize());
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
         }
+        defNum++;
         while (true) {
             ArrayList<Node> list = new ArrayList<>();
             read();
@@ -215,11 +222,17 @@ public class ParserController {
                 break;
             }
             children.addAll(list);
+            defNum++;
         }
         read();
         if (curToken.getType() != tokenType.SEMICN) {
+            if (curToken.getType() == tokenType.LPARENT && defNum == 1) {
+                unread();
+                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            }
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.i));
+            return NodeGenerator.generateNode(SyntaxVarType.VarDecl, children);
         } else {
             children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             return NodeGenerator.generateNode(SyntaxVarType.VarDecl, children);
@@ -259,7 +272,8 @@ public class ParserController {
             read();
             if (curToken.getType() != tokenType.RBRACK) {
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
+                return NodeGenerator.generateNode(SyntaxVarType.ConstDef, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
         read();
@@ -282,8 +296,7 @@ public class ParserController {
         if (curToken.getType() != tokenType.IDENFR) {
             unread();
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-        } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        return NodeGenerator.generateNode(SyntaxVarType.Ident, children);
+        } else return NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint());
     }
 
     public Node Parse_ConstExp() {
@@ -334,7 +347,7 @@ public class ParserController {
                 unread(constInitVal.getSize());
                 read();
                 if (curToken.getType() == tokenType.RBRACE) {
-                    children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                    children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                     return NodeGenerator.generateNode(SyntaxVarType.ConstInitVal, children);
                 }
                 unread();
@@ -357,7 +370,7 @@ public class ParserController {
             if (curToken.getType() != tokenType.LBRACK) {
                 unread();
                 break;
-            } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+            } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             Node constExp = Parse_ConstExp();
             if (constExp.getType() != SyntaxVarType.ILLEGAL) children.add(constExp);
             else {
@@ -367,14 +380,15 @@ public class ParserController {
             read();
             if (curToken.getType() != tokenType.RBRACK) {
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-            } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
+                return NodeGenerator.generateNode(SyntaxVarType.VarDef, children);
+            } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
         read();
         if (curToken.getType() != tokenType.ASSIGN) {
             unread();
             return NodeGenerator.generateNode(SyntaxVarType.VarDef, children);
-        } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+        } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         Node initVal = Parse_InitVal();
         if (initVal.getType() != SyntaxVarType.ILLEGAL) children.add(initVal);
         else {
@@ -394,7 +408,7 @@ public class ParserController {
             if (curToken.getType() != tokenType.LBRACE) {
                 unread();
                 return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-            } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+            } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             Node initVal = Parse_InitVal();
             if (initVal.getType() != SyntaxVarType.ILLEGAL) {
                 children.add(initVal);
@@ -403,7 +417,7 @@ public class ParserController {
                     if (curToken.getType() != tokenType.COMMA) {
                         unread();
                         break;
-                    } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                    } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                     initVal = Parse_InitVal();
                     if (initVal.getType() != SyntaxVarType.ILLEGAL) children.add(initVal);
                     else {
@@ -415,13 +429,13 @@ public class ParserController {
                 if (curToken.getType() != tokenType.RBRACE) {
                     unread();
                     return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-                } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 return NodeGenerator.generateNode(SyntaxVarType.InitVal, children);
             } else {
                 unread(initVal.getSize());
                 read();
                 if (curToken.getType() == tokenType.RBRACE) {
-                    children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                    children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                     return NodeGenerator.generateNode(SyntaxVarType.InitVal, children);
                 }
                 unread();
@@ -446,7 +460,7 @@ public class ParserController {
         ArrayList<Node> children = new ArrayList<>();
         read();
         if (curToken.getType() == tokenType.VOIDTK || curToken.getType() == tokenType.INTTK)
-            children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+            children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         else {
             unread();
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
@@ -467,7 +481,7 @@ public class ParserController {
             if (curToken.getType() != tokenType.COMMA) {
                 unread();
                 break;
-            } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+            } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             funcFParam = Parse_FuncFParam();
             if (funcFParam.getType() != SyntaxVarType.ILLEGAL) children.add(funcFParam);
             else {
@@ -484,7 +498,7 @@ public class ParserController {
         if (curToken.getType() != tokenType.LBRACE) {
             unread();
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-        } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+        } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         while (true) {
             Node blockItem = Parse_BlockItem();
             if (blockItem.getType() != SyntaxVarType.ILLEGAL) children.add(blockItem);
@@ -497,7 +511,7 @@ public class ParserController {
         if (curToken.getType() != tokenType.RBRACE) {
             unread();
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-        } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+        } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         return NodeGenerator.generateNode(SyntaxVarType.Block, children);
     }
 
@@ -519,18 +533,19 @@ public class ParserController {
         if (curToken.getType() != tokenType.LBRACK) {
             unread();
             return NodeGenerator.generateNode(SyntaxVarType.FuncFParam, children);
-        } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+        } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         read();
         if (curToken.getType() != tokenType.RBRACK) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-        } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+            ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
+            return NodeGenerator.generateNode(SyntaxVarType.FuncFParam, children);
+        } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         while (true) {
             read();
             if (curToken.getType() != tokenType.LBRACK) {
                 unread();
                 break;
-            } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+            } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             Node constExp = Parse_ConstExp();
             if (constExp.getType() != SyntaxVarType.ILLEGAL) children.add(constExp);
             else {
@@ -540,8 +555,9 @@ public class ParserController {
             read();
             if (curToken.getType() != tokenType.RBRACK) {
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-            } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
+                return NodeGenerator.generateNode(SyntaxVarType.FuncFParam, children);
+            } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
         return NodeGenerator.generateNode(SyntaxVarType.FuncFParam, children);
     }
@@ -562,15 +578,29 @@ public class ParserController {
         return NodeGenerator.generateNode(SyntaxVarType.BlockItem, children);
     }
 
+    private Node Parse_SEMICN(ArrayList<Node> children, SyntaxVarType type) {
+        read();
+        if (curToken.getType() != tokenType.SEMICN) {
+            unread();
+            ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.i));
+            return NodeGenerator.generateNode(type, children);
+        } else {
+            children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
+            return NodeGenerator.generateNode(type, children);
+        }
+    }
+
     public Node Parse_Stmt() {
         ArrayList<Node> children = new ArrayList<>();
         read();
         switch (curToken.getType()) {
             case SEMICN -> {
+                //Parse ';'
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                return NodeGenerator.generateNode(SyntaxVarType.Stmt, children);
+                return NodeGenerator.generateNode(SyntaxVarType.ExpStmt, children);
             }
             case IFTK -> {
+                //Parse 'if' '(' Cond ')' Stmt ['else' Stmt]
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 read();
                 if (curToken.getType() != tokenType.LPARENT) {
@@ -597,7 +627,7 @@ public class ParserController {
                 read();
                 if (curToken.getType() != tokenType.ELSETK) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.Stmt, children);
+                    return NodeGenerator.generateNode(SyntaxVarType.IfStmt, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 Node stmt2 = Parse_Stmt();
                 if (stmt2.getType() != SyntaxVarType.ILLEGAL) children.add(stmt2);
@@ -605,9 +635,10 @@ public class ParserController {
                     unread(stmt2.getSize());
                     return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
                 }
-                return NodeGenerator.generateNode(SyntaxVarType.Stmt, children);
+                return NodeGenerator.generateNode(SyntaxVarType.IfStmt, children);
             }
             case FORTK -> {
+                //Parse  'for' '(' [ForStmt] ';' [Cond] ';' [forStmt] ')' Stmt
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 read();
                 if (curToken.getType() != tokenType.LPARENT) {
@@ -644,34 +675,28 @@ public class ParserController {
                     unread(stmt3.getSize());
                     return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
                 }
-                return NodeGenerator.generateNode(SyntaxVarType.Stmt, children);
+                return NodeGenerator.generateNode(SyntaxVarType.ForLoopStmt, children);
             }
-            case BREAKTK, CONTINUETK -> {
+            case BREAKTK -> {
+                // Parse 'break' ';'
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                read();
-                if (curToken.getType() != tokenType.SEMICN) {
-                    unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-                } else {
-                    children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                    return NodeGenerator.generateNode(SyntaxVarType.Stmt, children);
-                }
+                return Parse_SEMICN(children, SyntaxVarType.BreakStmt);
+            }
+            case CONTINUETK -> {
+                // Parse 'continue' ';'
+                children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
+                return Parse_SEMICN(children, SyntaxVarType.ContinueStmt);
             }
             case RETURNTK -> {
+                // Parse 'return' [Exp] ';'
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 Node exp1 = Parse_Exp();
                 if (exp1.getType() != SyntaxVarType.ILLEGAL) children.add(exp1);
                 else unread(exp1.getSize());
-                read();
-                if (curToken.getType() != tokenType.SEMICN) {
-                    unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-                } else {
-                    children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                    return NodeGenerator.generateNode(SyntaxVarType.Stmt, children);
-                }
+                return Parse_SEMICN(children, SyntaxVarType.ReturnStmt);
             }
             case PRINTFTK -> {
+                // Parse 'printf' '(' [FormatString] [',' Exp] ')' ';'
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 read();
                 if (curToken.getType() != tokenType.LPARENT) {
@@ -701,16 +726,10 @@ public class ParserController {
                 read();
                 if (curToken.getType() != tokenType.RPARENT) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-                } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                read();
-                if (curToken.getType() != tokenType.SEMICN) {
-                    unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-                } else {
-                    children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
+                    ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
                     return NodeGenerator.generateNode(SyntaxVarType.Stmt, children);
-                }
+                } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
+                return Parse_SEMICN(children, SyntaxVarType.PrintfStmt);
             }
             default -> unread();
         }
@@ -723,58 +742,53 @@ public class ParserController {
                 unread(NodeGenerator.generateNode(SyntaxVarType.Stmt, children).getSize());
                 children.clear();
             } else {
-                children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 read();
                 if (curToken.getType() != tokenType.GETINTTK) {
+                    //Parse LVal '=' Exp ';'
                     unread();
                     Node exp3 = Parse_Exp();
-                    if (exp3.getType() != SyntaxVarType.ILLEGAL) children.add(exp3);
-                    else {
+                    if (exp3.getType() != SyntaxVarType.ILLEGAL) {
+                        children.add(exp3);
+                        return Parse_SEMICN(children, SyntaxVarType.AssignStmt);
+                    } else {
                         unread(exp3.getSize());
                         unread(NodeGenerator.generateNode(SyntaxVarType.Stmt, children).getSize());
                         children.clear();
                     }
                 } else {
-                    children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                    //Parse LVal '=' 'getint' '(' ')' ';'
+                    children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                     read();
                     if (curToken.getType() != tokenType.LPARENT) {
                         unread();
                         return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
                     }
-                    children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                    children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                     read();
                     if (curToken.getType() != tokenType.RPARENT) {
                         unread();
-                        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-                    }
-                    children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
-                    read();
-                    if (curToken.getType() != tokenType.SEMICN) {
-                        unread();
-                        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-                    } else {
-                        children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                        ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
                         return NodeGenerator.generateNode(SyntaxVarType.Stmt, children);
                     }
+                    children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
+                    return Parse_SEMICN(children, SyntaxVarType.GetIntStmt);
                 }
             }
         }
         Node block = Parse_Block();
+        //Parse Block
         if (block.getType() != SyntaxVarType.ILLEGAL) {
             children.add(block);
-            return NodeGenerator.generateNode(SyntaxVarType.Stmt, children);
+            return NodeGenerator.generateNode(SyntaxVarType.BlockStmt, children);
         } else unread(block.getSize());
-        Node exp5 = Parse_Exp();
-        if (exp5.getType() != SyntaxVarType.ILLEGAL) children.add(exp5);
-        else unread(exp5.getSize());
-        read();
-        if (curToken.getType() != tokenType.SEMICN) {
-            unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-        } else {
-            children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
-            return NodeGenerator.generateNode(SyntaxVarType.Stmt, children);
-        }
+        Node exp4 = Parse_Exp();
+        //Parse Exp
+        if (exp4.getType() != SyntaxVarType.ILLEGAL) {
+            children.add(exp4);
+            return Parse_SEMICN(children, SyntaxVarType.ExpStmt);
+        } else unread(exp4.getSize());
+        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
     }
 
     public Node Parse_LVal() {
@@ -790,7 +804,7 @@ public class ParserController {
             if (curToken.getType() != tokenType.LBRACK) {
                 unread();
                 break;
-            } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+            } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             Node exp = Parse_Exp();
             if (exp.getType() != SyntaxVarType.ILLEGAL) children.add(exp);
             else {
@@ -800,8 +814,9 @@ public class ParserController {
             read();
             if (curToken.getType() != tokenType.RBRACK) {
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-            } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
+                return NodeGenerator.generateNode(SyntaxVarType.LVal, children);
+            } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
         return NodeGenerator.generateNode(SyntaxVarType.LVal, children);
     }
@@ -829,7 +844,7 @@ public class ParserController {
         if (curToken.getType() != tokenType.ASSIGN) {
             unread();
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-        } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+        } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         Node exp = Parse_Exp();
         if (exp.getType() != SyntaxVarType.ILLEGAL) children.add(exp);
         else {
@@ -845,8 +860,7 @@ public class ParserController {
         if (curToken.getType() != tokenType.STRCON) {
             unread();
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-        } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
-        return NodeGenerator.generateNode(SyntaxVarType.FormatString, children);
+        } else return NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint());
     }
 
     public Node Parse_AddExp() {
@@ -899,7 +913,7 @@ public class ParserController {
                 before = NodeGenerator.generateNode(SyntaxVarType.LOrExp, new ArrayList<>(children));
                 children.clear();
                 children.add(before);
-                children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             }
             Node lAndExp = Parse_LAndExp();
             if (lAndExp.getType() != SyntaxVarType.ILLEGAL) children.add(lAndExp);
@@ -917,7 +931,7 @@ public class ParserController {
         if (curToken.getType() != tokenType.LPARENT) {
             unread();
         } else {
-            children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+            children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             Node exp = Parse_Exp();
             if (exp.getType() != SyntaxVarType.ILLEGAL) children.add(exp);
             else {
@@ -928,7 +942,7 @@ public class ParserController {
             if (curToken.getType() != tokenType.RPARENT) {
                 unread();
                 return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-            } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+            } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             return NodeGenerator.generateNode(SyntaxVarType.PrimaryExp, children);
         }
         Node lVal = Parse_LVal();
@@ -965,7 +979,7 @@ public class ParserController {
         if (curToken.getType() != tokenType.INTCON) {
             unread();
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-        } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+        } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         return NodeGenerator.generateNode(SyntaxVarType.IntConst, children);
     }
 
@@ -980,15 +994,16 @@ public class ParserController {
                 unread(NodeGenerator.generateNode(SyntaxVarType.UnaryExp, children).getSize());
                 children.clear();
             } else {
-                children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 Node funcRParams = Parse_FuncRParams();
                 if (funcRParams.getType() != SyntaxVarType.ILLEGAL) children.add(funcRParams);
                 else unread(funcRParams.getSize());
                 read();
                 if (curToken.getType() != tokenType.RPARENT) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
-                } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                    ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
+                    return NodeGenerator.generateNode(SyntaxVarType.UnaryExp, children);
+                } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 return NodeGenerator.generateNode(SyntaxVarType.UnaryExp, children);
             }
         } else unread(indent.getSize());
@@ -1139,7 +1154,7 @@ public class ParserController {
                 before = NodeGenerator.generateNode(SyntaxVarType.LAndExp, new ArrayList<>(children));
                 children.clear();
                 children.add(before);
-                children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+                children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 Node eqExp1 = Parse_EqExp();
                 if (eqExp1.getType() != SyntaxVarType.ILLEGAL) children.add(eqExp1);
                 else {
@@ -1166,7 +1181,7 @@ public class ParserController {
             if (curToken.getType() != tokenType.COMMA) {
                 unread();
                 break;
-            } else children.add(NodeGenerator.generateToken( curToken, tokenStream.getWatchPoint()));
+            } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             Node exp1 = Parse_Exp();
             if (exp1.getType() != SyntaxVarType.ILLEGAL) children.add(exp1);
             else {

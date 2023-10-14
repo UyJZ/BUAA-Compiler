@@ -8,9 +8,12 @@ public class Token {
 
     private tokenType type;
 
-    public Token(String token, tokenType type) {
+    private final int line;
+
+    public Token(String token, tokenType type, int line) {
         this.value = token;
         this.type = type;
+        this.line = line;
     }
 
     public tokenType getType() {
@@ -24,5 +27,9 @@ public class Token {
 
     public String typeString() {
         return type.toString();
+    }
+
+    public int getLine() {
+        return line;
     }
 }

@@ -32,7 +32,6 @@ public class NodeGenerator {
             case LVal -> new LVal(type, children);
             case Cond -> new Cond(type, children);
             case ForStmt -> new ForStmt(type, children);
-            case FormatString -> new FormatString(type, children);
             case AddExp -> new AddExp(type, children);
             case LOrExp -> new LOrExp(type, children);
             case PrimaryExp -> new PrimaryExp(type, children);
@@ -48,11 +47,20 @@ public class NodeGenerator {
             case Decl -> new Decl(type, children);
             case BlockItem -> new BlockItem(type, children);
             case Exp -> new Exp(type, children);
-            case Ident -> new Ident(type, children);
             case BType -> new BType(type, children);
             case InitVal -> new InitVal(type, children);
             case ConstExp -> new ConstExp(type, children);
             case ILLEGAL -> new Node(type, children);
+            case AssignStmt -> new AssignStmt(type, children);
+            case ExpStmt -> new ExpStmt(type, children);
+            case IfStmt -> new IfStmt(type, children);
+            case ForLoopStmt -> new ForLoopStmt(type, children);
+            case BreakStmt -> new BreakStmt(type, children);
+            case ContinueStmt -> new ContinueStmt(type, children);
+            case ReturnStmt -> new ReturnStmt(type, children);
+            case PrintfStmt -> new PrintfStmt(type, children);
+            case BlockStmt -> new BlockStmt(type, children);
+            case GetIntStmt -> new GetIntStmt(type, children);
             default -> null;
         };
     }

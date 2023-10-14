@@ -1,5 +1,12 @@
-int main()
+int func1(int a, int b[], int c[][2])
 {
-    x = getint();
+    int d = a*2 + b[0] % 2 + c[0][0] % 3;
+    var1_g = d * (a + 2);
+    ;
+    func2();
+    return 0;
+}
+
+int main() {
     return 0;
 }
