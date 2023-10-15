@@ -1,8 +1,8 @@
+import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Lexer.Lexer;
 import FrontEnd.Lexer.Token;
 import FrontEnd.Nodes.Node;
 import FrontEnd.Parser.ParserController;
-import FrontEnd.WordList;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -20,7 +20,8 @@ public class Compiler {
         PrintStream ps = new PrintStream(fos);
         ParserController parserController = new ParserController(lexer.getTokenStream());
         Node c = parserController.parse();
-        c.print(ps);
+        c.checkError();
+        ErrorChecker.showErrorMsg();
     }
 
     private static StringBuilder readFile(String filePath) throws FileNotFoundException {

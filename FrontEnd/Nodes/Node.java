@@ -1,5 +1,6 @@
 package FrontEnd.Nodes;
 
+import Enums.FuncType;
 import Enums.SyntaxVarType;
 
 import java.io.PrintStream;
@@ -71,5 +72,9 @@ public class Node {
 
     public void checkError() {
         for (Node child : children) child.checkError();
+    }
+
+    public int getDim() {
+        return -1;
     }
 }

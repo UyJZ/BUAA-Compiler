@@ -6,6 +6,7 @@ import Enums.tokenType;
 import FrontEnd.ErrorManager.Error;
 import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Lexer.Token;
+import FrontEnd.Symbol.SymbolManager;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -25,6 +26,19 @@ public class TokenNode extends Node {
     @Override
     public String toString() {
         return token.toString();
+    }
+
+    public String getIdentName() {
+        if (token.getType() != tokenType.IDENFR) return null;
+        else return token.getValue();
+    }
+
+    public boolean isFormatString() {
+        return token.getType() == tokenType.STRCON;
+    }
+
+    public tokenType getTokenType() {
+        return token.getType();
     }
 
     @Override
@@ -84,6 +98,20 @@ public class TokenNode extends Node {
                 //step4: check if the symbol is a constant
                 //step5: push it into symbolTable
                     System.out.println("check ident error:1.rename error 2.undeclared error");
+        }
+    }
+
+    public int getDim() {
+        switch (token.getType()) {
+            case IDENFR -> {
+                return SymbolManager.getInstance().getDimByName(getIdentName());
+            }
+            case INTCON -> {
+                return 0;
+            }
+            default -> {
+                return -1;
+            }
         }
     }
 }

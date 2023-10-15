@@ -1,12 +1,16 @@
 package FrontEnd.Symbol;
 
+import FrontEnd.ErrorManager.RenameException;
+
+import java.util.HashMap;
 import java.util.Stack;
 
 public class SymbolManager {
 
     private static final SymbolManager instance = new SymbolManager(); // 采取单例模式
+    private final Stack<SymbolTable> symbolTableStack;
 
-    private final Stack<SymbolTable> symbolTables;
+    private final HashMap<String, SymbolTable> funcMap;
 
     private String currentFuncName;
 
@@ -15,31 +19,76 @@ public class SymbolManager {
     private int loopDepth;
 
     public SymbolManager() {
-        symbolTables = new Stack<>();
+        symbolTableStack = new Stack<>();
+        funcMap = new HashMap<>();
         isGlobal = true;
         currentFuncName = null;
         loopDepth = 0;
     }
 
-    public void addSymbol(Symbol symbol) {
-        symbolTables.peek().addSymbol(symbol);
+    public int getLoopDepth() {
+        return loopDepth;
     }
 
-    public void popSymbolTable() {
-        symbolTables.pop();
+    public void enterFuncBlock(FuncSymbol funcSymbol) throws RenameException {
+        symbolTableStack.peek().addSymbol(funcSymbol);
+        SymbolTable symbolTable = new SymbolTable();
+        symbolTableStack.push(symbolTable);
+        funcMap.put(funcSymbol.getSymbolName(), symbolTable);
+        currentFuncName = funcSymbol.getSymbolName();
     }
 
-    public void pushSymbolTable() {
-        symbolTables.push(new SymbolTable());
+    public void enterBlock() {
+        symbolTableStack.push(new SymbolTable());
     }
 
-    public Symbol getSymbol(String name) {
-        //TODO: 从符号表中查找符号
+    public void enterLoopBlock() {
+        loopDepth++;
+    }
+
+    public void leaveBlock() {
+        symbolTableStack.pop();
+    }
+
+    public void leaveLoopBlock() {
+        loopDepth--;
+    }
+
+    public void addSymbol (Symbol symbol) throws RenameException {
+        SymbolTable topTable = symbolTableStack.peek();
+        topTable.addSymbol(symbol);
+    }
+
+    public boolean isDefined(String name) {
+        for (SymbolTable s : symbolTableStack) {
+            if (s.containsName(name) && !name.equals(currentFuncName)) return true;
+        }
+        return false;
+    }
+
+    public int getDimByName(String name) {
+        for (SymbolTable s : symbolTableStack) {
+            if (s.containsName(name)) return s.getSymbol(name).getDim();
+        }
+        return -1;
+    }
+
+    public Symbol getSymbolByName(String name) {
+        for (SymbolTable s : symbolTableStack) {
+            if (s.containsName(name)) return s.getSymbol(name);
+        }
         return null;
     }
 
-    public int getLoopDepth() {
-        return loopDepth;
+    public FuncSymbol getFuncSymbolByFuncName(String name) {
+        if (funcMap.containsKey(name)) {
+            return (FuncSymbol) funcMap.get(name).getSymbol(name);
+        }
+        return null;
+    }
+
+    public String getCurrentFuncName() {
+        return currentFuncName;
     }
 
     public static SymbolManager getInstance() {

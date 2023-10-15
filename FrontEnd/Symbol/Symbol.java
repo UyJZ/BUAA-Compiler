@@ -20,4 +20,8 @@ public class Symbol {
     public SymbolType getSymbolType() {
         return symbolType;
     }
+
+    public int getDim() {
+        return -1;
+    }
 }

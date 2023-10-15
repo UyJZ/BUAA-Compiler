@@ -4,7 +4,7 @@ import Enums.SymbolType;
 
 public class VarSymbol extends Symbol {
 
-    private boolean isGlobal;
+    private boolean isConst;
 
     private int initValue;
 
@@ -12,8 +12,24 @@ public class VarSymbol extends Symbol {
 
     private int dim;
 
-    public VarSymbol(String symbolName, SymbolType symbolType) {
+    public VarSymbol(String symbolName, SymbolType symbolType, int dim, boolean isConst) {
         super(symbolName, symbolType);
+        this.isConst = isConst;
+        this.value = initValue;
+        this.isConst = false;
+        this.dim = dim;
+    }
+
+    public boolean isConst() {
+        return isConst;
+    }
+
+    public void setInitValue() {
+        //TODO
+    }
+
+    public int getDim() {
+        return dim;
     }
 
 }

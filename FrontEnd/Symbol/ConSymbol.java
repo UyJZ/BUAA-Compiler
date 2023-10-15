@@ -4,15 +4,23 @@ import Enums.SymbolType;
 
 import java.util.ArrayList;
 
-public class ConSymbol extends Symbol{
+public class ConSymbol extends Symbol {
 
     private int dim;
 
     private ArrayList<Integer> initValue;
 
-    int value;
-    public ConSymbol(String symbolName, SymbolType symbolType, int value) {
+    private ArrayList<Integer> lengthList;
+
+    public ConSymbol(String symbolName, SymbolType symbolType, ArrayList<Integer> initValue, ArrayList<Integer> lengthList) {
         super(symbolName, symbolType);
-        this.value = value;
+        this.initValue = initValue;
+        this.lengthList = lengthList;
+        this.dim = lengthList.size();
+    }
+
+    @Override
+    public int getDim() {
+        return dim;
     }
 }

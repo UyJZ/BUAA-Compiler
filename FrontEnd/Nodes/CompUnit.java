@@ -1,6 +1,7 @@
 package FrontEnd.Nodes;
 
 import Enums.SyntaxVarType;
+import FrontEnd.Symbol.SymbolManager;
 
 import java.util.ArrayList;
 
@@ -12,7 +13,9 @@ public class CompUnit extends Node{
     @Override
     public void checkError() {
         //TODO:Enter the symbol table and create a new block
+        SymbolManager.getInstance().enterBlock();
         super.checkError();
+        SymbolManager.getInstance().leaveBlock();
         //TODO:Leave the symbol table
     }
 }
