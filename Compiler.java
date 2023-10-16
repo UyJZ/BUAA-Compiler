@@ -9,19 +9,22 @@ import java.util.ArrayList;
 
 public class Compiler {
     public static void main(String[] args) throws IOException {
-        StringBuilder stringBuilder = readFile("./testfile.txt");
+        StringBuilder stringBuilder = readFile("testfile.txt");
         Lexer lexer = new Lexer(stringBuilder);
         lexer.analysisLexer();
         //ArrayList<Token> tokens = lexer.analysisLexer();
         //hw2 LexerAnalysis:
         //LexerAnalysis(stringBuilder, tokens);
         //hw3 ParserAnalysis:
+        FileOutputStream fs = new FileOutputStream("output.txt");
         FileOutputStream fos = new FileOutputStream("error.txt");
         PrintStream ps = new PrintStream(fos);
+        PrintStream ps_parse = new PrintStream(fs);
         ParserController parserController = new ParserController(lexer.getTokenStream());
         Node c = parserController.parse();
         c.checkError();
-        ErrorChecker.showErrorMsg(ps);
+        c.print(ps_parse);
+        //ErrorChecker.showErrorMsg(ps);
     }
 
     private static StringBuilder readFile(String filePath) throws FileNotFoundException {

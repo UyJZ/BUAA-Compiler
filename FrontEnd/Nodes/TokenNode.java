@@ -76,7 +76,7 @@ public class TokenNode extends Node {
         int curPos = 0;
         String space = "\t\0 ";
         while (curPos < formatString.length()) {
-            while (space.contains(formatString.substring(curPos, curPos + 1))) {
+            while (curPos < formatString.length() && space.contains(formatString.substring(curPos, curPos + 1))) {
                 curPos++;
             }
             if (curPos >= formatString.length()) break;
