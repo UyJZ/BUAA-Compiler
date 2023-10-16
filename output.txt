@@ -1,26 +1,5 @@
-INTTK int
-MAINTK main
-LPARENT (
-RPARENT )
-LBRACE {
-IDENFR x
-<LVal>
-ASSIGN =
-GETINTTK getint
-RPARENT )
-SEMICN ;
-<Stmt>
-RETURNTK return
-INTCON 0
-<Number>
-<PrimaryExp>
-<UnaryExp>
-<MulExp>
-<AddExp>
-<Exp>
-SEMICN ;
-<Stmt>
-RBRACE }
-<Block>
-<MainFuncDef>
-<CompUnit>
+4 : c
+7 : c
+8 : c
+9 : j
+11 : a

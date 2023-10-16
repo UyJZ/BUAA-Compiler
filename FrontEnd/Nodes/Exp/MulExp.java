@@ -5,8 +5,14 @@ import FrontEnd.Nodes.Node;
 
 import java.util.ArrayList;
 
-public class MulExp extends Node{
+public class MulExp extends Node {
     public MulExp(SyntaxVarType type, ArrayList<Node> children) {
         super(type, children);
+    }
+
+    @Override
+    public int getDim() {
+        for (Node n : children) if (n.getDim() != -1) return n.getDim();
+        return -1;
     }
 }

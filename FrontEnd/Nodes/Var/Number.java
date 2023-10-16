@@ -9,4 +9,8 @@ public class Number extends Node {
     public Number(SyntaxVarType type, ArrayList<Node> children) {
         super(type, children);
     }
+
+    public int getDim() {
+        return 0;
+    }
 }

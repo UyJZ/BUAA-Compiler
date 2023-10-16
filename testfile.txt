@@ -1,5 +1,6 @@
-int main()
-{
-    x = getint();
+int main() {
+    a;
+    a = 1;
+    a();
     return 0;
 }

@@ -46,15 +46,15 @@ public class Lexer {
 
     private int pos;
 
+    private int curLine;
+
     public Lexer(StringBuilder source) {
         this.source = new StringBuilder(source);
         pos = 0;
-        lines = 0;
+        curLine = 1;
         tokens = new ArrayList<>();
         tokenStream = new TokenStream(new ArrayList<>());
     }
-
-    private int lines;
 
     public void next() {
         pos++;
@@ -63,7 +63,7 @@ public class Lexer {
     private void skipSpace() {
         while (hasNext() && spaces.contains(source.substring(pos, pos + 1))) {
             if (source.charAt(pos) == '\n') {
-                lines++;
+                curLine++;
             }
             next();
         }
@@ -82,6 +82,7 @@ public class Lexer {
             while (hasNext()) {
                 if (source.substring(pos, pos + 1).equals("\n")) {
                     pos++;
+                    curLine++;
                     break;
                 }
                 next();
@@ -89,6 +90,7 @@ public class Lexer {
         } else if (nextString(2).equals("/*")) {
             pos++;
             while (hasNext()) {
+                if (source.substring(pos, pos + 1).equals("\n")) curLine++;
                 if (nextString(2).equals("*/")) {
                     pos += 2;
                     break;
@@ -126,7 +128,7 @@ public class Lexer {
         for (Map.Entry<String, tokenType> entry : OPERATOR_MAP.entrySet()) {
             if (s.startsWith(entry.getKey())) {
                 pos += entry.getKey().length();
-                return new Token(entry.getKey(), entry.getValue());
+                return new Token(entry.getKey(), entry.getValue(), curLine);
             }
         }
         return null;
@@ -145,7 +147,7 @@ public class Lexer {
         }
         String s = nextString(l);
         pos = pos + l;
-        return new Token(s, recognizeKeyWords(s));
+        return new Token(s, recognizeKeyWords(s), curLine);
     }
 
     private boolean isIntCon(String s) {
@@ -162,7 +164,7 @@ public class Lexer {
                 l--;
                 String s = source.substring(pos, pos + l);
                 pos = pos + l;
-                return new Token(s, tokenType.INTCON);
+                return new Token(s, tokenType.INTCON, curLine);
             }
             l++;
         }
@@ -173,7 +175,7 @@ public class Lexer {
         int l = 1;
         while (pos + l <= source.length()) {
             if (source.charAt(pos + l) == '"') {
-                Token token = new Token(source.substring(pos, pos + l + 1), tokenType.STRCON);
+                Token token = new Token(source.substring(pos, pos + l + 1), tokenType.STRCON, curLine);
                 pos = pos + l + 1;
                 return token;
             }
