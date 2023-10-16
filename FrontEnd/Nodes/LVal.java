@@ -37,7 +37,7 @@ public class LVal extends Node {
     @Override
     public void checkError() {
         if (children.get(0) instanceof TokenNode && ((TokenNode) children.get(0)).getTokenType() == tokenType.IDENFR)
-            if (!SymbolManager.getInstance().isDefined(((TokenNode) children.get(0)).getIdentName()))
+            if (!SymbolManager.getInstance().isVarDefined(((TokenNode) children.get(0)).getIdentName()))
                 ErrorChecker.AddError(new Error(identLine(), ErrorType.c));
         super.checkError();
     }

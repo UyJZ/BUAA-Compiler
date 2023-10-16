@@ -23,7 +23,7 @@ public class ConstDef extends Node {
 
     public ConstDef(SyntaxVarType type, ArrayList<Node> children) {
         super(type, children);
-        name = ((TokenNode) children.get(1)).toString();
+        name = ((TokenNode) children.get(0)).getIdentName();
         for (Node child : children) {
             if (child instanceof ConstDecl) {
                 dim++;
@@ -31,13 +31,7 @@ public class ConstDef extends Node {
         }
     }
 
-    @Override
-    public void checkError() {
-        VarSymbol varSymbol = new VarSymbol(name, SymbolType.SYMBOL_VAR, dim, true);
-        try {
-            SymbolManager.getInstance().addSymbol(varSymbol);
-        } catch (RenameException e) {
-            ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.b));
-        }
+    public String getName() {
+        return name;
     }
 }

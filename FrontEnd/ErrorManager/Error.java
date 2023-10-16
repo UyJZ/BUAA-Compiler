@@ -15,11 +15,12 @@ public class Error implements Comparable<Object>{
     @Override
     public int compareTo(Object o) {
         Error e = (Error) o;
+        if (this.line == e.line) return this.type.ordinal() - e.type.ordinal();
         return this.line - e.line;
     }
 
     @Override
     public String toString() {
-        return line + " : " + type;
+        return line + " " + type;
     }
 }

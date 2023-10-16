@@ -51,7 +51,7 @@ public class Lexer {
     public Lexer(StringBuilder source) {
         this.source = new StringBuilder(source);
         pos = 0;
-        curLine = 0;
+        curLine = 1;
         tokens = new ArrayList<>();
         tokenStream = new TokenStream(new ArrayList<>());
     }
@@ -82,6 +82,7 @@ public class Lexer {
             while (hasNext()) {
                 if (source.substring(pos, pos + 1).equals("\n")) {
                     pos++;
+                    curLine++;
                     break;
                 }
                 next();
@@ -89,6 +90,7 @@ public class Lexer {
         } else if (nextString(2).equals("/*")) {
             pos++;
             while (hasNext()) {
+                if (source.substring(pos, pos + 1).equals("\n")) curLine++;
                 if (nextString(2).equals("*/")) {
                     pos += 2;
                     break;

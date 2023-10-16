@@ -1,7 +1,7 @@
 package FrontEnd.Nodes.Func;
 
 import Enums.ErrorType;
-import Enums.FuncType;
+import Enums.FunctionType;
 import Enums.SymbolType;
 import Enums.SyntaxVarType;
 import FrontEnd.ErrorManager.Error;
@@ -21,13 +21,13 @@ public class MainFuncDef extends Node {
 
     public void checkError() {
         try {
-            SymbolManager.getInstance().enterFuncBlock(new FuncSymbol("main", SymbolType.SYMBOL_FUNC, FuncType.FUNC_INT, new ArrayList<>()));
+            SymbolManager.getInstance().enterFuncBlock(new FuncSymbol("main", SymbolType.SYMBOL_FUNC, FunctionType.FUNC_INT, new ArrayList<>()));
         } catch (RenameException e) {
             ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.b));
         }
         Block block = (Block) children.get(children.size() - 1);
         if (!block.isLastStmtReturnInt())
-            ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.g));
+            ErrorChecker.AddError(new Error(block.getEndLine(), ErrorType.g));
         super.checkError();
         SymbolManager.getInstance().leaveBlock();
     }

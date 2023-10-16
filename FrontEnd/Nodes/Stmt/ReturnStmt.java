@@ -1,8 +1,9 @@
 package FrontEnd.Nodes.Stmt;
 
-import Enums.FuncType;
+import Enums.FunctionType;
 import Enums.SyntaxVarType;
 import FrontEnd.Nodes.Node;
+import FrontEnd.Nodes.Exp.Exp;
 
 import java.util.ArrayList;
 
@@ -11,7 +12,12 @@ public class ReturnStmt extends Stmt {
         super(type, children);
     }
 
-    public FuncType getReturnType() {
-        return children.size() > 2 ? FuncType.FUNC_INT : FuncType.FUNC_VOID;
+    public FunctionType getReturnType() {
+        for (Node n : children) {
+            if (n instanceof Exp) {
+                return FunctionType.FUNC_INT;
+            }
+        }
+        return FunctionType.FUNC_VOID;
     }
 }

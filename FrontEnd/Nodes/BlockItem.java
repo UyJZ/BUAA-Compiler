@@ -1,6 +1,6 @@
 package FrontEnd.Nodes;
 
-import Enums.FuncType;
+import Enums.FunctionType;
 import Enums.SyntaxVarType;
 import FrontEnd.Nodes.Stmt.ReturnStmt;
 
@@ -11,7 +11,8 @@ public class BlockItem extends Node{
         super(type, children);
     }
 
-    public FuncType getReturnType() {
+    public FunctionType getReturnType() {
+        if (!(children.get(0) instanceof ReturnStmt)) return null;
         return ((ReturnStmt)children.get(0)).getReturnType();
     }
 

@@ -1,5 +1,5 @@
 package Enums;
 
-public enum FuncType {
+public enum FunctionType {
     FUNC_INT, FUNC_VOID
 }

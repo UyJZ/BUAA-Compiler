@@ -1,6 +1,5 @@
 package FrontEnd.Nodes;
 
-import Enums.FuncType;
 import Enums.SyntaxVarType;
 
 import java.io.PrintStream;

@@ -58,7 +58,7 @@ public class TokenNode extends Node {
 
     private void checkFormatStringError() {
         //TODO: check format string error
-        StringBuilder formatString = new StringBuilder(token.toString());
+        StringBuilder formatString = new StringBuilder(token.getValue().substring(1, token.getValue().length() - 1));
         if (!parseFormatString(formatString))
             ErrorChecker.AddError(new Error(token.getLine(), ErrorType.a));
     }
@@ -66,6 +66,10 @@ public class TokenNode extends Node {
     public int getParameterNum() {
         if (token.getType() != tokenType.STRCON) return -1;
         else return token.toString().split("%d").length - 1;
+    }
+
+    public String getValue() {
+        return token.getValue();
     }
 
     private boolean parseFormatString(StringBuilder formatString) {
@@ -76,7 +80,7 @@ public class TokenNode extends Node {
                 curPos++;
             }
             if (curPos >= formatString.length()) break;
-            char lookAhead = formatString.charAt(curPos), lookAhead2 = (curPos + 1 < formatString.length()) ? formatString.charAt(curPos + 1) : null;
+            char lookAhead = formatString.charAt(curPos), lookAhead2 = (curPos + 1 < formatString.length()) ? formatString.charAt(curPos + 1) : '\0';
             boolean inRange = (int) lookAhead == 32 || (int) lookAhead == 33 ||
                     ((int) lookAhead >= 40 && (int) lookAhead <= 126 && (int) lookAhead != 92);
             if (curPos + 1 < formatString.length() && lookAhead == '%' && lookAhead2 == 'd' || lookAhead == '\\' && lookAhead2 == 'n')

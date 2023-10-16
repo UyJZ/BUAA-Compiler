@@ -15,8 +15,6 @@ public class VarSymbol extends Symbol {
     public VarSymbol(String symbolName, SymbolType symbolType, int dim, boolean isConst) {
         super(symbolName, symbolType);
         this.isConst = isConst;
-        this.value = initValue;
-        this.isConst = false;
         this.dim = dim;
     }
 

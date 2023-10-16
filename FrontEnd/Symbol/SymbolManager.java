@@ -3,6 +3,7 @@ package FrontEnd.Symbol;
 import FrontEnd.ErrorManager.RenameException;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 public class SymbolManager {
@@ -32,7 +33,7 @@ public class SymbolManager {
 
     public void enterFuncBlock(FuncSymbol funcSymbol) throws RenameException {
         symbolTableStack.peek().addSymbol(funcSymbol);
-        SymbolTable symbolTable = new SymbolTable();
+        SymbolTable symbolTable = new SymbolTable(funcSymbol);
         symbolTableStack.push(symbolTable);
         funcMap.put(funcSymbol.getSymbolName(), symbolTable);
         currentFuncName = funcSymbol.getSymbolName();
@@ -59,17 +60,25 @@ public class SymbolManager {
         topTable.addSymbol(symbol);
     }
 
-    public boolean isDefined(String name) {
+    public boolean isVarDefined(String name) {
         for (SymbolTable s : symbolTableStack) {
             if (s.containsName(name) && !name.equals(currentFuncName)) return true;
         }
         return false;
     }
 
+    public boolean isVarFuncDefined(String name) {
+        for (SymbolTable s : symbolTableStack) {
+            if (s.containsVarFuncName(name) && !name.equals(currentFuncName)) return true;
+        }
+        return funcMap.containsKey(name);
+    }
+
     public int getDimByName(String name) {
         for (SymbolTable s : symbolTableStack) {
             if (s.containsName(name)) return s.getSymbol(name).getDim();
         }
+        if (funcMap.get(name) != null) return funcMap.get(name).getFuncSymbol(name).getDim();
         return -1;
     }
 
@@ -82,7 +91,7 @@ public class SymbolManager {
 
     public FuncSymbol getFuncSymbolByFuncName(String name) {
         if (funcMap.containsKey(name)) {
-            return (FuncSymbol) funcMap.get(name).getSymbol(name);
+            return (FuncSymbol) funcMap.get(name).getFuncSymbol(name);
         }
         return null;
     }

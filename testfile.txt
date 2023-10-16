@@ -1,12 +1,6 @@
-int func1(int a, int b[], int c[][2])
-{
-    int d = a*2 + b[0] % 2 + c[0][0] % 3;
-    var1_g = d * (a + 2);
-    ;
-    func2();
-    return 0;
-}
-
 int main() {
+    a;
+    a = 1;
+    a();
     return 0;
 }

@@ -1,7 +1,7 @@
 package FrontEnd.Nodes.Func;
 
 import Enums.ErrorType;
-import Enums.FuncType;
+import Enums.FunctionType;
 import Enums.SymbolType;
 import Enums.SyntaxVarType;
 import FrontEnd.ErrorManager.Error;
@@ -9,9 +9,9 @@ import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.ErrorManager.RenameException;
 import FrontEnd.Nodes.Block;
 import FrontEnd.Nodes.Node;
+import FrontEnd.Nodes.TokenNode;
 import FrontEnd.Symbol.FuncSymbol;
 import FrontEnd.Symbol.SymbolManager;
-import FrontEnd.Symbol.VarSymbol;
 
 import java.util.ArrayList;
 
@@ -19,15 +19,15 @@ public class FuncDef extends Node {
 
     private String funcName;
 
-    private FuncType funcType;
+    private FunctionType functionType;
 
     private final ArrayList<FuncFParam> funcFParams = new ArrayList<>();
 
     public FuncDef(SyntaxVarType type, ArrayList<Node> children) {
         super(type, children);
         //TODO: fill the funcFParams
-        funcName = (children.get(1)).toString();
-        funcType = children.get(0).toString().equals("void") ? FuncType.FUNC_VOID : FuncType.FUNC_INT;
+        funcName = ((TokenNode) (children.get(1))).getIdentName();
+        functionType = ((FrontEnd.Nodes.Func.FuncType) children.get(0)).getValue().equals("void") ? FunctionType.FUNC_VOID : FunctionType.FUNC_INT;
         for (Node child : children) {
             if (child instanceof FuncFParams) {
                 funcFParams.addAll(((FuncFParams) child).getParamList());
@@ -41,17 +41,19 @@ public class FuncDef extends Node {
         ArrayList<Integer> list = new ArrayList<>();
         for (FuncFParam f : funcFParams) list.add(f.getDim());
         try {
-            SymbolManager.getInstance().enterFuncBlock(new FuncSymbol(funcName, SymbolType.SYMBOL_FUNC, funcType, list));
+            SymbolManager.getInstance().enterFuncBlock(new FuncSymbol(funcName, SymbolType.SYMBOL_FUNC, functionType, list));
         } catch (RenameException e) {
             ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.b));
         }
         Block block = (Block) children.get(children.size() - 1);
-        if (funcType == FuncType.FUNC_INT) {
+        if (functionType == FunctionType.FUNC_INT) {
             if (!block.isLastStmtReturnInt())
-                ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.g));
+                ErrorChecker.AddError(new Error(block.getEndLine(), ErrorType.g));
         } else {
-            if (block.isReturnIntInFunc())
-                ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.f));
+            if (block.isReturnIntInFunc()) {
+                ArrayList<Integer> list1 = block.getReturnIntLine();
+                for (Integer i : list1) ErrorChecker.AddError(new Error(i, ErrorType.f));
+            }
         }
         for (Node node : children) {
             if (node instanceof Block) ((Block) node).checkErrorInFunc();

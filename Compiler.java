@@ -16,12 +16,12 @@ public class Compiler {
         //hw2 LexerAnalysis:
         //LexerAnalysis(stringBuilder, tokens);
         //hw3 ParserAnalysis:
-        FileOutputStream fos = new FileOutputStream("output.txt");
+        FileOutputStream fos = new FileOutputStream("error.txt");
         PrintStream ps = new PrintStream(fos);
         ParserController parserController = new ParserController(lexer.getTokenStream());
         Node c = parserController.parse();
         c.checkError();
-        ErrorChecker.showErrorMsg();
+        ErrorChecker.showErrorMsg(ps);
     }
 
     private static StringBuilder readFile(String filePath) throws FileNotFoundException {
