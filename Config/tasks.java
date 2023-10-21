@@ -5,11 +5,11 @@ public class tasks {
     public static boolean isParserAnalysis = false;
     public static boolean isErrorHandle = false;
 
-    private static String LexerOutputPath = "output.txt";
+    private static final String LexerOutputPath = "output.txt";
 
-    private static String ParserOutputPath = "output.txt";
+    private static final String ParserOutputPath = "output.txt";
 
-    private static String ErrorHandleOutputPath = "error.txt";
+    private static final String ErrorHandleOutputPath = "error.txt";
 
     public static String getInputPath() {
         return "testfile.txt";
