@@ -1,5 +1,6 @@
 package FrontEnd.Parser;
 
+import Config.tasks;
 import Enums.ErrorType;
 import Enums.SyntaxVarType;
 import Enums.tokenType;
@@ -16,11 +17,14 @@ public class ParserController {
 
     private final TokenStream tokenStream;
 
+    private final boolean isErrorManager;
+
 
     private Token curToken;
 
     public ParserController(TokenStream tokenStream) {
         this.tokenStream = tokenStream;
+        this.isErrorManager = tasks.isErrorHandle;
     }
 
     private void read() {
@@ -106,7 +110,9 @@ public class ParserController {
         read();
         if (curToken.getType() != tokenType.RPARENT) {
             unread();
-            ErrorChecker.AddError(children, ErrorType.j);
+            if (isErrorManager)
+                ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
+            else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         Node block = Parse_Block();
         if (block.getType() != SyntaxVarType.ILLEGAL) children.add(block);
@@ -183,8 +189,10 @@ public class ParserController {
         read();
         if (curToken.getType() != tokenType.SEMICN) {
             unread();
-            ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.i));
-            return NodeGenerator.generateNode(SyntaxVarType.ConstDecl, children);
+            if (isErrorManager) {
+                ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.i));
+                return NodeGenerator.generateNode(SyntaxVarType.ConstDecl, children);
+            } else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
         } else {
             children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             return NodeGenerator.generateNode(SyntaxVarType.ConstDecl, children);
@@ -231,8 +239,10 @@ public class ParserController {
                 return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
             }
             unread();
-            ErrorChecker.AddError(children, ErrorType.i);
-            return NodeGenerator.generateNode(SyntaxVarType.VarDecl, children);
+            if (isErrorManager) {
+                ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.i));
+                return NodeGenerator.generateNode(SyntaxVarType.VarDecl, children);
+            } else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
         } else {
             children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             return NodeGenerator.generateNode(SyntaxVarType.VarDecl, children);
@@ -272,7 +282,9 @@ public class ParserController {
             read();
             if (curToken.getType() != tokenType.RBRACK) {
                 unread();
-                ErrorChecker.AddError(children, ErrorType.k);
+                if (isErrorManager)
+                    ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
+                else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
         read();
@@ -379,7 +391,9 @@ public class ParserController {
             read();
             if (curToken.getType() != tokenType.RBRACK) {
                 unread();
-                ErrorChecker.AddError(children, ErrorType.k);
+                if (isErrorManager)
+                    ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
+                else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
         read();
@@ -535,7 +549,9 @@ public class ParserController {
         read();
         if (curToken.getType() != tokenType.RBRACK) {
             unread();
-            ErrorChecker.AddError(children, ErrorType.k);
+            if (isErrorManager)
+                ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
+            else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         while (true) {
             read();
@@ -552,7 +568,9 @@ public class ParserController {
             read();
             if (curToken.getType() != tokenType.RBRACK) {
                 unread();
-                ErrorChecker.AddError(children, ErrorType.k);
+                if (isErrorManager)
+                    ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
+                else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
         return NodeGenerator.generateNode(SyntaxVarType.FuncFParam, children);
@@ -578,8 +596,10 @@ public class ParserController {
         read();
         if (curToken.getType() != tokenType.SEMICN) {
             unread();
-            ErrorChecker.AddError(children, ErrorType.i);
-            return NodeGenerator.generateNode(type, children);
+            if (isErrorManager) {
+                ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.i));
+                return NodeGenerator.generateNode(type, children);
+            } else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
         } else {
             children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             return NodeGenerator.generateNode(type, children);
@@ -722,7 +742,9 @@ public class ParserController {
                 read();
                 if (curToken.getType() != tokenType.RPARENT) {
                     unread();
-                    ErrorChecker.AddError(children, ErrorType.j);
+                    if (isErrorManager)
+                        ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
+                    else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 return Parse_SEMICN(children, SyntaxVarType.PrintfStmt);
             }
@@ -763,7 +785,9 @@ public class ParserController {
                     read();
                     if (curToken.getType() != tokenType.RPARENT) {
                         unread();
-                        ErrorChecker.AddError(children, ErrorType.j);
+                        if (isErrorManager)
+                            ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
+                        else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
                     } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                     return Parse_SEMICN(children, SyntaxVarType.GetIntStmt);
                 }
@@ -807,7 +831,9 @@ public class ParserController {
             read();
             if (curToken.getType() != tokenType.RBRACK) {
                 unread();
-                ErrorChecker.AddError(children, ErrorType.k);
+                if (isErrorManager)
+                    ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
+                else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
         return NodeGenerator.generateNode(SyntaxVarType.LVal, children);
@@ -993,7 +1019,9 @@ public class ParserController {
                 read();
                 if (curToken.getType() != tokenType.RPARENT) {
                     unread();
-                    ErrorChecker.AddError(children, ErrorType.j);
+                    if (isErrorManager)
+                        ErrorChecker.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
+                    else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 return NodeGenerator.generateNode(SyntaxVarType.UnaryExp, children);
             }
