@@ -3,11 +3,11 @@ package Enums;
 public enum SyntaxVarType {
     CompUnit, Decl, FuncDef, MainFuncDef, ConstDecl, VarDecl, ConstDef, BType,
     ConstExp, ConstInitVal, VarDef, InitVal, Exp, FuncType, FuncFParams, Block, FuncFParam, BlockItem,
-    Stmt, LVal, Cond, ForStmt, AddExp, LOrExp, PrimaryExp, Number, IntConst, UnaryExp,
+    Stmt, LVal, Cond, ForStmt, AddExp, LOrExp, PrimaryExp, Number, IntConst, UnaryExp, HEXCON,
     UnaryOp, MulExp, RelExp, EqExp, LAndExp, ILLEGAL, TOKEN, FuncRParams,
     AssignStmt("Stmt"), ExpStmt("Stmt"), IfStmt("Stmt"), ForLoopStmt("Stmt"), BreakStmt("Stmt"),
     ContinueStmt("Stmt"), ReturnStmt("Stmt"), GetIntStmt("Stmt"), PrintfStmt("Stmt"),
-    BlockStmt("Stmt");
+    BlockStmt("Stmt"), RepeatStmt("Stmt");
 
     private final String typeName;
 

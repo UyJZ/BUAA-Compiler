@@ -61,6 +61,8 @@ public class NodeGenerator {
             case PrintfStmt -> new PrintfStmt(type, children);
             case BlockStmt -> new BlockStmt(type, children);
             case GetIntStmt -> new GetIntStmt(type, children);
+            case RepeatStmt -> new RepeatStmt(type, children);
+            case HEXCON -> new HexCon(type, children);
             default -> null;
         };
     }

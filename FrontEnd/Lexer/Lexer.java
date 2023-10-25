@@ -119,6 +119,8 @@ public class Lexer {
             case "printf" -> tokenType.PRINTFTK;
             case "return" -> tokenType.RETURNTK;
             case "void" -> tokenType.VOIDTK;
+            case "repeat" -> tokenType.REPEATTK;
+            case "until" -> tokenType.UNTILTK;
             default -> tokenType.IDENFR;
         };
     }
@@ -171,6 +173,21 @@ public class Lexer {
         return null;
     }
 
+    private Token recognizeHexCon() {
+        Pattern patternHexCon = Pattern.compile("0[Xx][0-9a-fA-F]+");
+        int l = 4;
+        while (pos + l <= source.length()) {
+            if (!patternHexCon.matcher(nextString(l)).matches()) {
+                l--;
+                String s = source.substring(pos, pos + l);
+                pos = pos + l;
+                return new Token(s, tokenType.HEXCON, curLine);
+            }
+            l++;
+        }
+        return null;
+    }
+
     private Token recognizeFormatString() {
         int l = 1;
         while (pos + l <= source.length()) {
@@ -195,6 +212,8 @@ public class Lexer {
                 return recognizeFormatString();
             } else if (patternIdentHead.matcher(nextString(1)).matches()) {
                 return recognizeIdent();
+            } else if (isHexCon(nextString(3))) {
+                return recognizeHexCon();
             } else if (isIntCon(nextString(1))) {
                 return recognizeIntCon();
             } else if (symbolsHead.contains(source.substring(pos, pos + 1))) {
@@ -202,6 +221,12 @@ public class Lexer {
             } else skipSpace();
         }
         return null;
+    }
+
+    private boolean isHexCon(String s) {
+        Pattern patternHexCon = Pattern.compile("0[xX][0-9a-fA-F]+");
+        Matcher matcher = patternHexCon.matcher(s);
+        return matcher.matches();
     }
 
     public void analysisLexer() {

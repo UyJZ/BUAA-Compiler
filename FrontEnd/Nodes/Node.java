@@ -25,6 +25,7 @@ public class Node {
         set.add(SyntaxVarType.ILLEGAL);
         set.add(SyntaxVarType.BlockItem);
         set.add(SyntaxVarType.Decl);
+        set.add(SyntaxVarType.HEXCON);
         set.add(SyntaxVarType.BType);
         set.add(SyntaxVarType.IntConst);
         if (children.size() == 0) {
