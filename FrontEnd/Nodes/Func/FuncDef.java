@@ -12,6 +12,14 @@ import FrontEnd.Nodes.Node;
 import FrontEnd.Nodes.TokenNode;
 import FrontEnd.Symbol.FuncSymbol;
 import FrontEnd.Symbol.SymbolManager;
+import llvm_ir.IRController;
+import llvm_ir.Value;
+import llvm_ir.Values.BasicBlock;
+import llvm_ir.Values.Function;
+import llvm_ir.llvmType.BasicBlockType;
+import llvm_ir.llvmType.Integer32Type;
+import llvm_ir.llvmType.LLVMType;
+import llvm_ir.llvmType.VoidType;
 
 import java.util.ArrayList;
 
@@ -61,5 +69,42 @@ public class FuncDef extends Node {
         }
         SymbolManager.getInstance().leaveBlock();
         //TODO:Leave the symbol table
+    }
+
+    @Override
+    public Value genLLVMir() {
+        SymbolManager.getInstance().setGlobal(false);
+        ArrayList<Integer> list = new ArrayList<>();
+        ArrayList<LLVMType> types = new ArrayList<>();
+        for (FuncFParam f : funcFParams) {
+            list.add(f.getDim());
+            types.add(new Integer32Type());
+        }
+        try {
+            SymbolManager.getInstance().enterFuncBlock(new FuncSymbol(funcName, SymbolType.SYMBOL_FUNC, functionType, list, types));
+        } catch (RenameException e) {
+            ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.b));
+        }
+        boolean hasParam = false;
+        for (Node n : children) {
+            if (n instanceof FuncFParams) {
+                hasParam = true;
+            }
+        }
+        Function function = new Function(functionType == FunctionType.FUNC_INT ? new Integer32Type() : new VoidType(), funcName, hasParam);
+        IRController.getInstance().addFunction(function);
+        for (Node n : children) {
+            if (n instanceof FuncFParams) n.genLLVMir();
+        }
+        IRController.getInstance().addNewBasicBlock(new BasicBlock(new BasicBlockType(), IRController.getInstance().genVirtualRegNum()));
+        for (Node n : children) {
+            if (n instanceof FuncFParams) ((FuncFParams) n).setParamLLVMForFunc();
+        }
+        for (Node n : children) {
+            if (!(n instanceof FuncFParams)) n.genLLVMir();
+        }
+        SymbolManager.getInstance().leaveBlock();
+        SymbolManager.getInstance().setGlobal(true);
+        return null;
     }
 }

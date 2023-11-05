@@ -5,6 +5,8 @@ public class tasks {
     public static boolean isParserAnalysis = false;
     public static boolean isErrorHandle = false;
 
+    public static boolean isLLVMoutput = false;
+
     private static String LexerOutputPath = "output.txt";
 
     private static String ParserOutputPath = "output.txt";
@@ -14,6 +16,8 @@ public class tasks {
     public static String getInputPath() {
         return "testfile.txt";
     }
+
+    public static String LLVMOutputPath = "llvm_ir.txt";
 
     public static void setLexerAnalysisForHw1() {
         tasks.isLexerAnalysis = true;
@@ -33,7 +37,14 @@ public class tasks {
         tasks.isParserAnalysis = false;
     }
 
+    public static void setLLVMOutputForHw4() {
+        tasks.isLexerAnalysis = false;
+        tasks.isErrorHandle = false;
+        tasks.isParserAnalysis = false;
+        tasks.isLLVMoutput = true;
+    }
+
     public static String getOutputPath() {
-        return isErrorHandle ? ErrorHandleOutputPath : LexerOutputPath;
+        return isErrorHandle ? ErrorHandleOutputPath : isLLVMoutput ? LLVMOutputPath : LexerOutputPath;
     }
 }

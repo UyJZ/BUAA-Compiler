@@ -7,6 +7,7 @@ import FrontEnd.ErrorManager.Error;
 import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Lexer.Token;
 import FrontEnd.Symbol.SymbolManager;
+import llvm_ir.Value;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -117,5 +118,10 @@ public class TokenNode extends Node {
                 return -1;
             }
         }
+    }
+
+    @Override
+    public Value genLLVMir() {
+        return null;
     }
 }

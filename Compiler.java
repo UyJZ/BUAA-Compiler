@@ -11,7 +11,7 @@ import java.util.ArrayList;
 
 public class Compiler {
     public static void main(String[] args) throws IOException {
-        tasks.setErrorHandleForHw3();
+        tasks.setLLVMOutputForHw4();
         CompilerHandler.work();
     }
 }

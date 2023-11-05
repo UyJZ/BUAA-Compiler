@@ -3,7 +3,10 @@ package Config;
 import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Lexer.Lexer;
 import FrontEnd.Lexer.Token;
+import FrontEnd.Nodes.CompUnit;
+import FrontEnd.Nodes.Node;
 import FrontEnd.Parser.ParserController;
+import llvm_ir.IRController;
 
 import javax.swing.text.html.parser.Parser;
 import java.io.*;
@@ -30,6 +33,11 @@ public class CompilerHandler {
             ParserController parserController = new ParserController(lexer.getTokenStream());
             parserController.parse().checkError();
             ErrorChecker.showErrorMsg(ps);
+        } else if (tasks.isLLVMoutput) {
+            ParserController parserController = new ParserController(lexer.getTokenStream());
+            Node c = parserController.parse();
+            c.genLLVMir();
+            IRController.getInstance().Output(ps);
         }
     }
 
