@@ -1,7 +1,10 @@
 package FrontEnd.Nodes.Exp;
 
 import Enums.SyntaxVarType;
+import FrontEnd.Nodes.LVal;
 import FrontEnd.Nodes.Node;
+import FrontEnd.Nodes.Var.Number;
+import llvm_ir.Value;
 
 import java.util.ArrayList;
 
@@ -13,5 +16,22 @@ public class PrimaryExp extends Node {
     public int getDim() {
         for (Node n : children) if (n.getDim() != -1) return n.getDim();
         return -1;
+    }
+
+    public int calc() {
+        if (children.size() == 1 && children.get(0) instanceof Number) return ((Number) children.get(0)).calc();
+        else if (children.size() == 1 && children.get(0) instanceof LVal) return ((LVal) children.get(0)).calc();
+        else if (children.size() == 3) {
+            return ((Exp) children.get(1)).calc();
+        } else return -1;
+    }
+
+    @Override
+    public Value genLLVMir() {
+        if (children.size() == 1 && children.get(0) instanceof Number) return ((Number) children.get(0)).genLLVMir();
+        else if (children.size() == 1 && children.get(0) instanceof LVal) return ((LVal) children.get(0)).genLLVMir();
+        else if (children.size() == 3) {
+            return children.get(1).genLLVMir();
+        } else return null;
     }
 }

@@ -10,6 +10,7 @@ import FrontEnd.Nodes.Node;
 import FrontEnd.Nodes.TokenNode;
 import FrontEnd.Symbol.SymbolManager;
 import FrontEnd.Symbol.VarSymbol;
+import llvm_ir.Value;
 
 import java.util.ArrayList;
 
@@ -31,14 +32,4 @@ public class ConstDecl extends Node {
         }
     }
 
-    @Override
-    public void checkError() {
-        VarSymbol varSymbol = new VarSymbol(name, SymbolType.SYMBOL_VAR, dim, true);
-        try {
-            SymbolManager.getInstance().addSymbol(varSymbol);
-        } catch (RenameException e) {
-            ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.b));
-        }
-        super.checkError();
-    }
 }

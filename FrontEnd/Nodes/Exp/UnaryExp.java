@@ -8,8 +8,15 @@ import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Nodes.Func.FuncRParams;
 import FrontEnd.Nodes.Node;
 import FrontEnd.Nodes.TokenNode;
+import FrontEnd.Nodes.UnaryOp;
 import FrontEnd.Symbol.FuncSymbol;
 import FrontEnd.Symbol.SymbolManager;
+import llvm_ir.IRController;
+import llvm_ir.Value;
+import llvm_ir.Values.Instruction.BinaryInstr;
+import llvm_ir.Values.Instruction.CallInstr;
+import llvm_ir.llvmType.Integer32Type;
+import llvm_ir.llvmType.VoidType;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -50,5 +57,46 @@ public class UnaryExp extends Node {
         }
         for (Node n : children) if (n.getDim() != -1) return n.getDim();
         return -1;
+    }
+
+    public int calc() {
+        if (children.size() == 1 && children.get(0) instanceof PrimaryExp) return ((PrimaryExp) children.get(0)).calc();
+        else if (children.size() == 2) {
+            if (((UnaryOp) children.get(0)).getOp() == tokenType.MINU) {
+                return -((UnaryExp) children.get(1)).calc();
+            } else {
+                return ((UnaryExp) children.get(1)).calc();
+            }
+        } else return -1;
+    }
+
+    @Override
+    public Value genLLVMir() {
+        if (children.size() == 1 && children.get(0) instanceof PrimaryExp) return children.get(0).genLLVMir();
+        else if (children.size() == 2) {
+            if (((UnaryOp) children.get(0)).getOp() == tokenType.MINU) {
+                Value operand1 = children.get(1).genLLVMir();
+                BinaryInstr binaryInstr = new BinaryInstr(new Integer32Type(), operand1, BinaryInstr.op.SUB);
+                IRController.getInstance().addInstr(binaryInstr);
+                return binaryInstr;
+            } else {
+                return children.get(1).genLLVMir();
+            }
+        } else {
+            FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName(((TokenNode) children.get(0)).getIdentName());
+            ArrayList<Value> params = new ArrayList<>();
+            for (Node n : children) {
+                if (n instanceof FuncRParams) {
+                    params.addAll(((FuncRParams) n).genLLVMirForFunc());
+                }
+            }
+            CallInstr callInstr;
+            if (funcSymbol.getLLVMType() instanceof VoidType)
+                callInstr = new CallInstr(funcSymbol.getLLVMType(), "@" + funcSymbol.getSymbolName(), params, "");
+            else
+                callInstr = new CallInstr(funcSymbol.getLLVMType(), "@" + funcSymbol.getSymbolName(), params, IRController.getInstance().genVirtualRegNum());
+            IRController.getInstance().addInstr(callInstr);
+            return callInstr;
+        }
     }
 }

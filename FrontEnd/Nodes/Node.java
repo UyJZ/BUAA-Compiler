@@ -1,6 +1,7 @@
 package FrontEnd.Nodes;
 
 import Enums.SyntaxVarType;
+import llvm_ir.Value;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -75,5 +76,12 @@ public class Node {
 
     public int getDim() {
         return -1;
+    }
+
+    public Value genLLVMir() {
+        for (Node child : children) {
+            child.genLLVMir();
+        }
+        return null;
     }
 }

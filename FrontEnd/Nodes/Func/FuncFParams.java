@@ -21,4 +21,12 @@ public class FuncFParams extends Node {
     public ArrayList<FuncFParam> getParamList() {
         return paramList;
     }
+
+    public void setParamLLVMForFunc() {
+        for (Node n : children) {
+            if (n instanceof FuncFParam) {
+                ((FuncFParam) n).setParamLLVMForFunc();
+            }
+        }
+    }
 }

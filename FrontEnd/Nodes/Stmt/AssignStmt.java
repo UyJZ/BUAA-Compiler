@@ -8,6 +8,11 @@ import FrontEnd.Nodes.Exp.Exp;
 import FrontEnd.Nodes.LVal;
 import FrontEnd.Nodes.Node;
 import FrontEnd.Symbol.*;
+import llvm_ir.IRController;
+import llvm_ir.Value;
+import llvm_ir.Values.Instruction.StoreInstr;
+import llvm_ir.llvmType.Integer32Type;
+import llvm_ir.llvmType.PointerType;
 
 import java.util.ArrayList;
 
@@ -30,5 +35,20 @@ public class AssignStmt extends Stmt {
         super.checkError();
         VarSymbol varSymbol = (VarSymbol) SymbolManager.getInstance().getSymbolByName(lVal.getName());
         if (varSymbol != null && varSymbol.isConst()) ErrorChecker.AddError(new Error(lVal.identLine(), ErrorType.h));
+    }
+
+    @Override
+    public Value genLLVMir() {
+        Value operand = children.get(2).genLLVMir();
+        VarSymbol symbol = (VarSymbol) SymbolManager.getInstance().getSymbolByName(lVal.getName());
+        if (symbol.isGlobal()) {
+            StoreInstr instr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), operand.getName(), "@" + lVal.getName());
+            IRController.getInstance().addInstr(instr);
+            return instr;
+        } else {
+            StoreInstr instr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), operand.getName(), symbol.getLLVMirValue().getName());
+            IRController.getInstance().addInstr(instr);
+            return instr;
+        }
     }
 }

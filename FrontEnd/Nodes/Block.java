@@ -3,6 +3,7 @@ package FrontEnd.Nodes;
 import Enums.FunctionType;
 import Enums.SyntaxVarType;
 import FrontEnd.Symbol.SymbolManager;
+import llvm_ir.Value;
 
 import java.util.ArrayList;
 
@@ -41,5 +42,12 @@ public class Block extends Node{
         if (children.get(children.size() - 2) instanceof BlockItem)
             return ((BlockItem) children.get(children.size() - 2)).getReturnType() == FunctionType.FUNC_INT;
         return false;
+    }
+    @Override
+    public Value genLLVMir() {
+        SymbolManager.getInstance().enterBlock();
+        super.genLLVMir();
+        SymbolManager.getInstance().leaveBlock();
+        return null;
     }
 }

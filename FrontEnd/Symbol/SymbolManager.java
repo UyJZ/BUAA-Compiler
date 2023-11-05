@@ -2,9 +2,7 @@ package FrontEnd.Symbol;
 
 import FrontEnd.ErrorManager.RenameException;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 
 public class SymbolManager {
 
@@ -83,7 +81,9 @@ public class SymbolManager {
     }
 
     public Symbol getSymbolByName(String name) {
-        for (SymbolTable s : symbolTableStack) {
+        List<SymbolTable> list = new ArrayList<>(symbolTableStack);
+        Collections.reverse(list);
+        for (SymbolTable s : list) {
             if (s.containsName(name)) return s.getSymbol(name);
         }
         return null;
@@ -102,5 +102,13 @@ public class SymbolManager {
 
     public static SymbolManager getInstance() {
         return instance;
+    }
+
+    public boolean isGlobal() {
+        return isGlobal;
+    }
+
+    public void setGlobal(boolean global) {
+        isGlobal = global;
     }
 }
