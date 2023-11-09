@@ -16,16 +16,15 @@ public class InitVal extends Node {
     }
 
     public Initial getVal() {
+        ArrayList<ArrayList<Integer>> list = new ArrayList<>();
         if (children.get(0) instanceof Exp) {
-            ArrayList<ArrayList<Integer>> list = new ArrayList<>();
             list.add(new ArrayList<>());
             list.get(0).add(((Exp) children.get(0)).calc());
             return new Initial(0, list);
         } else {
-            ArrayList<ArrayList<Integer>> list = new ArrayList<>();
-            if (children.get(0) instanceof TokenNode && children.get(1) instanceof TokenNode
+            if (children.get(0) instanceof TokenNode && children.get(1) instanceof InitVal
                     && ((TokenNode) children.get(0)).getTokenType() == tokenType.LBRACE &&
-                    (((TokenNode) children.get(1)).getTokenType() == tokenType.LBRACE)) {
+                    ((InitVal)children.get(1)).getVal().getDim() == 1) {
                 Initial initial = new Initial(2, list);
                 for (Node n : children) {
                     if (n instanceof InitVal) {
@@ -44,6 +43,38 @@ public class InitVal extends Node {
                 return initial;
             }
         }
+    }
+
+    public int getDim() {
+        if (children.get(0) instanceof Exp) return 0;
+        else {
+            for (Node n : children) {
+                if (n instanceof InitVal) return n.getDim() + 1;
+            }
+        }
+        return -1;
+    }
+
+    public ArrayList<ArrayList<Value>> genLLVMirListFor2Dim() {
+        assert (getDim() == 2);
+        ArrayList<ArrayList<Value>> valuesList = new ArrayList<>();
+        for (Node n : children) {
+            if (n instanceof InitVal) {
+                valuesList.add(((InitVal) n).genLLVMirListFor1Dim());
+            }
+        }
+        return valuesList;
+    }
+
+    public ArrayList<Value> genLLVMirListFor1Dim() {
+        assert (getDim() == 1);
+        ArrayList<Value> valueArrayList = new ArrayList<>();
+        for (Node n : children) {
+            if (n instanceof InitVal) {
+                valueArrayList.add( n.genLLVMir());
+            }
+        }
+        return valueArrayList;
     }
 
     @Override

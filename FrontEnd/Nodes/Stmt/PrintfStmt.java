@@ -54,6 +54,12 @@ public class PrintfStmt extends Stmt {
                 CallInstr callInstr = new CallInstr(new VoidType(), "@putint", p, "");
                 i++;
                 IRController.getInstance().addInstr(callInstr);
+            } else if (i + 1 < s.length() && s.charAt(i) == '\\' && s.charAt(i + 1) == 'n') {
+                ArrayList<Value> p = new ArrayList<>();
+                p.add(new Value(new Integer32Type(), String.valueOf((int) '\n')));
+                CallInstr callInstr = new CallInstr(new VoidType(), "@putch", p, "");
+                IRController.getInstance().addInstr(callInstr);
+                i++;
             } else {
                 ArrayList<Value> p = new ArrayList<>();
                 p.add(new Value(new Integer32Type(), String.valueOf((int) s.charAt(i))));

@@ -2,8 +2,11 @@ package llvm_ir.Values;
 
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.Instruction.Instr;
+import llvm_ir.Values.Instruction.terminatorInstr.ReturnInstr;
 import llvm_ir.llvmType.BasicBlockType;
 import llvm_ir.llvmType.LLVMType;
+import llvm_ir.llvmType.VoidType;
 
 import java.util.ArrayList;
 
@@ -23,6 +26,7 @@ public class Function extends Value {
     private ArrayList<BasicBlock> blockArrayList;
 
     public void addBasicBlock(BasicBlock basicBlock) {
+        if (blockArrayList.size() == 0) basicBlock.setFirstBlock();
         blockArrayList.add(basicBlock);
     }
 
@@ -57,5 +61,10 @@ public class Function extends Value {
         }
         sb.append("}\n");
         return sb.toString();
+    }
+
+    public boolean isLastInstrReturnVoid() {
+        Instr instr = blockArrayList.get(blockArrayList.size() - 1).lastInstr();
+        return instr instanceof ReturnInstr && instr.getType() instanceof VoidType;
     }
 }

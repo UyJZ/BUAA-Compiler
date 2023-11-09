@@ -2,12 +2,13 @@ package FrontEnd.Nodes;
 
 import Enums.FunctionType;
 import Enums.SyntaxVarType;
+import FrontEnd.Nodes.Stmt.Stmt;
 import FrontEnd.Symbol.SymbolManager;
 import llvm_ir.Value;
 
 import java.util.ArrayList;
 
-public class Block extends Node{
+public class Block extends Stmt {
     public Block(SyntaxVarType type, ArrayList<Node> children) {
         super(type, children);
     }

@@ -15,10 +15,13 @@ import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.Instruction.BinaryInstr;
 import llvm_ir.Values.Instruction.CallInstr;
+import llvm_ir.Values.Instruction.IcmpInstr;
+import llvm_ir.llvmType.BoolType;
 import llvm_ir.llvmType.Integer32Type;
 import llvm_ir.llvmType.VoidType;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 
 public class UnaryExp extends Node {
@@ -79,9 +82,13 @@ public class UnaryExp extends Node {
                 BinaryInstr binaryInstr = new BinaryInstr(new Integer32Type(), operand1, BinaryInstr.op.SUB);
                 IRController.getInstance().addInstr(binaryInstr);
                 return binaryInstr;
-            } else {
+            } else if ((((UnaryOp) children.get(0)).getOp()) == tokenType.NOT){
+                Value operand1 = children.get(1).genLLVMir();
+                IcmpInstr instr = new IcmpInstr(operand1.getType(), operand1.getName(), "0", IcmpInstr.CmpOp.eq);
+                IRController.getInstance().addInstr(instr);
+                return instr;
+            } else
                 return children.get(1).genLLVMir();
-            }
         } else {
             FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName(((TokenNode) children.get(0)).getIdentName());
             ArrayList<Value> params = new ArrayList<>();

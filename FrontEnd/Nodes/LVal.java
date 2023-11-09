@@ -11,10 +11,10 @@ import FrontEnd.Nodes.Exp.Exp;
 import FrontEnd.Symbol.VarSymbol;
 import llvm_ir.IRController;
 import llvm_ir.Value;
-import llvm_ir.Values.Instruction.AllocaInst;
-import llvm_ir.Values.Instruction.LoadInstr;
-import llvm_ir.Values.Instruction.StoreInstr;
+import llvm_ir.Values.Instruction.*;
+import llvm_ir.llvmType.ArrayType;
 import llvm_ir.llvmType.Integer32Type;
+import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.PointerType;
 
 import java.util.ArrayList;
@@ -70,18 +70,178 @@ public class LVal extends Node {
     public Value genLLVMir() {
         VarSymbol symbol = (VarSymbol) SymbolManager.getInstance().getSymbolByName(name);
         if (symbol.getDim() == 0) {
+            Instr instr;
             if (symbol.isGlobal() && !SymbolManager.getInstance().isGlobal()) {
-                LoadInstr instr = new LoadInstr(new Integer32Type(), symbol.getSymbolName());
-                IRController.getInstance().addInstr(instr);
-                return instr;
+                instr = new LoadInstr(new Integer32Type(), symbol.getSymbolName());
             } else {
-                LoadInstr instr = new LoadInstr(new Integer32Type(), symbol.getLLVMirValue().getName());
-                IRController.getInstance().addInstr(instr);
-                return instr;
+                instr = new LoadInstr(new Integer32Type(), symbol.getLLVMirValue().getName());
             }
-        } else {
-            //getelementptr
+            IRController.getInstance().addInstr(instr);
+            return instr;
+        } else if (symbol.getDim() == 1) {
+            ArrayList<Value> values = new ArrayList<>();
+            for (Node n : children) if (n instanceof Exp) values.add(n.genLLVMir());
+            if (values.size() == 0) {
+                Value rootPtr = getElementRootPtr(symbol);
+                assert (symbol.getType() instanceof ArrayType || symbol.getType() instanceof PointerType);
+                GEPInstr gepInstr;
+                if (symbol.getType() instanceof ArrayType) {
+                    gepInstr = new GEPInstr((ArrayType) symbol.getType(), rootPtr.getName(), new Value(new Integer32Type(), "0"));
+                } else if (symbol.getType() instanceof PointerType && !symbol.isParam()) {
+                    gepInstr = new GEPInstr((PointerType) symbol.getType(), rootPtr.getName(), new Value(new Integer32Type(), "0"));
+                } else {
+                    return rootPtr;
+                }
+                gepInstr.setLLVMtypeForFuncParam();
+                IRController.getInstance().addInstr(gepInstr);
+                return gepInstr;
+            } else {
+                Value instr = getElementRootPtr(symbol);
+                assert (symbol.getType() instanceof ArrayType || symbol.getType() instanceof PointerType);
+                if (symbol.getType() instanceof ArrayType arrayType) {
+                    GEPInstr gepInstr = new GEPInstr(arrayType, instr.getName(), values.get(0));
+                    IRController.getInstance().addInstr(gepInstr);
+                    LoadInstr loadInstr = new LoadInstr(new Integer32Type(), gepInstr.getName());
+                    IRController.getInstance().addInstr(loadInstr);
+                    return loadInstr;
+                } else {
+                    PointerType pointerType = (PointerType) symbol.getType();
+                    GEPInstr gepInstr = new GEPInstr(pointerType, instr.getName(), values.get(0));
+                    IRController.getInstance().addInstr(gepInstr);
+                    LoadInstr loadInstr = new LoadInstr(new Integer32Type(), gepInstr.getName());
+                    IRController.getInstance().addInstr(loadInstr);
+                    return loadInstr;
+                }
+            }
+        } else if (symbol.getDim() == 2) {
+            ArrayList<Value> values = new ArrayList<>();
+            for (Node n : children) {
+                if (n instanceof Exp) {
+                    values.add(n.genLLVMir());
+                }
+            }
+            Value RootPtr = getElementRootPtr(symbol);
+            if (values.size() == 0) {
+                assert (symbol.getType() instanceof ArrayType || symbol.getType() instanceof PointerType);
+                GEPInstr gepInstr;
+                if (symbol.getType() instanceof ArrayType && !symbol.isParam()) {
+                    gepInstr = new GEPInstr((ArrayType) symbol.getType(), RootPtr.getName(), new Value(new Integer32Type(), "0"));
+                    gepInstr.setLLVMtypeForFuncParam();
+                    IRController.getInstance().addInstr(gepInstr);
+                    return gepInstr;
+                } else {
+                    return RootPtr;
+                }
+            } else if (values.size() == 1) {
+                assert (symbol.getType() instanceof ArrayType || symbol.getType() instanceof PointerType);
+                GEPInstr gepInstr;
+                //两种可能，二维数组or指针数组，但是这个只可能用于函数参数，因此最后只需要统一转换成指针
+                if (symbol.getType() instanceof ArrayType) {
+                    gepInstr = new GEPInstr((ArrayType) symbol.getType(), RootPtr.getName(), values.get(0));
+                } else {
+                    gepInstr = new GEPInstr((PointerType) symbol.getType(), RootPtr.getName(), values.get(0));
+                }
+                IRController.getInstance().addInstr(gepInstr);
+                assert (gepInstr.getType() instanceof ArrayType);
+                GEPInstr gepInstr1 = new GEPInstr((ArrayType) gepInstr.getType(), gepInstr.getName(), new Value(new Integer32Type(), "0"));
+                IRController.getInstance().addInstr(gepInstr1);
+                gepInstr1.setLLVMtypeForFuncParam();//统一转换
+                return gepInstr1;
+            } else {
+                assert (values.size() == 2);
+                assert (symbol.getType() instanceof ArrayType || symbol.getType() instanceof PointerType);
+                //这个同上，两种
+                if (symbol.getType() instanceof ArrayType arrayType) {
+                    GEPInstr gepInstr = new GEPInstr(arrayType, RootPtr.getName(), values.get(0));
+                    IRController.getInstance().addInstr(gepInstr);
+                    assert (arrayType.getEleType() instanceof ArrayType);
+                    GEPInstr gepInstr1 = new GEPInstr((ArrayType) (arrayType.getEleType()), gepInstr.getName(), values.get(1));
+                    IRController.getInstance().addInstr(gepInstr1);
+                    LoadInstr loadInstr = new LoadInstr(new Integer32Type(), gepInstr1.getName());
+                    IRController.getInstance().addInstr(loadInstr);
+                    return loadInstr;
+                } else {
+                    PointerType pointerType = (PointerType) symbol.getType();
+                    GEPInstr gepInstr = new GEPInstr(pointerType, RootPtr.getName(), values.get(0));
+                    IRController.getInstance().addInstr(gepInstr);
+                    assert (pointerType.getElementType() instanceof ArrayType);
+                    GEPInstr gepInstr1 = new GEPInstr((ArrayType) pointerType.getElementType(), gepInstr.getName(), values.get(1));
+                    IRController.getInstance().addInstr(gepInstr1);
+                    LoadInstr loadInstr = new LoadInstr(new Integer32Type(), gepInstr1.getName());
+                    IRController.getInstance().addInstr(loadInstr);
+                    return loadInstr;
+                }
+            }
         }
         return null;
+    }
+
+    public Value genLLVMForAssign() {
+        VarSymbol symbol = (VarSymbol) SymbolManager.getInstance().getSymbolByName(name);
+        if (symbol.getDim() == 0) {
+            if (symbol.isGlobal()) {
+                return new Value(new Integer32Type(), "@" + symbol.getSymbolName());
+            } else return new Value(new Integer32Type(), symbol.getLLVMirValue().getName());
+        } else if (symbol.getDim() == 1) {
+            ArrayList<Value> values = new ArrayList<>();
+            for (Node n : children) {
+                if (n instanceof Exp) {
+                    values.add(n.genLLVMir());
+                }
+            }
+            assert (values.size() == 1);
+            Value rootPtr = getElementRootPtr(symbol);
+            assert (symbol.getType() instanceof ArrayType || symbol.getType() instanceof PointerType);
+            if (symbol.getType() instanceof ArrayType arrayType) {
+                GEPInstr gepInstr = new GEPInstr(arrayType, rootPtr.getName(), values.get(0));
+                IRController.getInstance().addInstr(gepInstr);
+                return gepInstr;
+            } else {
+                PointerType pointerType = (PointerType) symbol.getType();
+                GEPInstr gepInstr = new GEPInstr(pointerType, rootPtr.getName(), values.get(0));
+                IRController.getInstance().addInstr(gepInstr);
+                return gepInstr;
+            }
+        } else if (symbol.getDim() == 2) {
+            ArrayList<Value> values = new ArrayList<>();
+            for (Node n : children) {
+                if (n instanceof Exp) {
+                    values.add(n.genLLVMir());
+                }
+            }
+            Value rootPtr = getElementRootPtr(symbol);
+            assert (values.size() == 2);
+            assert (symbol.getType() instanceof ArrayType || symbol.getType() instanceof PointerType);
+            if (symbol.getType() instanceof ArrayType arrayType) {
+                GEPInstr gepInstr = new GEPInstr(arrayType, symbol.getLLVMirValue().getName(), values.get(0));
+                IRController.getInstance().addInstr(gepInstr);
+                assert (arrayType.getEleType() instanceof ArrayType);
+                GEPInstr gepInstr1 = new GEPInstr((ArrayType) (arrayType.getEleType()), gepInstr.getName(), values.get(1));
+                IRController.getInstance().addInstr(gepInstr1);
+                return gepInstr1;
+            } else {
+                PointerType pointerType = (PointerType) symbol.getType();
+                GEPInstr gepInstr = new GEPInstr(pointerType, rootPtr.getName(), values.get(0));
+                IRController.getInstance().addInstr(gepInstr);
+                assert (pointerType.getElementType() instanceof ArrayType);
+                GEPInstr gepInstr1 = new GEPInstr((ArrayType) pointerType.getElementType(), gepInstr.getName(), values.get(1));
+                IRController.getInstance().addInstr(gepInstr1);
+                return gepInstr1;
+            }
+        }
+        return null;
+    }
+
+    public Value getElementRootPtr(VarSymbol symbol) {
+        Value instr;
+        if (symbol.isGlobal() && !SymbolManager.getInstance().isGlobal()) {
+            instr = new Value(symbol.getType(), "@" + symbol.getSymbolName());
+        } else if (symbol.isParam()) {
+            instr = new LoadInstr(symbol.getType(), symbol.getLLVMirValue().getName());
+            IRController.getInstance().addInstr((LoadInstr) instr);
+        } else {
+            instr = new Value(symbol.getType(), symbol.getLLVMirValue().getName());
+        }
+        return instr;
     }
 }

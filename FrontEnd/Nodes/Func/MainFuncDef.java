@@ -48,7 +48,7 @@ public class MainFuncDef extends Node {
         }
         Function function = new Function(new Integer32Type(), "main", false);
         IRController.getInstance().addFunction(function);
-        IRController.getInstance().addNewBasicBlock(new BasicBlock(new BasicBlockType(), IRController.getInstance().genVirtualRegNum()));
+        IRController.getInstance().addNewBasicBlock(new BasicBlock());
         super.genLLVMir();
         return null;
     }

@@ -1,5 +1,8 @@
 package FrontEnd.Symbol;
 
+import llvm_ir.llvmType.Integer32Type;
+import llvm_ir.llvmType.LLVMType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,11 +10,18 @@ public class Initial {
 
     private int dim;
 
+    private LLVMType elementType;
+
     private ArrayList<ArrayList<Integer>> values; // dim == 0 时, lens.get(0).get(0) is the value, dim == 1时, len.get(0) is the value
 
     public Initial(int dim, ArrayList<ArrayList<Integer>> values) {
         this.dim = dim;
         this.values = values;
+        this.elementType = new Integer32Type();
+    }
+
+    public LLVMType getElementType() {
+        return elementType;
     }
 
     public ArrayList<ArrayList<Integer>> getValues() {
@@ -65,6 +75,7 @@ public class Initial {
             return stringBuilder.toString();
         }
     }
+
     public int getVal(List<Integer> pos) {
         try {
             if (dim == 0) return values.get(0).get(0);
@@ -74,4 +85,109 @@ public class Initial {
             return 0;
         }
     }
+
+    public String GlobalVarLLVMir(ArrayList<Integer> lens, LLVMType elementType) {
+        StringBuilder sb = new StringBuilder();
+        if (lens.size() == 0) {
+            sb.append(elementType).append(" ").append(values.get(0).get(0));
+        } else if (lens.size() == 1) {
+            if (values.get(0).size() == 0) {
+                sb.append("[").append(lens.get(0)).append(" x ").append(elementType).append("]").append(" zeroinitializer ");
+            } else {
+                sb.append("[").append(lens.get(0)).append(" x ").append(elementType).append("] [");
+                for (int i = 0; i < values.get(0).size(); i++) {
+                    sb.append(elementType).append(" ").append(values.get(0).get(i));
+                    if (i != values.get(0).size() - 1) sb.append(" ,");
+                }
+                for (int i = values.get(0).size(); i < lens.get(0); i++) {
+                    sb.append(" ,").append(elementType).append(" 0");
+                }
+                sb.append(" ]");
+            }
+        } else {
+            sb.append("[").append(lens.get(0)).append(" x").append("[").append(lens.get(1)).append(" x ").append(elementType).append("] ]");
+            ArrayList<OneDimArray> OneDimArrays = new ArrayList<>();
+            for (int i = 0; i < lens.get(0); i++) {
+                if (i >= values.size()) {
+                    OneDimArrays.add(new OneDimArray(lens.get(1), new ArrayList<>(), elementType));
+                } else {
+                    OneDimArrays.add(new OneDimArray(lens.get(1), values.get(i), elementType));
+                }
+            }
+            int allZeroPos = lens.get(0);
+            for (int i = OneDimArrays.size() - 1; i >= 0; i--) {
+                if (OneDimArrays.get(i).allZero) {
+                    allZeroPos = i;
+                } else break;
+            }
+            sb.append(" [");
+            for (int i = 0; i < allZeroPos; i++) {
+                sb.append(OneDimArrays.get(i).getValue());
+                if (i != allZeroPos - 1) sb.append(", ");
+            }
+            for (int i = allZeroPos;i < lens.get(0); i++)
+                sb.append(", ").append(" [").append(lens.get(1)).append(" x ").append(elementType).append("] ").append("zeroinitializer");
+            sb.append("]");
+        }
+        return sb.toString();
+    }
+
+    private class OneDimArray {
+
+        public String type;
+
+        public ArrayList<Integer> values;
+
+        public LLVMType elementType;
+
+        public int len;
+
+        public boolean allZero;
+
+        public int ArrayAllZeroPos;
+
+        public OneDimArray(int len, ArrayList<Integer> values, LLVMType type) {
+            this.len = len;
+            this.elementType = type;
+            this.values = values;
+            this.allZero = true;
+            for (int i = 0; i < values.toArray().length; i++) {
+                if (values.get(i) != 0) {
+                    allZero = false;
+                    break;
+                }
+            }
+            int allzeroPos = values.toArray().length;
+            for (int i = values.toArray().length - 1; i >= 0; i--) {
+                if (values.get(i) == 0) {
+                    allzeroPos = i;
+                } else break;
+            }
+            ArrayAllZeroPos = allzeroPos;
+            StringBuilder sb = new StringBuilder();
+            sb.append(" [");
+            sb.append(len).append(" * ").append(elementType);
+            sb.append("] ");
+            this.type = sb.toString();
+        }
+
+        public String getValue() {
+            StringBuilder sb = new StringBuilder();
+            if (allZero) {
+                sb.append("[").append(" ").append(len).append(" x ").append(elementType).append("] ").append("zeroinitializer");
+            } else {
+                sb.append(" [").append(len).append(" x ").append(elementType).append(" ] [");
+                for (int i = 0; i < values.toArray().length; i++) {
+                    sb.append(elementType).append(" ").append(values.get(i));
+                    if (i != values.size() - 1) sb.append(" ,");
+                }
+                for (int i = values.size(); i < len; i++) {
+                    sb.append(" ,").append(elementType).append(" 0");
+                }
+                sb.append("]");
+            }
+            return sb.toString();
+        }
+    }
+
 }

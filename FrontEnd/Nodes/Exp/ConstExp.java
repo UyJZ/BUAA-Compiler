@@ -2,6 +2,7 @@ package FrontEnd.Nodes.Exp;
 
 import Enums.SyntaxVarType;
 import FrontEnd.Nodes.Node;
+import llvm_ir.Value;
 
 import java.util.ArrayList;
 
@@ -12,5 +13,10 @@ public class ConstExp extends Node {
 
     public int calc() {
         return ((AddExp) children.get(0)).calc();
+    }
+
+    @Override
+    public Value genLLVMir() {
+        return children.get(0).genLLVMir();
     }
 }

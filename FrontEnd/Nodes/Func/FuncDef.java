@@ -16,6 +16,7 @@ import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.BasicBlock;
 import llvm_ir.Values.Function;
+import llvm_ir.Values.Instruction.terminatorInstr.ReturnInstr;
 import llvm_ir.llvmType.BasicBlockType;
 import llvm_ir.llvmType.Integer32Type;
 import llvm_ir.llvmType.LLVMType;
@@ -96,12 +97,16 @@ public class FuncDef extends Node {
         for (Node n : children) {
             if (n instanceof FuncFParams) n.genLLVMir();
         }
-        IRController.getInstance().addNewBasicBlock(new BasicBlock(new BasicBlockType(), IRController.getInstance().genVirtualRegNum()));
+        IRController.getInstance().addNewBasicBlock(new BasicBlock());
         for (Node n : children) {
             if (n instanceof FuncFParams) ((FuncFParams) n).setParamLLVMForFunc();
         }
         for (Node n : children) {
             if (!(n instanceof FuncFParams)) n.genLLVMir();
+        }
+        if (function.getType() instanceof VoidType && !function.isLastInstrReturnVoid()) {
+            ReturnInstr returnInstr = new ReturnInstr(new VoidType(), "");
+            IRController.getInstance().addInstr(returnInstr);
         }
         SymbolManager.getInstance().leaveBlock();
         SymbolManager.getInstance().setGlobal(true);

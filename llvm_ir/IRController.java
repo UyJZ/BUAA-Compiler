@@ -1,6 +1,5 @@
 package llvm_ir;
 
-import FrontEnd.Symbol.FuncSymbol;
 import FrontEnd.Symbol.VarSymbol;
 import llvm_ir.Values.BasicBlock;
 import llvm_ir.Values.Function;
@@ -22,11 +21,11 @@ public class IRController {
 
     private BasicBlock currentBasicBlock;
 
-    private Model model;
+    private Module module;
 
     private IRController() {
         virtualRegNumMap = new HashMap<>();
-        model = new Model();
+        module = new Module();
     }
 
     public static IRController getInstance() {
@@ -35,7 +34,7 @@ public class IRController {
 
     public void addFunction(Function function) {
         virtualRegNumMap.put(function, 0);
-        model.addFunction(function);
+        module.addFunction(function);
         currentFunction = function;
     }
 
@@ -44,10 +43,11 @@ public class IRController {
     }
 
     public void addGlobalVar(GlobalVar globalVar) {
-        model.addGlobalVar(globalVar);
+        module.addGlobalVar(globalVar);
     }
 
     public void addNewBasicBlock(BasicBlock block) {
+        block.setName(genVirtualRegNum());
         currentFunction.addBasicBlock(block);
         currentBasicBlock = block;
     }
@@ -55,9 +55,6 @@ public class IRController {
     public String genVirtualRegNum() {
         int num = virtualRegNumMap.get(currentFunction);
         virtualRegNumMap.put(currentFunction, num + 1);
-        if (num == 1 && currentFunction.getName().equals("@main")) {
-            System.out.println("debug");
-        }
         return "%" + num;
     }
 
@@ -70,7 +67,7 @@ public class IRController {
     }
 
     public void Output(PrintStream ps) {
-        ps.println(model);
+        ps.println(module);
     }
 
     public Function getFunctionByName(String name) {

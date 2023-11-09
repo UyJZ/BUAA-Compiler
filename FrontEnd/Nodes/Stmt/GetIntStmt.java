@@ -40,8 +40,9 @@ public class GetIntStmt extends Stmt {
         Symbol symbol = SymbolManager.getInstance().getSymbolByName(lVal.getName());
         CallInstr callInstr = new CallInstr(new Integer32Type(), "@getint", new ArrayList<>(), IRController.getInstance().genVirtualRegNum());
         IRController.getInstance().addInstr(callInstr);
-        StoreInstr storeInstr = new StoreInstr(callInstr.getType(), new PointerType(new Integer32Type()), callInstr.getName(), ((VarSymbol) symbol).getLLVMirValue().getName());
-        IRController.getInstance().addInstr(storeInstr);
-        return storeInstr;
+        Value operand1 = lVal.genLLVMForAssign();
+        StoreInstr instr = new StoreInstr(operand1.getType(), new PointerType(operand1.getType()), callInstr.getName(), operand1.getName());
+        IRController.getInstance().addInstr(instr);
+        return instr;
     }
 }

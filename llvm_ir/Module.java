@@ -6,7 +6,7 @@ import llvm_ir.llvmType.ModelType;
 
 import java.util.ArrayList;
 
-public class Model extends Value {
+public class Module extends Value {
     private ArrayList<GlobalVar> globalVarList;
     private ArrayList<Function> functionList;
 
@@ -15,7 +15,7 @@ public class Model extends Value {
             "declare void @putch(i32)\n" +
             "declare void @putstr(i8*)";
 
-    public Model() {
+    public Module() {
         super(new ModelType(), "CompUnit");
         this.globalVarList = new ArrayList<>();
         this.functionList = new ArrayList<>();
