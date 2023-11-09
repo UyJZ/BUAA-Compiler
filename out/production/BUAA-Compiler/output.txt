@@ -1,27 +1,27 @@
-INTTK int
-MAINTK main
+VOIDTK void
+<FuncType>
+IDENFR f1
 LPARENT (
+INTTK int
+IDENFR x
+<FuncFParam>
+<FuncFParams>
 RPARENT )
 LBRACE {
+PRINTFTK printf
+LPARENT (
+STRCON "%d"
+COMMA ,
 IDENFR x
 <LVal>
-ASSIGN =
-GETINTTK getint
-LPARENT (
-RPARENT )
-SEMICN ;
-<Stmt>
-RETURNTK return
-INTCON 0
-<Number>
 <PrimaryExp>
 <UnaryExp>
 <MulExp>
 <AddExp>
 <Exp>
+RPARENT )
 SEMICN ;
 <Stmt>
 RBRACE }
 <Block>
-<MainFuncDef>
-<CompUnit>
+<FuncDef>

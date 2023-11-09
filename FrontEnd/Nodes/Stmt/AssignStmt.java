@@ -14,6 +14,7 @@ import llvm_ir.Values.Instruction.StoreInstr;
 import llvm_ir.llvmType.Integer32Type;
 import llvm_ir.llvmType.PointerType;
 
+import javax.imageio.event.IIOReadProgressListener;
 import java.util.ArrayList;
 
 public class AssignStmt extends Stmt {
@@ -40,15 +41,10 @@ public class AssignStmt extends Stmt {
     @Override
     public Value genLLVMir() {
         Value operand = children.get(2).genLLVMir();
-        VarSymbol symbol = (VarSymbol) SymbolManager.getInstance().getSymbolByName(lVal.getName());
-        if (symbol.isGlobal()) {
-            StoreInstr instr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), operand.getName(), "@" + lVal.getName());
-            IRController.getInstance().addInstr(instr);
-            return instr;
-        } else {
-            StoreInstr instr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), operand.getName(), symbol.getLLVMirValue().getName());
-            IRController.getInstance().addInstr(instr);
-            return instr;
-        }
+        assert (children.get(0) instanceof LVal);
+        Value operand1 = lVal.genLLVMForAssign();
+        StoreInstr instr = new StoreInstr(operand1.getType(), new PointerType(operand1.getType()), operand.getName(), operand1.getName());
+        IRController.getInstance().addInstr(instr);
+        return instr;
     }
 }

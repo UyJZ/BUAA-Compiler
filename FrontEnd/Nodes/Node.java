@@ -1,7 +1,11 @@
 package FrontEnd.Nodes;
 
 import Enums.SyntaxVarType;
+import FrontEnd.Nodes.Stmt.BreakStmt;
+import FrontEnd.Nodes.Stmt.ContinueStmt;
+import FrontEnd.Nodes.Stmt.Stmt;
 import llvm_ir.Value;
+import llvm_ir.Values.BasicBlock;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -83,5 +87,16 @@ public class Node {
             child.genLLVMir();
         }
         return null;
+    }
+
+    public void setBlockForLoop(BasicBlock Stmt2Block, BasicBlock NextBlock) {
+        if (this instanceof BreakStmt || this instanceof ContinueStmt) ((Stmt) this).setBlock(Stmt2Block, NextBlock);
+        for (Node child : children) {
+            if (child instanceof BreakStmt || child instanceof ContinueStmt) {
+                ((Stmt) child).setBlock(Stmt2Block, NextBlock);
+            } else {
+                child.setBlockForLoop(Stmt2Block, NextBlock);
+            }
+        }
     }
 }

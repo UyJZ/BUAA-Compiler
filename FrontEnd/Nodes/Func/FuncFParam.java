@@ -56,20 +56,23 @@ public class FuncFParam extends Node {
     @Override
     public Value genLLVMir() {
         try {
-            VarSymbol symbol = new VarSymbol(getName(), SymbolType.SYMBOL_VAR, getDim(), false);
+            int width = 0;
+            for (Node n : children) {
+                if (n instanceof ConstExp) width = ((ConstExp) n).calc();
+            }
+            VarSymbol symbol = new VarSymbol(getName(), SymbolType.SYMBOL_VAR, getDim(), false, width);
             SymbolManager.getInstance().addSymbol(symbol);
             symbol.setAsParam();
             IRController.getInstance().addParam(symbol);
         } catch (RenameException e) {
             ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.b));
         }
-        super.genLLVMir();
         return null;
     }
 
     public void setParamLLVMForFunc() {
         Symbol symbol = SymbolManager.getInstance().getSymbolByName(getName());
-        LLVMType type1 = new Integer32Type();
+        LLVMType type1 = ((VarSymbol) symbol).getLLVMirValue().getType();
         AllocaInst allocaInst = new AllocaInst(type1, IRController.getInstance().genVirtualRegNum());
         IRController.getInstance().addInstr(allocaInst);
         StoreInstr storeInstr = new StoreInstr(type1, new PointerType(type1), ((VarSymbol) symbol).getLLVMirValue().getName(), allocaInst.getName());

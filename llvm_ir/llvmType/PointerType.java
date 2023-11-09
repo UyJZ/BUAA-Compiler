@@ -11,4 +11,8 @@ public class PointerType extends LLVMType{
     public String toString() {
         return elementType.toString() + "*";
     }
+
+    public LLVMType getElementType() {
+        return elementType;
+    }
 }
