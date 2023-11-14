@@ -92,9 +92,7 @@ public class VarSymbol extends Symbol {
         return initial.getVal(pos);
     }
 
-    public Value getLLVMirValue() {
-        return llvmValue;
-    }
+
 
     public LLVMType getType() {
         return type;

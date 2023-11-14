@@ -68,12 +68,12 @@ public class VarDef extends Node {
 
     @Override
     public void checkError() {
-        Symbol symbol = createSymbol();
         try {
-            SymbolManager.getInstance().addSymbol(symbol);
+            SymbolManager.getInstance().addSymbol(new VarSymbol(name, SymbolType.SYMBOL_VAR, dim, false));
         } catch (RenameException e) {
             ErrorChecker.AddError(new Error(children.get(0).getEndLine(), ErrorType.b));
         }
+        super.checkError();
     }
 
     @Override
@@ -82,13 +82,14 @@ public class VarDef extends Node {
         if (SymbolManager.getInstance().isGlobal()) {
             GlobalVar globalVar = new GlobalVar(symbol);
             IRController.getInstance().addGlobalVar(globalVar);
+            symbol.setLlvmValue(globalVar);
         } else {
             LLVMType varType = new LLVMType();
             if (symbol.getDim() == 0)
                 varType = new Integer32Type();
             else
                 varType = new ArrayType(symbol.getLens(), new Integer32Type());
-            AllocaInst allocaInst = new AllocaInst(varType, IRController.getInstance().genVirtualRegNum());
+            AllocaInst allocaInst = new AllocaInst(varType);
             IRController.getInstance().addInstr(allocaInst);
             symbol.setLlvmValue(allocaInst);
             if (symbol.getDim() == 1) {
@@ -97,9 +98,9 @@ public class VarDef extends Node {
                     //GEP and store
                     for (int i = 0; i < values.size(); i++) {
                         ArrayType type1 = new ArrayType(symbol.getLens(), new Integer32Type());
-                        GEPInstr gepInstr = new GEPInstr(type1, symbol.getLLVMirValue().getName(), new Value(new Integer32Type(), String.valueOf(i)));
+                        GEPInstr gepInstr = new GEPInstr(type1, symbol.getLLVMirValue(), new Value(new Integer32Type(), String.valueOf(i)));
                         IRController.getInstance().addInstr(gepInstr);
-                        StoreInstr storeInstr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), values.get(i).getName(), gepInstr.getName());
+                        StoreInstr storeInstr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), values.get(i), gepInstr);
                         IRController.getInstance().addInstr(storeInstr);
                     }
                 }
@@ -109,14 +110,14 @@ public class VarDef extends Node {
                     for (int i = 0; i < v.size(); i++) {
                         ArrayType type1 = new ArrayType(symbol.getLens(), new Integer32Type());
                         LLVMType type2 = type1.getEleType();
-                        GEPInstr gepInstr = new GEPInstr(type1, symbol.getLLVMirValue().getName(), new Value(new Integer32Type(), String.valueOf(i)));
+                        GEPInstr gepInstr = new GEPInstr(type1, symbol.getLLVMirValue(), new Value(new Integer32Type(), String.valueOf(i)));
                         IRController.getInstance().addInstr(gepInstr);
                         for (int j = 0; j < v.get(i).size(); j++) {
                             //两个gep
                             assert (type2 instanceof ArrayType);
-                            GEPInstr gepInstr1 = new GEPInstr((ArrayType) type2, gepInstr.getName(), new Value(new Integer32Type(), String.valueOf(j)));
+                            GEPInstr gepInstr1 = new GEPInstr((ArrayType) type2, gepInstr, new Value(new Integer32Type(), String.valueOf(j)));
                             IRController.getInstance().addInstr(gepInstr1);
-                            StoreInstr storeInstr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), v.get(i).get(j).getName(), gepInstr1.getName());
+                            StoreInstr storeInstr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), v.get(i).get(j), gepInstr1);
                             IRController.getInstance().addInstr(storeInstr);
                         }
                     }
@@ -125,7 +126,7 @@ public class VarDef extends Node {
             } else {
                 assert (symbol.getDim() == 0);
                 if (isAssigned) {
-                    StoreInstr storeInstr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), ((InitVal) children.get(children.size() - 1)).genLLVMir().getName(), allocaInst.getName());
+                    StoreInstr storeInstr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), ((InitVal) children.get(children.size() - 1)).genLLVMir(), allocaInst);
                     IRController.getInstance().addInstr(storeInstr);
                 }
             }

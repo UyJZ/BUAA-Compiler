@@ -19,19 +19,23 @@ public class GEPInstr extends Instr {
 
     private LLVMType fatherType;
 
-    public GEPInstr(ArrayType type, String ptr, Value index) {
+    public GEPInstr(ArrayType type, Value ptr, Value index) {
         super(type.getEleType(), IRController.getInstance().genVirtualRegNum());
         indexs = new ArrayList<>();
         indexs.add(index);
-        this.ptr = ptr;
+        this.ptr = ptr.getName();
+        this.operands.add(ptr);
+        this.operands.add(index);
         this.fatherType = type;
     }
 
-    public GEPInstr(PointerType type, String ptr, Value index) {
+    public GEPInstr(PointerType type, Value ptr, Value index) {
         super(type.getElementType(), IRController.getInstance().genVirtualRegNum());
         indexs = new ArrayList<>();
         indexs.add(index);
-        this.ptr = ptr;
+        this.ptr = ptr.getName();
+        this.operands.add(ptr);
+        this.operands.add(index);
         this.fatherType = type;
     }
 

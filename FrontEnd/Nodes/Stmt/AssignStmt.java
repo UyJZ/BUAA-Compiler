@@ -43,7 +43,7 @@ public class AssignStmt extends Stmt {
         Value operand = children.get(2).genLLVMir();
         assert (children.get(0) instanceof LVal);
         Value operand1 = lVal.genLLVMForAssign();
-        StoreInstr instr = new StoreInstr(operand1.getType(), new PointerType(operand1.getType()), operand.getName(), operand1.getName());
+        StoreInstr instr = new StoreInstr(operand1.getType(), new PointerType(operand1.getType()), operand, operand1);
         IRController.getInstance().addInstr(instr);
         return instr;
     }

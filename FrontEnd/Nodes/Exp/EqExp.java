@@ -39,15 +39,15 @@ public class EqExp extends Node {
             Value right = children.get(2).genLLVMir();
             if (!left.getType().equals(right.getType())) {
                 if (left.getType() instanceof Integer32Type) {
-                    ZextInstr zextInstr = new ZextInstr(right.getType(), left.getType(), right.getName());
+                    ZextInstr zextInstr = new ZextInstr(right.getType(), left.getType(), right);
                     IRController.getInstance().addInstr(zextInstr);
-                    IcmpInstr icmpInstr = new IcmpInstr(left.getType(), left.getName(), zextInstr.getName(), cmpOp);
+                    IcmpInstr icmpInstr = new IcmpInstr(left.getType(), left, zextInstr, cmpOp);
                     IRController.getInstance().addInstr(icmpInstr);
                     return icmpInstr;
                 } else {
-                    ZextInstr zextInstr = new ZextInstr(left.getType(), right.getType(), left.getName());
+                    ZextInstr zextInstr = new ZextInstr(left.getType(), right.getType(), left);
                     IRController.getInstance().addInstr(zextInstr);
-                    IcmpInstr icmpInstr = new IcmpInstr(zextInstr.getType(), zextInstr.getName(), right.getName(), cmpOp);
+                    IcmpInstr icmpInstr = new IcmpInstr(zextInstr.getType(), zextInstr, right, cmpOp);
                     IRController.getInstance().addInstr(icmpInstr);
                     return icmpInstr;
                 }
@@ -57,7 +57,7 @@ public class EqExp extends Node {
     }
 
     private Value Compare(Value left, Value right, IcmpInstr.CmpOp cmpOp) {
-        IcmpInstr icmpInstr = new IcmpInstr(left.getType(), left.getName(), right.getName(), cmpOp);
+        IcmpInstr icmpInstr = new IcmpInstr(left.getType(), left, right, cmpOp);
         IRController.getInstance().addInstr(icmpInstr);
         return icmpInstr;
     }

@@ -48,11 +48,13 @@ public class FuncDef extends Node {
     public void checkError() {
         //TODO:Enter the symbol table and create a new block,push this funcDef into symbolTable, insert the funcFParams
         ArrayList<Integer> list = new ArrayList<>();
+        boolean isleave = true;
         for (FuncFParam f : funcFParams) list.add(f.getDim());
         try {
             SymbolManager.getInstance().enterFuncBlock(new FuncSymbol(funcName, SymbolType.SYMBOL_FUNC, functionType, list));
         } catch (RenameException e) {
             ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.b));
+            isleave = false;
         }
         Block block = (Block) children.get(children.size() - 1);
         if (functionType == FunctionType.FUNC_INT) {
@@ -68,7 +70,8 @@ public class FuncDef extends Node {
             if (node instanceof Block) ((Block) node).checkErrorInFunc();
             else node.checkError();
         }
-        SymbolManager.getInstance().leaveBlock();
+        if (isleave)
+            SymbolManager.getInstance().leaveBlock();
         //TODO:Leave the symbol table
     }
 
@@ -81,8 +84,9 @@ public class FuncDef extends Node {
             list.add(f.getDim());
             types.add(new Integer32Type());
         }
+        FuncSymbol symbol = new FuncSymbol(funcName, SymbolType.SYMBOL_FUNC, functionType, list, types);
         try {
-            SymbolManager.getInstance().enterFuncBlock(new FuncSymbol(funcName, SymbolType.SYMBOL_FUNC, functionType, list, types));
+            SymbolManager.getInstance().enterFuncBlock(symbol);
         } catch (RenameException e) {
             ErrorChecker.AddError(new Error(children.get(1).getEndLine(), ErrorType.b));
         }
@@ -93,6 +97,7 @@ public class FuncDef extends Node {
             }
         }
         Function function = new Function(functionType == FunctionType.FUNC_INT ? new Integer32Type() : new VoidType(), funcName, hasParam);
+        symbol.setLlvmValue(function);
         IRController.getInstance().addFunction(function);
         for (Node n : children) {
             if (n instanceof FuncFParams) n.genLLVMir();

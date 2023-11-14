@@ -67,4 +67,8 @@ public class Function extends Value {
         Instr instr = blockArrayList.get(blockArrayList.size() - 1).lastInstr();
         return instr instanceof ReturnInstr && instr.getType() instanceof VoidType;
     }
+
+    public String getName() {
+        return name;
+    }
 }

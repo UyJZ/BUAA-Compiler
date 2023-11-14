@@ -7,6 +7,8 @@ import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Nodes.Exp.Exp;
 import FrontEnd.Nodes.Node;
 import FrontEnd.Nodes.TokenNode;
+import FrontEnd.Symbol.FuncSymbol;
+import FrontEnd.Symbol.SymbolManager;
 import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.Instruction.CallInstr;
@@ -51,19 +53,22 @@ public class PrintfStmt extends Stmt {
             if (i + 1 < s.length() && s.charAt(i) == '%' && s.charAt(i + 1) == 'd') {
                 ArrayList<Value> p = new ArrayList<>();
                 p.add(instrs.get(start++));
-                CallInstr callInstr = new CallInstr(new VoidType(), "@putint", p, "");
+                FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("putint");
+                CallInstr callInstr = new CallInstr(new VoidType(), funcSymbol.getLLVMirValue(), p, "");
                 i++;
                 IRController.getInstance().addInstr(callInstr);
             } else if (i + 1 < s.length() && s.charAt(i) == '\\' && s.charAt(i + 1) == 'n') {
                 ArrayList<Value> p = new ArrayList<>();
                 p.add(new Value(new Integer32Type(), String.valueOf((int) '\n')));
-                CallInstr callInstr = new CallInstr(new VoidType(), "@putch", p, "");
+                FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("putch");
+                CallInstr callInstr = new CallInstr(new VoidType(), funcSymbol.getLLVMirValue(), p, "");
                 IRController.getInstance().addInstr(callInstr);
                 i++;
             } else {
                 ArrayList<Value> p = new ArrayList<>();
                 p.add(new Value(new Integer32Type(), String.valueOf((int) s.charAt(i))));
-                CallInstr callInstr = new CallInstr(new VoidType(), "@putch", p, "");
+                FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("putch");
+                CallInstr callInstr = new CallInstr(new VoidType(), funcSymbol.getLLVMirValue(), p, "");
                 IRController.getInstance().addInstr(callInstr);
             }
         }

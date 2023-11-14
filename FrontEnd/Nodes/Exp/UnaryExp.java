@@ -13,6 +13,7 @@ import FrontEnd.Symbol.FuncSymbol;
 import FrontEnd.Symbol.SymbolManager;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Instruction.BinaryInstr;
 import llvm_ir.Values.Instruction.CallInstr;
 import llvm_ir.Values.Instruction.IcmpInstr;
@@ -82,9 +83,9 @@ public class UnaryExp extends Node {
                 BinaryInstr binaryInstr = new BinaryInstr(new Integer32Type(), operand1, BinaryInstr.op.SUB);
                 IRController.getInstance().addInstr(binaryInstr);
                 return binaryInstr;
-            } else if ((((UnaryOp) children.get(0)).getOp()) == tokenType.NOT){
+            } else if ((((UnaryOp) children.get(0)).getOp()) == tokenType.NOT) {
                 Value operand1 = children.get(1).genLLVMir();
-                IcmpInstr instr = new IcmpInstr(operand1.getType(), operand1.getName(), "0", IcmpInstr.CmpOp.eq);
+                IcmpInstr instr = new IcmpInstr(operand1.getType(), operand1, new ConstInteger(0), IcmpInstr.CmpOp.eq);
                 IRController.getInstance().addInstr(instr);
                 return instr;
             } else
@@ -99,9 +100,9 @@ public class UnaryExp extends Node {
             }
             CallInstr callInstr;
             if (funcSymbol.getLLVMType() instanceof VoidType)
-                callInstr = new CallInstr(funcSymbol.getLLVMType(), "@" + funcSymbol.getSymbolName(), params, "");
+                callInstr = new CallInstr(funcSymbol.getLLVMType(), funcSymbol.getLLVMirValue(), params, "");
             else
-                callInstr = new CallInstr(funcSymbol.getLLVMType(), "@" + funcSymbol.getSymbolName(), params, IRController.getInstance().genVirtualRegNum());
+                callInstr = new CallInstr(funcSymbol.getLLVMType(), funcSymbol.getLLVMirValue(), params, IRController.getInstance().genVirtualRegNum());
             IRController.getInstance().addInstr(callInstr);
             return callInstr;
         }

@@ -32,14 +32,8 @@ public class ForStmt extends Node {
             else if (node instanceof Exp) expr = (Exp) node;
         }
         VarSymbol symbol = (VarSymbol) SymbolManager.getInstance().getSymbolByName(lVal.getName());
-        if (symbol.isGlobal()) {
-            StoreInstr instr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), operand.getName(), "@" + lVal.getName());
-            IRController.getInstance().addInstr(instr);
-            return instr;
-        } else {
-            StoreInstr instr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), operand.getName(), symbol.getLLVMirValue().getName());
-            IRController.getInstance().addInstr(instr);
-            return instr;
-        }
+        StoreInstr instr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), operand, symbol.getLLVMirValue());
+        IRController.getInstance().addInstr(instr);
+        return instr;
     }
 }

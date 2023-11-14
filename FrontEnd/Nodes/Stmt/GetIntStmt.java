@@ -6,6 +6,7 @@ import FrontEnd.ErrorManager.Error;
 import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Nodes.LVal;
 import FrontEnd.Nodes.Node;
+import FrontEnd.Symbol.FuncSymbol;
 import FrontEnd.Symbol.Symbol;
 import FrontEnd.Symbol.SymbolManager;
 import FrontEnd.Symbol.VarSymbol;
@@ -38,10 +39,11 @@ public class GetIntStmt extends Stmt {
     @Override
     public Value genLLVMir() {
         Symbol symbol = SymbolManager.getInstance().getSymbolByName(lVal.getName());
-        CallInstr callInstr = new CallInstr(new Integer32Type(), "@getint", new ArrayList<>(), IRController.getInstance().genVirtualRegNum());
+        FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("getint");
+        CallInstr callInstr = new CallInstr(new Integer32Type(), funcSymbol.getLLVMirValue(), new ArrayList<>(), IRController.getInstance().genVirtualRegNum());
         IRController.getInstance().addInstr(callInstr);
         Value operand1 = lVal.genLLVMForAssign();
-        StoreInstr instr = new StoreInstr(operand1.getType(), new PointerType(operand1.getType()), callInstr.getName(), operand1.getName());
+        StoreInstr instr = new StoreInstr(operand1.getType(), new PointerType(operand1.getType()), callInstr, operand1);
         IRController.getInstance().addInstr(instr);
         return instr;
     }

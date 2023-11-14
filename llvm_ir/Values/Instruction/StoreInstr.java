@@ -1,5 +1,6 @@
 package llvm_ir.Values.Instruction;
 
+import llvm_ir.Value;
 import llvm_ir.llvmType.LLVMType;
 
 public class StoreInstr extends Instr {
@@ -14,11 +15,13 @@ public class StoreInstr extends Instr {
 
     private String from;
 
-    public StoreInstr(LLVMType type, LLVMType type2, String from, String to) {
-        super(type, to);
+    public StoreInstr(LLVMType type, LLVMType type2, Value from, Value to) {
+        super(type, to.getName());
         isStoreVal = false;
-        this.from = from;
-        this.to = to;
+        this.from = from.getName();
+        this.to = to.getName();
+        this.operands.add(from);
+        this.operands.add(to);
         this.type2 = type2;
     }
 

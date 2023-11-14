@@ -5,6 +5,7 @@ import FrontEnd.Nodes.Node;
 import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.BasicBlock;
+import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Instruction.IcmpInstr;
 import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
 import llvm_ir.llvmType.BasicBlockType;
@@ -52,13 +53,13 @@ public class LAndExp extends Node {
 
     private Value ToBool(Value v) {
         if (!(v.getType() instanceof BoolType)) {
-            IcmpInstr icmpInstr = new IcmpInstr(v.getType(), v.getName(), "0", IcmpInstr.CmpOp.ne);
+            IcmpInstr icmpInstr = new IcmpInstr(v.getType(), v, new ConstInteger(0), IcmpInstr.CmpOp.ne);
             IRController.getInstance().addInstr(icmpInstr);
-            BranchInstr branchInstr = new BranchInstr(new LLVMType(), trueBlock, falseBlock, icmpInstr.getName());
+            BranchInstr branchInstr = new BranchInstr(new LLVMType(), trueBlock, falseBlock, icmpInstr);
             IRController.getInstance().addInstr(branchInstr);
             return null;
         }
-        BranchInstr branchInstr = new BranchInstr(new LLVMType(), trueBlock, falseBlock, v.getName());
+        BranchInstr branchInstr = new BranchInstr(new LLVMType(), trueBlock, falseBlock, v);
         IRController.getInstance().addInstr(branchInstr);
         return null;
     }

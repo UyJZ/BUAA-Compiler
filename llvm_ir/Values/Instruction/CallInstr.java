@@ -17,17 +17,13 @@ public class CallInstr extends Instr {
 
     private String functionName;
 
-    public CallInstr(LLVMType type, Function function, ArrayList<Value> params) {
-        super(type, type instanceof VoidType ? "" : IRController.getInstance().genVirtualRegNum());
-        this.params = params;
-        this.function = function;
-    }
-
-    public CallInstr(LLVMType type, String funcName, ArrayList<Value> params, String targetReg) {
+    public CallInstr(LLVMType type, Value func, ArrayList<Value> params, String targetReg) {
         //库函数
         super(type, type instanceof VoidType ? "" : targetReg);
         this.params = params;
-        functionName = funcName;
+        this.operands.add(func);
+        this.operands.addAll(params);
+        functionName = func.getName();
     }
 
     @Override

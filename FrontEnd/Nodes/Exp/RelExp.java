@@ -44,20 +44,20 @@ public class RelExp extends Node {
             if (!left.getType().equals(right.getType())) {
                 ZextInstr zextInstr;
                 if (right.getType() instanceof Integer32Type) {
-                    zextInstr = new ZextInstr(left.getType(), right.getType(), left.getName());
+                    zextInstr = new ZextInstr(left.getType(), right.getType(), left);
                     IRController.getInstance().addInstr(zextInstr);
-                    IcmpInstr icmpInstr = new IcmpInstr(right.getType(), zextInstr.getName(), right.getName(), cmpOp);
+                    IcmpInstr icmpInstr = new IcmpInstr(right.getType(), zextInstr, right, cmpOp);
                     IRController.getInstance().addInstr(icmpInstr);
                     return icmpInstr;
                 } else {
-                    zextInstr = new ZextInstr(right.getType(), left.getType(), right.getName());
+                    zextInstr = new ZextInstr(right.getType(), left.getType(), right);
                     IRController.getInstance().addInstr(zextInstr);
-                    IcmpInstr icmpInstr = new IcmpInstr(zextInstr.getType(), left.getName(), zextInstr.getName(), cmpOp);
+                    IcmpInstr icmpInstr = new IcmpInstr(zextInstr.getType(), left, zextInstr, cmpOp);
                     IRController.getInstance().addInstr(icmpInstr);
                     return icmpInstr;
                 }
             } else {
-                IcmpInstr icmpInstr = new IcmpInstr(left.getType(), left.getName(), right.getName(), cmpOp);
+                IcmpInstr icmpInstr = new IcmpInstr(left.getType(), left, right, cmpOp);
                 IRController.getInstance().addInstr(icmpInstr);
                 return icmpInstr;
             }

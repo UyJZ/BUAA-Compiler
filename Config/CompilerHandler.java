@@ -6,6 +6,7 @@ import FrontEnd.Lexer.Token;
 import FrontEnd.Nodes.CompUnit;
 import FrontEnd.Nodes.Node;
 import FrontEnd.Parser.ParserController;
+import FrontEnd.Symbol.SymbolManager;
 import llvm_ir.IRController;
 
 import javax.swing.text.html.parser.Parser;
@@ -29,17 +30,24 @@ public class CompilerHandler {
         } else if (tasks.isParserAnalysis) {
             ParserController parserController = new ParserController(lexer.getTokenStream());
             parserController.parse().print(ps);
-        } else if (tasks.isErrorHandle) {
+        } else if (tasks.isErrorHandle && !tasks.isLLVMoutput) {
             ParserController parserController = new ParserController(lexer.getTokenStream());
             parserController.parse().checkError();
             ErrorChecker.showErrorMsg(ps);
         } else if (tasks.isLLVMoutput) {
+            assert (tasks.getOutputPath().equals("llvm_ir.txt"));
             ParserController parserController = new ParserController(lexer.getTokenStream());
             Node c = parserController.parse();
-            c.genLLVMir();
-            IRController.getInstance().Output(ps);
+            c.checkError();
+            ErrorChecker.showErrorMsg(new PrintStream(new FileOutputStream("error.txt")));
+            if (ErrorChecker.getErrors().size() == 0) {
+                SymbolManager.getInstance().flush();
+                c.genLLVMir();
+                IRController.getInstance().Output(ps);
+            }
         }
     }
+
 
     private static StringBuilder readFile(String filePath) throws FileNotFoundException {
         StringBuilder stringBuffer = new StringBuilder();

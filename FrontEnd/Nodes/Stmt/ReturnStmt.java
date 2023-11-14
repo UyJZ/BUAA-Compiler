@@ -30,13 +30,12 @@ public class ReturnStmt extends Stmt {
     @Override
     public Value genLLVMir() {
         ReturnInstr ret;
-        if (children.size() == 1)  {
+        if (children.size() == 1) {
             ret = new ReturnInstr(new VoidType(), "void");
             IRController.getInstance().addInstr(ret);
-        }
-        else if (children.size() == 3) {
+        } else if (children.size() == 3) {
             Value operand = ((Exp) children.get(1)).genLLVMir();
-            ret = new ReturnInstr(new Integer32Type(), operand.getName());
+            ret = new ReturnInstr(new Integer32Type(), operand);
             IRController.getInstance().addInstr(ret);
         } else {
             ret = new ReturnInstr(new VoidType(), "");
