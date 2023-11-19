@@ -46,18 +46,18 @@ public class RelExp extends Node {
                 if (right.getType() instanceof Integer32Type) {
                     zextInstr = new ZextInstr(left.getType(), right.getType(), left);
                     IRController.getInstance().addInstr(zextInstr);
-                    IcmpInstr icmpInstr = new IcmpInstr(right.getType(), zextInstr, right, cmpOp);
+                    IcmpInstr icmpInstr = new IcmpInstr(zextInstr, right, cmpOp);
                     IRController.getInstance().addInstr(icmpInstr);
                     return icmpInstr;
                 } else {
                     zextInstr = new ZextInstr(right.getType(), left.getType(), right);
                     IRController.getInstance().addInstr(zextInstr);
-                    IcmpInstr icmpInstr = new IcmpInstr(zextInstr.getType(), left, zextInstr, cmpOp);
+                    IcmpInstr icmpInstr = new IcmpInstr(left, zextInstr, cmpOp);
                     IRController.getInstance().addInstr(icmpInstr);
                     return icmpInstr;
                 }
             } else {
-                IcmpInstr icmpInstr = new IcmpInstr(left.getType(), left, right, cmpOp);
+                IcmpInstr icmpInstr = new IcmpInstr(left, right, cmpOp);
                 IRController.getInstance().addInstr(icmpInstr);
                 return icmpInstr;
             }

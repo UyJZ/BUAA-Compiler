@@ -5,6 +5,10 @@ public class tasks {
     public static boolean isParserAnalysis = false;
     public static boolean isErrorHandle = false;
 
+    public static boolean isMIPSoutput = false;
+
+    public static boolean isOptimize = false;
+
     public static boolean isLLVMoutput = false;
 
     private static String LexerOutputPath = "output.txt";
@@ -46,5 +50,9 @@ public class tasks {
 
     public static String getOutputPath() {
         return isLLVMoutput ? LLVMOutputPath : isErrorHandle ? ErrorHandleOutputPath : isLexerAnalysis ? LexerOutputPath : ParserOutputPath;
+    }
+
+    public static boolean isIsOptimize() {
+        return isOptimize;
     }
 }

@@ -1,10 +1,13 @@
 package llvm_ir.Values;
 
+import BackEnd.MIPS.Assembly.Data;
+import BackEnd.MIPS.MipsController;
 import FrontEnd.Symbol.Initial;
 import FrontEnd.Symbol.VarSymbol;
 import llvm_ir.Value;
 import llvm_ir.llvmType.ArrayType;
 import llvm_ir.llvmType.Integer32Type;
+import llvm_ir.llvmType.PointerType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +21,7 @@ public class GlobalVar extends Value {
     private final Initial initial;
 
     public GlobalVar(VarSymbol symbol) {
-        super(symbol.getDim() == 0 ? new Integer32Type() : new ArrayType(symbol.getLens(), new Integer32Type()),
+        super(new PointerType(symbol.getDim() == 0 ? new Integer32Type() : new ArrayType(symbol.getLens(), new Integer32Type())),
                 "@" + symbol.getSymbolName());
         this.lens = (ArrayList<Integer>) symbol.getLens();
         this.isConst = symbol.isConst();
@@ -49,5 +52,13 @@ public class GlobalVar extends Value {
                 return name + " = " + "dso_local " + isGlobal + initial.GlobalVarLLVMir(lens, new Integer32Type());
             }
         }
+    }
+
+    @Override
+    public void genMIPS() {
+        Data data = new Data(lens, initial, name);
+        this.data = data;
+        MipsController.getInstance().addGlobalVar(data);
+        this.isDistributed = true;
     }
 }

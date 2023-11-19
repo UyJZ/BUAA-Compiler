@@ -1,26 +1,45 @@
 package llvm_ir.Values;
 
+import BackEnd.MIPS.Assembly.BlockAsm;
+import BackEnd.MIPS.Assembly.LabelAsm;
+import BackEnd.MIPS.MipsController;
+import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.llvmType.BasicBlockType;
 import llvm_ir.llvmType.LLVMType;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 
 public class BasicBlock extends Value {
-    private Value label;
+    private LabelAsm label;
+
+    private Function father;
 
     private Instr terminator;
 
-    private ArrayList<BasicBlock> preBlocks = new ArrayList<>();
+    private BlockAsm blockAsm;
+
+    private HashSet<Value> inSet;
+
+    private HashSet<Value> outSet;
+
+    private HashSet<Value> defSet;
+
+    private final ArrayList<BasicBlock> posBlocks = new ArrayList<>();
+
+    private final ArrayList<BasicBlock> preBlocks = new ArrayList<>();
 
     private boolean isFirstBlock;
 
     public BasicBlock() {
         super(new BasicBlockType(), "");
+        this.father = IRController.getInstance().getCurrentFunction();
         instrs = new ArrayList<>();
+        this.label = new LabelAsm(father.getName() + "_" + father.getOrderOf(this));
         this.isFirstBlock = false;
     }
 
@@ -34,6 +53,10 @@ public class BasicBlock extends Value {
 
     public void setFirstBlock() {
         this.isFirstBlock = true;
+    }
+
+    public LabelAsm getMIPSLabel() {
+        return label;
     }
 
     @Override
@@ -61,4 +84,63 @@ public class BasicBlock extends Value {
         else return instrs.get(instrs.size() - 1);
     }
 
+    public void setName() {
+        this.name = IRController.getInstance().genVirtualRegNum();
+        for (Instr instr : instrs) {
+            instr.setName();
+        }
+    }
+
+    public void setInSet(HashSet<Value> set) {
+        inSet = set;
+    }
+
+    public void setOutSet(HashSet<Value> set) {
+        outSet = set;
+    }
+
+    public void setDefSet(HashSet<Value> set) {
+        defSet = set;
+    }
+
+    public HashSet<Value> getInSet() {
+        return inSet;
+    }
+
+    public HashSet<Value> getDefSet() {
+        return defSet;
+    }
+
+    public HashSet<Value> getOutSet() {
+        return outSet;
+    }
+
+    public void BuildDefUse() {
+        defSet = new HashSet<>();
+        outSet = new HashSet<>();
+        for (Instr instr : instrs) {
+            for (Value operand : instr.getOperands()) {
+                if (operand instanceof Instr || operand instanceof Param || operand instanceof GlobalVar) {
+                    outSet.add(operand);
+                }
+            }
+            if (instr.hasOutput()) {
+                defSet.add(instr);
+            }
+        }
+    }
+
+
+    public void addPosBlock(BasicBlock block) {
+        this.posBlocks.add(block);
+    }
+
+    @Override
+    public void genMIPS() {
+        MipsController.getInstance().addBasicBlock(this);
+    }
+
+    public void setBlockAsm(BlockAsm blockAsm) {
+        this.blockAsm = blockAsm;
+    }
 }

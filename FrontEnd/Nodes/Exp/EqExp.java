@@ -41,13 +41,13 @@ public class EqExp extends Node {
                 if (left.getType() instanceof Integer32Type) {
                     ZextInstr zextInstr = new ZextInstr(right.getType(), left.getType(), right);
                     IRController.getInstance().addInstr(zextInstr);
-                    IcmpInstr icmpInstr = new IcmpInstr(left.getType(), left, zextInstr, cmpOp);
+                    IcmpInstr icmpInstr = new IcmpInstr(left, zextInstr, cmpOp);
                     IRController.getInstance().addInstr(icmpInstr);
                     return icmpInstr;
                 } else {
                     ZextInstr zextInstr = new ZextInstr(left.getType(), right.getType(), left);
                     IRController.getInstance().addInstr(zextInstr);
-                    IcmpInstr icmpInstr = new IcmpInstr(zextInstr.getType(), zextInstr, right, cmpOp);
+                    IcmpInstr icmpInstr = new IcmpInstr(zextInstr, right, cmpOp);
                     IRController.getInstance().addInstr(icmpInstr);
                     return icmpInstr;
                 }
@@ -57,7 +57,7 @@ public class EqExp extends Node {
     }
 
     private Value Compare(Value left, Value right, IcmpInstr.CmpOp cmpOp) {
-        IcmpInstr icmpInstr = new IcmpInstr(left.getType(), left, right, cmpOp);
+        IcmpInstr icmpInstr = new IcmpInstr(left, right, cmpOp);
         IRController.getInstance().addInstr(icmpInstr);
         return icmpInstr;
     }

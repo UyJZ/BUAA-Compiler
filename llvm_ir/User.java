@@ -12,4 +12,9 @@ public class User extends Value {
         super(type, name);
         this.operands = new ArrayList<>();
     }
+
+    protected void addValue(Value value) {
+        this.operands.add(value);
+        IRController.getInstance().addUse(new Use(this, value));
+    }
 }

@@ -110,7 +110,7 @@ public class FuncDef extends Node {
             if (!(n instanceof FuncFParams)) n.genLLVMir();
         }
         if (function.getType() instanceof VoidType && !function.isLastInstrReturnVoid()) {
-            ReturnInstr returnInstr = new ReturnInstr(new VoidType(), "");
+            ReturnInstr returnInstr = new ReturnInstr(new VoidType());
             IRController.getInstance().addInstr(returnInstr);
         }
         SymbolManager.getInstance().leaveBlock();

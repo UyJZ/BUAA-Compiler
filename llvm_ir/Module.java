@@ -41,4 +41,20 @@ public class Module extends Value {
         }
         return sb.toString();
     }
+
+    public void setName() {
+        for (Function f : functionList) {
+            f.setName();
+        }
+    }
+
+    @Override
+    public void genMIPS() {
+        for (GlobalVar var : globalVarList) {
+            var.genMIPS();
+        }
+        for (Function f : functionList) {
+            f.genMIPS();
+        }
+    }
 }

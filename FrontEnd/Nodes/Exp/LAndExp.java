@@ -53,7 +53,7 @@ public class LAndExp extends Node {
 
     private Value ToBool(Value v) {
         if (!(v.getType() instanceof BoolType)) {
-            IcmpInstr icmpInstr = new IcmpInstr(v.getType(), v, new ConstInteger(0), IcmpInstr.CmpOp.ne);
+            IcmpInstr icmpInstr = new IcmpInstr(v, new ConstInteger(0), IcmpInstr.CmpOp.ne);
             IRController.getInstance().addInstr(icmpInstr);
             BranchInstr branchInstr = new BranchInstr(new LLVMType(), trueBlock, falseBlock, icmpInstr);
             IRController.getInstance().addInstr(branchInstr);

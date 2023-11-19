@@ -1,29 +1,40 @@
 package llvm_ir.Values.Instruction;
 
+import Config.tasks;
 import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.Function;
+import llvm_ir.Values.Param;
+import llvm_ir.llvmType.Integer32Type;
 import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.VoidType;
 
-import javax.management.ValueExp;
 import java.util.ArrayList;
 
 public class CallInstr extends Instr {
 
-    private ArrayList<Value> params;
+    private final ArrayList<Value> params;
 
     private Function function;
 
-    private String functionName;
+    private final String functionName;
 
-    public CallInstr(LLVMType type, Value func, ArrayList<Value> params, String targetReg) {
+    private final boolean isIOInstr;
+
+    private final boolean isInputInstr;
+
+    private final boolean isOutputInstr;
+
+    public CallInstr(LLVMType type, Value func, ArrayList<Value> params) {
         //库函数
-        super(type, type instanceof VoidType ? "" : targetReg);
+        super(type, type instanceof VoidType || tasks.isIsOptimize() ? "" : IRController.getInstance().genVirtualRegNum());
         this.params = params;
-        this.operands.add(func);
-        this.operands.addAll(params);
         functionName = func.getName();
+        isIOInstr = functionName.equals("@getint") || functionName.equals("@putint") || functionName.equals("@putch") || functionName.equals("@putstr");
+        isInputInstr = functionName.equals("@getint");
+        isOutputInstr = functionName.equals("@putint") || functionName.equals("@putch") || functionName.equals("@putstr");
+        if (!isIOInstr) this.operands.add(func);
+        this.operands.addAll(params);
     }
 
     @Override
@@ -41,5 +52,29 @@ public class CallInstr extends Instr {
         }
         sb.append(")");
         return sb.toString();
+    }
+
+    public boolean isInputInstr() {
+        return isInputInstr;
+    }
+
+    public boolean isOutputInstr() {
+        return isOutputInstr;
+    }
+
+    public String getFunctionName() {
+        return functionName;
+    }
+
+    public boolean isIOInstr() {
+        return isIOInstr;
+    }
+
+    public ArrayList<Value> getParam() {
+        return params;
+    }
+
+    public void setName() {
+        if (type instanceof Integer32Type) this.name = IRController.getInstance().genVirtualRegNum();
     }
 }

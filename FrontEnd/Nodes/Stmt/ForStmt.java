@@ -32,7 +32,7 @@ public class ForStmt extends Node {
             else if (node instanceof Exp) expr = (Exp) node;
         }
         VarSymbol symbol = (VarSymbol) SymbolManager.getInstance().getSymbolByName(lVal.getName());
-        StoreInstr instr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), operand, symbol.getLLVMirValue());
+        StoreInstr instr = new StoreInstr(operand, symbol.getLLVMirValue());
         IRController.getInstance().addInstr(instr);
         return instr;
     }

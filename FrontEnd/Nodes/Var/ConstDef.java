@@ -11,11 +11,11 @@ import FrontEnd.Nodes.Exp.ConstExp;
 import FrontEnd.Nodes.Node;
 import FrontEnd.Nodes.TokenNode;
 import FrontEnd.Symbol.Initial;
-import FrontEnd.Symbol.Symbol;
 import FrontEnd.Symbol.SymbolManager;
 import FrontEnd.Symbol.VarSymbol;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.GlobalVar;
 import llvm_ir.Values.Instruction.AllocaInst;
 import llvm_ir.Values.Instruction.GEPInstr;
@@ -23,10 +23,8 @@ import llvm_ir.Values.Instruction.StoreInstr;
 import llvm_ir.llvmType.ArrayType;
 import llvm_ir.llvmType.Integer32Type;
 import llvm_ir.llvmType.LLVMType;
-import llvm_ir.llvmType.PointerType;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class ConstDef extends Node {
 
@@ -91,6 +89,7 @@ public class ConstDef extends Node {
                 varType = new Integer32Type();
             else
                 varType = new ArrayType(symbol.getLens(), new Integer32Type());
+            varType.setConst();
             AllocaInst allocaInst = new AllocaInst(varType);
             IRController.getInstance().addInstr(allocaInst);
             symbol.setLlvmValue(allocaInst);
@@ -100,9 +99,9 @@ public class ConstDef extends Node {
                     //GEP and store
                     for (int i = 0; i < values.size(); i++) {
                         ArrayType type1 = new ArrayType(symbol.getLens(), new Integer32Type());
-                        GEPInstr gepInstr = new GEPInstr(type1, symbol.getLLVMirValue(), new Value(new Integer32Type(), String.valueOf(i)));
+                        GEPInstr gepInstr = new GEPInstr(symbol.getLLVMirValue(), new ConstInteger(0), new ConstInteger(i));
                         IRController.getInstance().addInstr(gepInstr);
-                        StoreInstr storeInstr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), values.get(i), gepInstr);
+                        StoreInstr storeInstr = new StoreInstr(values.get(i), gepInstr);
                         IRController.getInstance().addInstr(storeInstr);
                     }
                 }
@@ -111,15 +110,15 @@ public class ConstDef extends Node {
                     ArrayList<ArrayList<Value>> v = ((ConstInitVal) children.get(children.size() - 1)).genLLVMirListFor2Dim();
                     for (int i = 0; i < v.size(); i++) {
                         ArrayType type1 = new ArrayType(symbol.getLens(), new Integer32Type());
-                        LLVMType type2 = type1.getEleType();
-                        GEPInstr gepInstr = new GEPInstr(type1, symbol.getLLVMirValue(), new Value(new Integer32Type(), String.valueOf(i)));
+                        LLVMType type2 = type1.getElementType();
+                        GEPInstr gepInstr = new GEPInstr(symbol.getLLVMirValue(), new ConstInteger(0), new ConstInteger(i));
                         IRController.getInstance().addInstr(gepInstr);
                         for (int j = 0; j < v.get(i).size(); j++) {
                             //两个gep
                             assert (type2 instanceof ArrayType);
-                            GEPInstr gepInstr1 = new GEPInstr((ArrayType) type2, gepInstr, new Value(new Integer32Type(), String.valueOf(j)));
+                            GEPInstr gepInstr1 = new GEPInstr(gepInstr, new ConstInteger(0), new ConstInteger(j));
                             IRController.getInstance().addInstr(gepInstr1);
-                            StoreInstr storeInstr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), v.get(i).get(j), gepInstr1);
+                            StoreInstr storeInstr = new StoreInstr(v.get(i).get(j), gepInstr1);
                             IRController.getInstance().addInstr(storeInstr);
                         }
                     }
@@ -128,7 +127,7 @@ public class ConstDef extends Node {
             } else {
                 assert (symbol.getDim() == 0);
                 if (isAssigned) {
-                    StoreInstr storeInstr = new StoreInstr(new Integer32Type(), new PointerType(new Integer32Type()), ((ConstInitVal) children.get(children.size() - 1)).genLLVMir(), allocaInst);
+                    StoreInstr storeInstr = new StoreInstr(children.get(children.size() - 1).genLLVMir(), allocaInst);
                     IRController.getInstance().addInstr(storeInstr);
                 }
             }

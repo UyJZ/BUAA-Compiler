@@ -6,8 +6,8 @@ import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.VoidType;
 
 public class ReturnInstr extends Instr {
-    public ReturnInstr(LLVMType type, String name) {
-        super(type, name);
+    public ReturnInstr(LLVMType type) {
+        super(type, "");
     }
 
     public ReturnInstr(LLVMType type, Value value) {
@@ -21,6 +21,14 @@ public class ReturnInstr extends Instr {
             return "ret " + type.toString();
         } else {
             return "ret " + type.toString() + " " + name;
+        }
+    }
+
+    public void setName() {
+        if (type instanceof VoidType) {
+            name = "";
+        } else {
+            name = operands.get(0).getName();
         }
     }
 }

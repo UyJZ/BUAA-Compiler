@@ -15,4 +15,8 @@ public class PointerType extends LLVMType{
     public LLVMType getElementType() {
         return elementType;
     }
+
+    public void setLen(int len) {
+        this.len = len;
+    }
 }

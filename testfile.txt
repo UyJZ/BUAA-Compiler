@@ -42,7 +42,7 @@ int main()
         }
     }
 
-    
+
     printf("Test1 Success!");
     {
     }
@@ -52,6 +52,6 @@ int main()
     fun();
     fun();
     fun();
-    
+
     return 0;
 }

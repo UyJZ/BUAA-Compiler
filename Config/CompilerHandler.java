@@ -43,6 +43,9 @@ public class CompilerHandler {
             if (ErrorChecker.getErrors().size() == 0) {
                 SymbolManager.getInstance().flush();
                 c.genLLVMir();
+                if (tasks.isOptimize) {
+                    IRController.getInstance().setName();
+                }
                 IRController.getInstance().Output(ps);
             }
         }

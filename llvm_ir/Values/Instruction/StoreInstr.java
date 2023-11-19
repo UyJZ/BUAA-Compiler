@@ -2,6 +2,7 @@ package llvm_ir.Values.Instruction;
 
 import llvm_ir.Value;
 import llvm_ir.llvmType.LLVMType;
+import llvm_ir.llvmType.VoidType;
 
 public class StoreInstr extends Instr {
 
@@ -9,34 +10,27 @@ public class StoreInstr extends Instr {
 
     private int val;
 
-    private String to;
+    private Value to;
 
     private LLVMType type2;
 
-    private String from;
+    private Value from;
 
-    public StoreInstr(LLVMType type, LLVMType type2, Value from, Value to) {
-        super(type, to.getName());
+    public StoreInstr(Value from, Value to) {
+        super(new VoidType(), "");
         isStoreVal = false;
-        this.from = from.getName();
-        this.to = to.getName();
+        this.from = from;
+        this.to = to;
         this.operands.add(from);
         this.operands.add(to);
-        this.type2 = type2;
-    }
-
-    public StoreInstr(LLVMType type, int val, String to) {
-        super(type, to);
-        isStoreVal = true;
-        this.val = val;
     }
 
     @Override
     public String toString() {
         if (isStoreVal) {
-            return "store " + type.toString() + " " + val + ", " + type2.toString() + " " + name;
+            return "store " + from.getType().toString() + " " + val + ", " + to.getType().toString() + " " + to.getName();
         } else {
-            return "store " + type.toString() + " " + from + ", " + type2.toString() + " " + name;
+            return "store " + from.getType().toString() + " " + from.getName() + ", " + to.getType().toString() + " " + to.getName();
         }
     }
 }

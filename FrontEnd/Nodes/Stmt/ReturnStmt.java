@@ -31,14 +31,14 @@ public class ReturnStmt extends Stmt {
     public Value genLLVMir() {
         ReturnInstr ret;
         if (children.size() == 1) {
-            ret = new ReturnInstr(new VoidType(), "void");
+            ret = new ReturnInstr(new VoidType());
             IRController.getInstance().addInstr(ret);
         } else if (children.size() == 3) {
             Value operand = ((Exp) children.get(1)).genLLVMir();
             ret = new ReturnInstr(new Integer32Type(), operand);
             IRController.getInstance().addInstr(ret);
         } else {
-            ret = new ReturnInstr(new VoidType(), "");
+            ret = new ReturnInstr(new VoidType());
             IRController.getInstance().addInstr(ret);
         }
         BasicBlock block = new BasicBlock();

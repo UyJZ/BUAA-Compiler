@@ -1,5 +1,8 @@
 package llvm_ir.Values;
 
+import BackEnd.MIPS.Assembly.LabelAsm;
+import BackEnd.MIPS.MipsController;
+import BackEnd.MIPS.Register;
 import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.Instruction.Instr;
@@ -9,6 +12,7 @@ import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.VoidType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Function extends Value {
 
@@ -16,11 +20,14 @@ public class Function extends Value {
 
     private boolean hasParam;
 
+    private int ValOffset;
+
     public Function(LLVMType type, String name, boolean hasParam) {
         super(type, "@" + name);
         paramArrayList = new ArrayList<>();
         blockArrayList = new ArrayList<>();
         this.hasParam = hasParam;
+        ValOffset = 0;
     }
 
     private ArrayList<BasicBlock> blockArrayList;
@@ -71,4 +78,36 @@ public class Function extends Value {
     public String getName() {
         return name;
     }
+
+    public void setName() {
+        IRController.getInstance().setCurrentFunction(this);
+        for (Param p : paramArrayList) {
+            p.setName(IRController.getInstance().genVirtualRegNum());
+        }
+        for (BasicBlock b : blockArrayList) {
+            b.setName();
+        }
+    }
+
+    public void allocSpace(int size) {
+        ValOffset += size;
+    }
+
+    public int getOrderOf(BasicBlock block) {
+        return blockArrayList.indexOf(block);
+    }
+
+    public int getValOffset() {
+        return ValOffset;
+    }
+
+    @Override
+    public void genMIPS() {
+        MipsController.getInstance().addFunction(this);
+        for (BasicBlock b : blockArrayList) {
+            b.genMIPS();
+        }
+    }
+
+
 }

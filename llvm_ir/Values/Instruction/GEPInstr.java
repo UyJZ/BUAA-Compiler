@@ -1,8 +1,10 @@
 package llvm_ir.Values.Instruction;
 
+import Config.tasks;
 import FrontEnd.Symbol.VarSymbol;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstInteger;
 import llvm_ir.llvmType.ArrayType;
 import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.PointerType;
@@ -11,42 +13,49 @@ import java.util.ArrayList;
 
 public class GEPInstr extends Instr {
 
-    private String ptr;
+    private Value ptr;
 
     private ArrayList<Value> indexs;
 
-    private VarSymbol symbol;
-
-    private LLVMType fatherType;
-
-    public GEPInstr(ArrayType type, Value ptr, Value index) {
-        super(type.getEleType(), IRController.getInstance().genVirtualRegNum());
-        indexs = new ArrayList<>();
-        indexs.add(index);
-        this.ptr = ptr.getName();
-        this.operands.add(ptr);
-        this.operands.add(index);
-        this.fatherType = type;
+    private LLVMType genOutType(PointerType type) {
+        LLVMType type1 = type.getElementType();
+        if (indexs.size() == 2) {
+            assert type1 instanceof ArrayType;
+            return new PointerType(((ArrayType) type1).getElementType());
+        } else return type;
     }
 
-    public GEPInstr(PointerType type, Value ptr, Value index) {
-        super(type.getElementType(), IRController.getInstance().genVirtualRegNum());
+    public GEPInstr(Value ptr, ConstInteger index0, Value index) {
+        super(new LLVMType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
         indexs = new ArrayList<>();
+        indexs.add(index0);
         indexs.add(index);
-        this.ptr = ptr.getName();
+        this.ptr = ptr;
+        this.type = genOutType((PointerType) ptr.getType());
         this.operands.add(ptr);
         this.operands.add(index);
-        this.fatherType = type;
+    }
+
+    public GEPInstr(Value ptr, Value index) {
+        super(new LLVMType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
+        indexs = new ArrayList<>();
+        indexs.add(index);
+        this.ptr = ptr;
+        this.operands.add(ptr);
+        this.type = genOutType((PointerType) ptr.getType());
+        this.operands.add(index);
     }
 
     public void setLLVMtypeForFuncParam() {
-         this.type = new PointerType(type);
+        int len = type.getLen();
+        this.type = new PointerType(type);
+        ((PointerType) this.type).setLen(len);
     }
 
     @Override
     public String toString() {
-        if (fatherType instanceof PointerType)
-            return name + " = getelementptr " + type.toString() + ", " + fatherType.toString() + " " + ptr + ", i32 " + indexs.get(0).getName();
-        return name + " = getelementptr " + fatherType.toString() + ", " + fatherType.toString() + "* " + ptr + ", i32 0, i32 " + indexs.get(0).getName();
+        if (indexs.size() == 1)
+            return name + " = getelementptr " + ((PointerType) ptr.getType()).getElementType() + ", " + ptr.getType() + " " + ptr.getName() + ", i32 " + indexs.get(0).getName();
+        return name + " = getelementptr " + ((PointerType) ptr.getType()).getElementType() + ", " + ptr.getType() + " " + ptr.getName() + ", i32 0, i32 " + indexs.get(1).getName();
     }
 }

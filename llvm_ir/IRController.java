@@ -1,14 +1,17 @@
 package llvm_ir;
 
+import Config.tasks;
 import FrontEnd.Symbol.VarSymbol;
 import llvm_ir.Values.BasicBlock;
 import llvm_ir.Values.Function;
 import llvm_ir.Values.GlobalVar;
 import llvm_ir.Values.Instruction.Instr;
+import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
 import llvm_ir.Values.Param;
 import llvm_ir.llvmType.LLVMType;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class IRController {
@@ -16,6 +19,8 @@ public class IRController {
     private static IRController instance = new IRController();
 
     private HashMap<Function, Integer> virtualRegNumMap;
+
+    private ArrayList<Use> useList;
 
     private Function currentFunction;
 
@@ -26,6 +31,11 @@ public class IRController {
     private IRController() {
         virtualRegNumMap = new HashMap<>();
         module = new Module();
+        useList = new ArrayList<>();
+    }
+
+    public void addUse(Use use) {
+        useList.add(use);
     }
 
     public static IRController getInstance() {
@@ -38,8 +48,22 @@ public class IRController {
         currentFunction = function;
     }
 
+    public Module getModule() {
+        return module;
+    }
+
     public void addInstr(Instr instr) {
         currentBasicBlock.addInstr(instr);
+        if (instr instanceof BranchInstr branchInstr) {
+            for (BasicBlock block : branchInstr.getSuccessors()) {
+                block.addPreBlock(currentBasicBlock);
+                currentBasicBlock.addPosBlock(block);
+            }
+        }
+    }
+
+    public Function getCurrentFunction() {
+        return currentFunction;
     }
 
     public void addGlobalVar(GlobalVar globalVar) {
@@ -47,7 +71,7 @@ public class IRController {
     }
 
     public void addNewBasicBlock(BasicBlock block) {
-        block.setName(genVirtualRegNum());
+        block.setName( tasks.isOptimize ? "" : genVirtualRegNum());
         currentFunction.addBasicBlock(block);
         currentBasicBlock = block;
     }
@@ -76,5 +100,14 @@ public class IRController {
             if (function.getName().equals(N)) return function;
         }
         return null;
+    }
+
+    public void setCurrentFunction(Function function) {
+        assert (virtualRegNumMap.containsKey(function));
+        currentFunction = function;
+    }
+
+    public void setName() {
+        module.setName();
     }
 }

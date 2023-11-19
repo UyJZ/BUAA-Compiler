@@ -1,10 +1,13 @@
 package llvm_ir.Values.Instruction.terminatorInstr;
 
+import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.BasicBlock;
 import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.llvmType.BoolType;
 import llvm_ir.llvmType.LLVMType;
+
+import java.util.ArrayList;
 
 public class BranchInstr extends Instr {
 
@@ -31,5 +34,12 @@ public class BranchInstr extends Instr {
         if (label2 == null && judge == null)
             return "br label " + label1.getName();
         return "br " + new BoolType().toString() + " " + judge.getName() + ", label " + label1.getName() + ", label " + label2.getName();
+    }
+
+    public ArrayList<BasicBlock> getSuccessors() {
+        ArrayList<BasicBlock> successors = new ArrayList<>();
+        successors.add(label1);
+        if (label2 != null) successors.add(label2);
+        return successors;
     }
 }

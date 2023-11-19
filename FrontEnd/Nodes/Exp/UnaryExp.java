@@ -80,12 +80,15 @@ public class UnaryExp extends Node {
         else if (children.size() == 2) {
             if (((UnaryOp) children.get(0)).getOp() == tokenType.MINU) {
                 Value operand1 = children.get(1).genLLVMir();
+                if (operand1 instanceof ConstInteger constInteger) {
+                    return new ConstInteger(-constInteger.getVal());
+                }
                 BinaryInstr binaryInstr = new BinaryInstr(new Integer32Type(), operand1, BinaryInstr.op.SUB);
                 IRController.getInstance().addInstr(binaryInstr);
                 return binaryInstr;
             } else if ((((UnaryOp) children.get(0)).getOp()) == tokenType.NOT) {
                 Value operand1 = children.get(1).genLLVMir();
-                IcmpInstr instr = new IcmpInstr(operand1.getType(), operand1, new ConstInteger(0), IcmpInstr.CmpOp.eq);
+                IcmpInstr instr = new IcmpInstr(operand1, new ConstInteger(0), IcmpInstr.CmpOp.eq);
                 IRController.getInstance().addInstr(instr);
                 return instr;
             } else
@@ -100,9 +103,9 @@ public class UnaryExp extends Node {
             }
             CallInstr callInstr;
             if (funcSymbol.getLLVMType() instanceof VoidType)
-                callInstr = new CallInstr(funcSymbol.getLLVMType(), funcSymbol.getLLVMirValue(), params, "");
+                callInstr = new CallInstr(funcSymbol.getLLVMType(), funcSymbol.getLLVMirValue(), params);
             else
-                callInstr = new CallInstr(funcSymbol.getLLVMType(), funcSymbol.getLLVMirValue(), params, IRController.getInstance().genVirtualRegNum());
+                callInstr = new CallInstr(funcSymbol.getLLVMType(), funcSymbol.getLLVMirValue(), params);
             IRController.getInstance().addInstr(callInstr);
             return callInstr;
         }

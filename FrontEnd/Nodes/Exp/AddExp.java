@@ -6,6 +6,7 @@ import FrontEnd.Nodes.Node;
 import FrontEnd.Nodes.TokenNode;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Instruction.BinaryInstr;
 import llvm_ir.llvmType.Integer32Type;
 
@@ -39,6 +40,19 @@ public class AddExp extends Node {
             Value operand1 = children.get(0).genLLVMir();
             Value operand2 = children.get(2).genLLVMir();
             BinaryInstr.op Op;
+            if (operand1 instanceof ConstInteger constInteger && operand2 instanceof ConstInteger constInteger1) {
+                switch (((TokenNode) children.get(1)).getTokenType()) {
+                    case PLUS -> {
+                        return new ConstInteger(constInteger.getVal() + constInteger1.getVal());
+                    }
+                    case MINU -> {
+                        return new ConstInteger(constInteger.getVal() - constInteger1.getVal());
+                    }
+                    default -> {
+                        return null;
+                    }
+                }
+            }
             switch (((TokenNode) children.get(1)).getTokenType()) {
                 case PLUS -> {
                     Op = BinaryInstr.op.ADD;
