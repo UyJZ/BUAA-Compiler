@@ -1,5 +1,9 @@
 package llvm_ir;
 
+import BackEnd.MIPS.Assembly.JAsm;
+import BackEnd.MIPS.Assembly.JalAsm;
+import BackEnd.MIPS.Assembly.LabelAsm;
+import BackEnd.MIPS.MipsController;
 import llvm_ir.Values.Function;
 import llvm_ir.Values.GlobalVar;
 import llvm_ir.llvmType.ModelType;
@@ -54,7 +58,23 @@ public class Module extends Value {
             var.genMIPS();
         }
         for (Function f : functionList) {
+            f.genConStr();
+        }
+        LabelAsm entry = new LabelAsm("entry");
+        LabelAsm end = new LabelAsm("end");
+        JalAsm jal = new JalAsm(entry);
+        JAsm j = new JAsm(end);
+        for (Function f : functionList) {
+            if (f.isMainFunc()) MipsController.getInstance().addAsm(entry);
             f.genMIPS();
+        }
+        MipsController.getInstance().addAsm(end);
+    }
+
+    @Override
+    public void genConStr() {
+        for (Function function : functionList) {
+            function.genConStr();
         }
     }
 }

@@ -47,4 +47,8 @@ public class Data extends Asm {
             return sb.toString();
         }
     }
+
+    public String getName() {
+        return name;
+    }
 }

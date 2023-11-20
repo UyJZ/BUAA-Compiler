@@ -1,6 +1,8 @@
 package llvm_ir.Values;
 
+import BackEnd.MIPS.Register;
 import Config.tasks;
+import MidEnd.RegDispatcher;
 import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.llvmType.LLVMType;

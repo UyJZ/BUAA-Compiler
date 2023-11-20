@@ -3,6 +3,7 @@ package llvm_ir.Values.Instruction;
 import Config.tasks;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Function;
 import llvm_ir.Values.Param;
 import llvm_ir.llvmType.Integer32Type;
@@ -25,6 +26,14 @@ public class CallInstr extends Instr {
 
     private final boolean isOutputInstr;
 
+    private final boolean isOutputStrInstr;
+
+    private boolean isConStrHead;
+
+    private String ConstrName;
+
+    private int val;
+
     public CallInstr(LLVMType type, Value func, ArrayList<Value> params) {
         //库函数
         super(type, type instanceof VoidType || tasks.isIsOptimize() ? "" : IRController.getInstance().genVirtualRegNum());
@@ -33,8 +42,12 @@ public class CallInstr extends Instr {
         isIOInstr = functionName.equals("@getint") || functionName.equals("@putint") || functionName.equals("@putch") || functionName.equals("@putstr");
         isInputInstr = functionName.equals("@getint");
         isOutputInstr = functionName.equals("@putint") || functionName.equals("@putch") || functionName.equals("@putstr");
+        isOutputStrInstr = functionName.equals("@putstr") || functionName.equals("@putch");
         if (!isIOInstr) this.operands.add(func);
         this.operands.addAll(params);
+        if (functionName.equals("@putch")) {
+            val = ((ConstInteger) params.get(0)).getVal();
+        }
     }
 
     @Override
@@ -66,8 +79,24 @@ public class CallInstr extends Instr {
         return functionName;
     }
 
+    public void setConStrHead() {
+        isConStrHead = true;
+    }
+
     public boolean isIOInstr() {
         return isIOInstr;
+    }
+
+    public boolean isOutputStrInstr() {
+        return isOutputStrInstr;
+    }
+
+    public boolean isConStrHead() {
+        return isConStrHead;
+    }
+
+    public int getValForOutput() {
+        return val;
     }
 
     public ArrayList<Value> getParam() {
@@ -76,5 +105,18 @@ public class CallInstr extends Instr {
 
     public void setName() {
         if (type instanceof Integer32Type) this.name = IRController.getInstance().genVirtualRegNum();
+    }
+
+    public void setConStrName(String name) {
+        ConstrName = name;
+    }
+
+    @Override
+    public void genMIPS() {
+        if (isIOInstr) {
+            if (isInputInstr) {
+                //getint 先把a0压栈
+            }
+        }
     }
 }

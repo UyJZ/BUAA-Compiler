@@ -1,10 +1,16 @@
 package llvm_ir.Values.Instruction;
 
+import BackEnd.MIPS.Assembly.*;
+import BackEnd.MIPS.MipsController;
+import BackEnd.MIPS.Register;
 import MidEnd.RegDispatcher;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstInteger;
 import llvm_ir.llvmType.LLVMType;
 import Config.tasks;
+
+import java.util.HashSet;
 
 public class BinaryInstr extends Instr {
 
@@ -49,7 +55,123 @@ public class BinaryInstr extends Instr {
 
     @Override
     public void genMIPS() {
+        //结果先统一存在K0里面
+        Value operand1 = operands.get(0);
+        Value operand2 = operands.get(1);
+        //this is for addi but op1 & op2 can't be constInteger at the same time
+        HashSet<op> ALU = new HashSet<>();
+        ALU.add(op.ADD);
+        ALU.add(op.SUB);
+        ALU.add(op.OR);
+        ALU.add(op.AND);
+        if (ALU.contains(opcode)) {
+            if (operand1 instanceof ConstInteger || operand2 instanceof ConstInteger) {
+                AluITAsm.Op aluOp = null;
+                switch (opcode) {
+                    case ADD -> aluOp = AluITAsm.Op.addi;
+                    case SUB -> aluOp = AluITAsm.Op.subi;
+                    case AND -> aluOp = AluITAsm.Op.andi;
+                    case OR -> aluOp = AluITAsm.Op.ori;
+                }
+                if (operand1 instanceof ConstInteger constInteger && !(operand2 instanceof ConstInteger)) {
+                    if (operand2.isUseReg()) {
+                        AluITAsm aluITAsm = new AluITAsm(aluOp, Register.K0, operand2.getRegister(), constInteger.getVal());
+                        MipsController.getInstance().addAsm(aluITAsm);
+                    } else {
+                        MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.K0, Register.SP, operand2.getOffset());
+                        MipsController.getInstance().addAsm(lw);
+                        AluITAsm aluITAsm = new AluITAsm(aluOp, Register.K0, Register.K0, constInteger.getVal());
+                        MipsController.getInstance().addAsm(aluITAsm);
+                    }
+                    if (aluOp == AluITAsm.Op.subi) {
+                        AluRTAsm asm = new AluRTAsm(AluRTAsm.Op.sub, Register.K0, Register.ZERO, Register.K0);
+                        MipsController.getInstance().addAsm(asm);
+                    }
+                } else {
+                    if (operand1.isUseReg()) {
+                        AluITAsm aluITAsm = new AluITAsm(aluOp, Register.K0, operand1.getRegister(), ((ConstInteger) operand2).getVal());
+                        MipsController.getInstance().addAsm(aluITAsm);
+                    } else {
+                        MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.K0, Register.SP, operand1.getOffset());
+                        MipsController.getInstance().addAsm(lw);
+                        AluITAsm aluITAsm = new AluITAsm(aluOp, Register.K0, Register.K0, ((ConstInteger) operand2).getVal());
+                        MipsController.getInstance().addAsm(aluITAsm);
+                    }
+                }
+            } else {
+                AluRTAsm.Op aluOp = null;
+                switch (opcode) {
+                    case ADD -> aluOp = AluRTAsm.Op.add;
+                    case SUB -> aluOp = AluRTAsm.Op.sub;
+                    case AND -> aluOp = AluRTAsm.Op.and;
+                    case OR -> aluOp = AluRTAsm.Op.or;
+                }
+                Register r1;
+                Register r2;
+                if (operand1.isUseReg()) {
+                    r1 = operand1.getRegister();
+                } else {
+                    MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.K0, Register.SP, operand1.getOffset());
+                    MipsController.getInstance().addAsm(lw);
+                    r1 = Register.K0;
+                }
+                if (operand2.isUseReg()) {
+                    r2 = operand2.getRegister();
+                } else {
+                    MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.K1, Register.SP, operand2.getOffset());
+                    MipsController.getInstance().addAsm(lw);
+                    r2 = Register.K1;
+                }
+                AluRTAsm asm = new AluRTAsm(aluOp, Register.K0, r1, r2);
+                MipsController.getInstance().addAsm(asm);
+            }
+        } else {
+            MulDivAsm.Op op;
+            switch (opcode) {
+                case MUL -> op = MulDivAsm.Op.mult;
+                case SDIV, SREM -> op = MulDivAsm.Op.div;
+            }
+            Register r1;
+            Register r2;
+            if (operand1 instanceof ConstInteger) {
+                LiAsm li = new LiAsm(Register.K0, ((ConstInteger) operand1).getVal());
+                MipsController.getInstance().addAsm(li);
+                r1 = Register.K0;
+            } else if (operand1.isUseReg()) {
+                r1 = operand1.getRegister();
+            } else {
+                MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.K0, Register.SP, operand1.getOffset());
+                MipsController.getInstance().addAsm(lw);
+                r1 = Register.K0;
+            }
+            if (operand2 instanceof ConstInteger) {
+                LiAsm li = new LiAsm(Register.K1, ((ConstInteger) operand2).getVal());
+                MipsController.getInstance().addAsm(li);
+                r2 = Register.K1;
+            } else if (operand2.isUseReg()) {
+                r2 = operand2.getRegister();
+            } else {
+                MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.K1, Register.SP, operand2.getOffset());
+                MipsController.getInstance().addAsm(lw);
+                r2 = Register.K1;
+            }
+            MulDivAsm mulDivAsm = new MulDivAsm(r1, r2);
+            MipsController.getInstance().addAsm(mulDivAsm);
+            if (opcode == BinaryInstr.op.SREM) {
+                HLAsm mfhi = new HLAsm(HLAsm.Op.mfhi, Register.K0);
+                MipsController.getInstance().addAsm(mfhi);
+            } else {
+                HLAsm mflo = new HLAsm(HLAsm.Op.mflo, Register.K0);
+                MipsController.getInstance().addAsm(mflo);
+            }
+        }
         RegDispatcher.getInstance().distributeRegFor(this);
-
+        if (this.useReg) {
+            MoveAsm moveAsm = new MoveAsm(this.register, Register.K0);
+            MipsController.getInstance().addAsm(moveAsm);
+        } else {
+            MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, Register.K0, Register.SP, this.offset);
+            MipsController.getInstance().addAsm(sw);
+        }
     }
 }

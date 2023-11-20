@@ -3,6 +3,7 @@ package llvm_ir.Values;
 import BackEnd.MIPS.Assembly.LabelAsm;
 import BackEnd.MIPS.MipsController;
 import BackEnd.MIPS.Register;
+import MidEnd.RegDispatcher;
 import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.Instruction.Instr;
@@ -13,6 +14,8 @@ import llvm_ir.llvmType.VoidType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class Function extends Value {
 
@@ -20,14 +23,42 @@ public class Function extends Value {
 
     private boolean hasParam;
 
+    private HashMap<Value, Register> Val2Reg;
+
+    private HashMap<Register, Value> Reg2Val;
+
+    private LinkedHashSet<Register> freeRegs;
+
+    private LinkedHashSet<Register> freeArgRegs;
+
+    private LinkedHashSet<Register> usedArgRegs;
+
+    private LinkedHashSet<Register> usedRegs;
+
+    private HashMap<Value, Integer> Val2Offset;
+
+    private final boolean isMainFunc;
+
+    private final boolean isSysCall;
+
     private int ValOffset;
 
     public Function(LLVMType type, String name, boolean hasParam) {
         super(type, "@" + name);
+        isMainFunc = name.equals("main");
         paramArrayList = new ArrayList<>();
         blockArrayList = new ArrayList<>();
         this.hasParam = hasParam;
         ValOffset = 0;
+        offset = 0;
+        Val2Reg = new HashMap<>();
+        Reg2Val = new HashMap<>();
+        freeArgRegs = Register.argsRegs();
+        usedArgRegs = new LinkedHashSet<>();
+        usedRegs = new LinkedHashSet<>();
+        freeRegs = Register.tempRegs();
+        Val2Offset = new HashMap<>();
+        isSysCall = name.equals("getint") || name.equals("putint") || name.equals("putch") || name.equals("putstr");
     }
 
     private ArrayList<BasicBlock> blockArrayList;
@@ -35,6 +66,10 @@ public class Function extends Value {
     public void addBasicBlock(BasicBlock basicBlock) {
         if (blockArrayList.size() == 0) basicBlock.setFirstBlock();
         blockArrayList.add(basicBlock);
+    }
+
+    public boolean isMainFunc() {
+        return isMainFunc;
     }
 
     public ArrayList<BasicBlock> getBlockArrayList() {
@@ -101,13 +136,58 @@ public class Function extends Value {
         return ValOffset;
     }
 
+    public HashMap<Value, Register> getVal2Reg() {
+        return Val2Reg;
+    }
+
+    public HashMap<Register, Value> getReg2Val() {
+        return Reg2Val;
+    }
+
+    public LinkedHashSet<Register> getFreeRegs() {
+        return freeRegs;
+    }
+
+    public LinkedHashSet<Register> getUsedRegs() {
+        return usedRegs;
+    }
+
+    public HashMap<Value, Integer> getVal2Offset() {
+        return Val2Offset;
+    }
+
     @Override
     public void genMIPS() {
+        if (isSysCall) return;
         MipsController.getInstance().addFunction(this);
+        RegDispatcher.getInstance().enterFunc(this);
+        distributeForArgs();
         for (BasicBlock b : blockArrayList) {
             b.genMIPS();
+    }
+        RegDispatcher.getInstance().leaveFunc();
+    }
+
+    private void distributeForArgs() {
+        for (Param param : paramArrayList) {
+            if (!param.isDistributed()) {
+                if (freeRegs.isEmpty()) {
+                    offset -= 4;
+                    param.setOffset(offset);
+                } else {
+                    Register reg = freeArgRegs.iterator().next();
+                    freeArgRegs.remove(reg);
+                    usedArgRegs.add(reg);
+                    param.setUseReg(reg);
+                }
+            }
         }
     }
 
-
+    @Override
+    public void genConStr() {
+        for (BasicBlock b : blockArrayList) {
+            b.genConStr();
+        }
+    }
 }

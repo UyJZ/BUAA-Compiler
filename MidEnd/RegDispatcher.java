@@ -7,19 +7,23 @@ import llvm_ir.Values.Function;
 import llvm_ir.Values.GlobalVar;
 import llvm_ir.Values.Instruction.AllocaInst;
 import llvm_ir.Values.Instruction.BinaryInstr;
+import llvm_ir.Values.Param;
 import llvm_ir.llvmType.ArrayType;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 
 public class RegDispatcher {
     private static final RegDispatcher regDispatcher = new RegDispatcher();
 
     private Function currentFunction;
 
-    private HashSet<Register> freeRegs;
+    private LinkedHashSet<Register> freeRegs;
 
-    private HashSet<Register> usedRegs;
+    private LinkedHashSet<Register> freeArgRegs;
+
+    private LinkedHashSet<Register> usedRegs;
 
     private HashMap<Function, HashMap<Value, Register>> Val2Reg;
 
@@ -50,18 +54,51 @@ public class RegDispatcher {
         this.currentOffset = 0;
         this.module = null;
         this.freeRegs = Register.tempRegs();
-        this.usedRegs = new HashSet<>();
+        this.usedRegs = new LinkedHashSet<>();
+        this.freeRegs = Register.argsRegs();
     }
 
     public void setModule(Module module) {
         this.module = module;
     }
 
-    private void allocRegForValue(Value v) {
+    public void enterFunc(Function function) {
+        this.currentFunction = function;
+        Val2Reg.put(function, function.getVal2Reg());
+        Val2Offset.put(function, function.getVal2Offset());
+        Reg2Val.put(function, function.getReg2Val());
+        OffsetMap.put(function, function.getOffset());
+        flush(function);
+    }
+
+    public void leaveFunc() {
+        OffsetMap.put(currentFunction, currentOffset);
+        this.currentOffset = 0;
+    }
+
+    private void flush(Function function) {
+        currentOffset = function.getOffset();
+        this.freeRegs = function.getFreeRegs();
+        this.usedRegs = function.getUsedRegs();
+    }
+
+    public void distributeMemForAlloc(AllocaInst v) {
+        currentOffset = currentOffset - ((AllocaInst) v).getElementType().getLen();
+        ((AllocaInst) v).setElementOffset(currentOffset);
+    }
+
+    public void distributeSpaceForVal(Value v) {
+        currentOffset = currentOffset - v.getLen();
+        v.setOffset(currentOffset);
+    }
+
+    public void distributeRegFor(Value v) {
+        //这个条件目前是不确定的，也可以说是待定的，因为之后还有图着色算法，目前还没有确定无法被着色的val是否是isdistributed()
+        if (v.isDistributed() && v.isUseReg()) return;
         if (!v.isDistributed()) {
             if (freeRegs.isEmpty()) {
-                v.setOffset(currentOffset - 4);
-                currentOffset = currentOffset - 4;
+                v.setOffset(currentOffset - v.getLen());
+                currentOffset = currentOffset - v.getLen();
             } else {
                 Register reg = freeRegs.iterator().next();
                 freeRegs.remove(reg);
@@ -71,39 +108,19 @@ public class RegDispatcher {
         }
     }
 
-    public void enterFunc(Function function) {
-        OffsetMap.put(currentFunction, currentOffset);
-        this.currentFunction = function;
-        Val2Reg.put(function, new HashMap<>());
-        Val2Offset.put(function, new HashMap<>());
-        Reg2Val.put(function, new HashMap<>());
-        OffsetMap.put(function, 0);
-        flush();
-    }
-
-    private void flush() {
-        currentOffset = 0;
-        this.freeRegs = Register.tempRegs();
-        this.usedRegs = new HashSet<>();
-    }
-
-    private void allocSpaceForElement(Value v) {
-        //just alloc the mem , the pointer is usually defined by reg
-        assert (v instanceof AllocaInst allocaInst);
-        currentOffset = currentOffset - ((AllocaInst) v).getElementType().getLen();
-        ((AllocaInst) v).setElementOffset(currentOffset);
-    }
-
-    public void distributeRegFor(Value v) {
-        if (v instanceof AllocaInst allocaInst) {
-            allocSpaceForElement(v);
-        } else if (v instanceof BinaryInstr) {
-            v.setUseReg(Register.K0);
-        }
-        allocRegForValue(v);
-    }
-
     public int getCurrentOffset() {
         return currentOffset;
+    }
+
+    public LinkedHashSet<Register> RegToPushInStack() {
+        LinkedHashSet<Register> res = new LinkedHashSet<>();
+        res.add(Register.SP);
+        res.add(Register.RA);
+        res.addAll(usedRegs);
+        return res;
+    }
+
+    public void allocSpaceForReg() {
+        currentOffset = currentOffset - 4;
     }
 }

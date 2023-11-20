@@ -46,12 +46,6 @@ public class GEPInstr extends Instr {
         this.operands.add(index);
     }
 
-    public void setLLVMtypeForFuncParam() {
-        int len = type.getLen();
-        this.type = new PointerType(type);
-        ((PointerType) this.type).setLen(len);
-    }
-
     @Override
     public String toString() {
         if (indexs.size() == 1)

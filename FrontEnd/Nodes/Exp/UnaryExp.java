@@ -13,6 +13,7 @@ import FrontEnd.Symbol.FuncSymbol;
 import FrontEnd.Symbol.SymbolManager;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstBool;
 import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Instruction.BinaryInstr;
 import llvm_ir.Values.Instruction.CallInstr;
@@ -88,6 +89,10 @@ public class UnaryExp extends Node {
                 return binaryInstr;
             } else if ((((UnaryOp) children.get(0)).getOp()) == tokenType.NOT) {
                 Value operand1 = children.get(1).genLLVMir();
+                if (operand1 instanceof ConstInteger constInteger) {
+                    if (constInteger.getVal() != 0) return new ConstBool(false);
+                    else return new ConstBool(true);
+                }
                 IcmpInstr instr = new IcmpInstr(operand1, new ConstInteger(0), IcmpInstr.CmpOp.eq);
                 IRController.getInstance().addInstr(instr);
                 return instr;

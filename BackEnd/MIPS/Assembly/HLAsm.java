@@ -10,6 +10,11 @@ public class HLAsm extends Asm {
 
     private Op op;
 
+    public HLAsm(Op op, Register rs) {
+        this.op = op;
+        this.rs = rs;
+    }
+
     private Register rs;
 
 }

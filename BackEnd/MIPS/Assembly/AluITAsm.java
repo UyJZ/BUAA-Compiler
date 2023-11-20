@@ -5,7 +5,7 @@ import BackEnd.MIPS.Register;
 public class AluITAsm extends ITAsm {
 
     public enum Op {
-        addi, addiu, slti, sltiu, andi, ori, xori, lui, sll, srl
+        addi, addiu, slti, sltiu, andi, ori, xori, lui, sll, srl, subi
     }
 
     private Op op;

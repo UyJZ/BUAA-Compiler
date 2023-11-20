@@ -5,6 +5,7 @@ public class PointerType extends LLVMType{
 
     public PointerType(LLVMType elementType) {
         this.elementType = elementType;
+        this.len = 4;
     }
 
     @Override

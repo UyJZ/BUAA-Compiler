@@ -62,7 +62,7 @@ public enum Register {
         return set;
     }
 
-    public LinkedHashSet<Register> argsRegs() {
+    public static LinkedHashSet<Register> argsRegs() {
         LinkedHashSet<Register> set = new LinkedHashSet<>();
         for (int i = A0.ordinal(); i <= A3.ordinal(); i++) {
             set.add(indexToReg(i));

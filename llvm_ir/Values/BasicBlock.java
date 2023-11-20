@@ -1,10 +1,12 @@
 package llvm_ir.Values;
 
 import BackEnd.MIPS.Assembly.BlockAsm;
+import BackEnd.MIPS.Assembly.Data;
 import BackEnd.MIPS.Assembly.LabelAsm;
 import BackEnd.MIPS.MipsController;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.Instruction.CallInstr;
 import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.llvmType.BasicBlockType;
 import llvm_ir.llvmType.LLVMType;
@@ -138,9 +140,33 @@ public class BasicBlock extends Value {
     @Override
     public void genMIPS() {
         MipsController.getInstance().addBasicBlock(this);
+        for (int i = 0; i < instrs.size(); i++) {
+            if (instrs.get(i) instanceof CallInstr callInstr && callInstr.isOutputStrInstr()) {
+                //TODO:output string
+            } else {
+                instrs.get(i).genMIPS();
+            }
+        }
     }
 
     public void setBlockAsm(BlockAsm blockAsm) {
         this.blockAsm = blockAsm;
+    }
+
+    @Override
+    public void genConStr() {
+        for (int i = 0; i < instrs.size(); i++) {
+            if (instrs.get(i) instanceof CallInstr callInstr && callInstr.isOutputStrInstr()) {
+                StringBuilder sb = new StringBuilder();
+                callInstr.setConStrHead();
+                while (i < instrs.size() && instrs.get(i) instanceof CallInstr callInstr1 && callInstr1.isOutputStrInstr()) {
+                    char c = (char) callInstr1.getValForOutput();
+                    sb.append(c);
+                    i++;
+                }
+                Data data1 = new Data(sb.toString());
+                callInstr.setConStrName(data1.getName());
+            }
+        }
     }
 }

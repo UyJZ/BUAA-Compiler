@@ -63,6 +63,10 @@ public class Value {
         this.isDistributed = true;
     }
 
+    public Register getRegister() {
+        return register;
+    }
+
     public int getOffset() {
         return offset;
     }
@@ -77,5 +81,9 @@ public class Value {
 
     public boolean isDistributed() {
         return isDistributed;
+    }
+
+    public void genConStr() {
+        return;
     }
 }

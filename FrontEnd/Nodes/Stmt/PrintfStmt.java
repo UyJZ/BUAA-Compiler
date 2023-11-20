@@ -55,13 +55,7 @@ public class PrintfStmt extends Stmt {
             if (i + 1 < s.length() && s.charAt(i) == '%' && s.charAt(i + 1) == 'd') {
                 ArrayList<Value> p = new ArrayList<>();
                 Value v = instrs.get(start++);
-                if (v instanceof ConstInteger) {
-                    BinaryInstr binaryInstr = new BinaryInstr(new Integer32Type(), v, new ConstInteger(0), BinaryInstr.op.ADD);
-                    IRController.getInstance().addInstr(binaryInstr);
-                    p.add(new Param(new Integer32Type(), binaryInstr.getName()));
-                } else {
-                    p.add(new Param(new Integer32Type(), v.getName()));
-                }
+                p.add(new Param(new Integer32Type(), v.getName()));
                 FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("putint");
                 CallInstr callInstr = new CallInstr(new VoidType(), funcSymbol.getLLVMirValue(), p);
                 i++;

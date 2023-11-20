@@ -107,6 +107,11 @@ public class LVal extends Node {
                 }
             } else {
                 Value instr = symbol.getLLVMirValue();
+                if (symbol.isConst() && symbol.isGlobal() && values.get(0) instanceof ConstInteger) {
+                    ArrayList<Integer> v = new ArrayList<>();
+                    v.add(((ConstInteger) values.get(0)).getVal());
+                    return new ConstInteger(symbol.getValue(v));
+                }
                 if (symbol.isParam()) {
                     LoadInstr loadInstr = new LoadInstr(instr);
                     IRController.getInstance().addInstr(loadInstr);
@@ -159,6 +164,12 @@ public class LVal extends Node {
                 }
             } else {
                 assert (values.size() == 2);
+                if (symbol.isConst() && symbol.isGlobal() && values.get(0) instanceof ConstInteger && values.get(1) instanceof ConstInteger) {
+                    ArrayList<Integer> v = new ArrayList<>();
+                    v.add(((ConstInteger) values.get(0)).getVal());
+                    v.add(((ConstInteger) values.get(1)).getVal());
+                    return new ConstInteger(symbol.getValue(v));
+                }
                 if (symbol.isParam()) {
                     LoadInstr loadInstr = new LoadInstr(rootPtr);
                     IRController.getInstance().addInstr(loadInstr);
