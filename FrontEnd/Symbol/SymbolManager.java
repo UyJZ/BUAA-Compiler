@@ -39,7 +39,7 @@ public class SymbolManager {
         symbolTableStack.push(symbolTable);
         funcMap.put(funcSymbol.getSymbolName(), symbolTable);
         currentFuncName = funcSymbol.getSymbolName();
-        symbolTableStack.peek().addSymbol(funcSymbol);
+        //symbolTableStack.peek().addSymbol(funcSymbol);
     }
 
     public void enterBlock() {
@@ -64,16 +64,20 @@ public class SymbolManager {
         if (symbol instanceof FuncSymbol funcSymbol) funcSymbolHashMap.put(funcSymbol.getSymbolName(), funcSymbol);
     }
 
+    public void addSysSymbol(FuncSymbol symbol) throws RenameException {
+        funcSymbolHashMap.put(symbol.getSymbolName(), symbol);
+    }
+
     public boolean isVarDefined(String name) {
         for (SymbolTable s : symbolTableStack) {
-            if (s.containsName(name) && !name.equals(currentFuncName)) return true;
+            if (s.containsName(name)) return true;
         }
         return false;
     }
 
     public boolean isVarFuncDefined(String name) {
         for (SymbolTable s : symbolTableStack) {
-            if (s.containsVarFuncName(name) && !name.equals(currentFuncName)) return true;
+            if (s.containsVarFuncName(name)) return true;
         }
         return funcMap.containsKey(name);
     }

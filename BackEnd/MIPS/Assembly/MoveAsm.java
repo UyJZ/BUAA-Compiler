@@ -9,4 +9,9 @@ public class MoveAsm extends Asm{
         this.rs = rs;
         this.rt = rt;
     }
+
+    @Override
+    public String toString() {
+        return "\tmove\t" + rt + ", " + rs;
+    }
 }

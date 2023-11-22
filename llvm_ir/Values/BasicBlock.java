@@ -41,7 +41,6 @@ public class BasicBlock extends Value {
         super(new BasicBlockType(), "");
         this.father = IRController.getInstance().getCurrentFunction();
         instrs = new ArrayList<>();
-        this.label = new LabelAsm(father.getName() + "_" + father.getOrderOf(this));
         this.isFirstBlock = false;
     }
 
@@ -58,6 +57,7 @@ public class BasicBlock extends Value {
     }
 
     public LabelAsm getMIPSLabel() {
+        if (label == null) label = new LabelAsm(father.getName().substring(1) + "_" + father.getOrderOf(this));
         return label;
     }
 
@@ -143,6 +143,11 @@ public class BasicBlock extends Value {
         for (int i = 0; i < instrs.size(); i++) {
             if (instrs.get(i) instanceof CallInstr callInstr && callInstr.isOutputStrInstr()) {
                 //TODO:output string
+                callInstr.genMIPS();
+                while (i < instrs.size() && instrs.get(i) instanceof CallInstr callInstr1 && callInstr1.isOutputStrInstr()) {
+                    i++;
+                }
+                i--;
             } else {
                 instrs.get(i).genMIPS();
             }
@@ -161,10 +166,12 @@ public class BasicBlock extends Value {
                 callInstr.setConStrHead();
                 while (i < instrs.size() && instrs.get(i) instanceof CallInstr callInstr1 && callInstr1.isOutputStrInstr()) {
                     char c = (char) callInstr1.getValForOutput();
-                    sb.append(c);
+                    if (c == '\n') sb.append('\\').append('n');
+                    else sb.append(c);
                     i++;
                 }
                 Data data1 = new Data(sb.toString());
+                MipsController.getInstance().addGlobalVar(data1);
                 callInstr.setConStrName(data1.getName());
             }
         }

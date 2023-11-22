@@ -8,14 +8,16 @@ import llvm_ir.IRController;
 import llvm_ir.Module;
 import llvm_ir.Values.BasicBlock;
 import llvm_ir.Values.Function;
+import llvm_ir.llvmType.PointerType;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 
 public class MipsController {
     private static final MipsController mipsController = new MipsController();
 
-    private ArrayList<FunctionAsm> textSegment;
+    private ArrayList<Asm> textSegment;
 
     private ArrayList<Data> dataSegment;
 
@@ -36,7 +38,23 @@ public class MipsController {
     }
 
     public void run() {
+        module.genMIPS();
         //run mips
+    }
+
+    public void print(PrintStream ps) {
+        ps.println(".data");
+        for (Data data : dataSegment) {
+            ps.println(data);
+        }
+        ps.println(".text");
+        for (Asm functionAsm : textSegment) {
+            ps.println(functionAsm);
+        }
+    }
+
+    public void setModule(Module module) {
+        this.module = module;
     }
 
 
@@ -53,8 +71,10 @@ public class MipsController {
 
     public void addFunction(Function function) {
         currentFunction = function;
-        FunctionAsm functionAsm = new FunctionAsm("func_" + function.getName());
+        FunctionAsm functionAsm = new FunctionAsm("func_" + function.getName().substring(1));
         textSegment.add(functionAsm);
+        currentFuncAsm = functionAsm;
+        functionArrayList.add(functionAsm);
         //add function to mips
     }
 
@@ -69,7 +89,13 @@ public class MipsController {
     }
 
     public void addAsm(Asm asm) {
-        currentBlockAsm.addAsm(asm);
+        if (currentBlockAsm != null)
+            currentBlockAsm.addAsm(asm);
+        else textSegment.add(asm);
+    }
+
+    public void addEntry(Asm asm) {
+        textSegment.add(asm);
     }
 
     public void addGlobalVar(Data data) {

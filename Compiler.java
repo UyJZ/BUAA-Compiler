@@ -5,7 +5,7 @@ import java.io.*;
 
 public class Compiler {
     public static void main(String[] args) throws IOException {
-        tasks.setLLVMOutputForHw4();
+        tasks.isMIPSoutput = true;
         CompilerHandler.work();
     }
 }

@@ -21,7 +21,7 @@ public class Data extends Asm {
     public Data(ArrayList<Integer> lens, Initial initial, String name) {
         this.lens = lens;
         this.initial = initial;
-        this.name = name;
+        this.name = "global_" + name.substring(1);
         isasciiz = false;
     }
 
@@ -33,14 +33,14 @@ public class Data extends Asm {
 
     public String toString() {
         if (isasciiz) {
-            return this.name + "\t" + ".asciiz" + "\"" + ConString + "\"";
+            return this.name + ":\t" + ".asciiz   " + "\"" + ConString + "\"";
         } else {
             StringBuilder sb = new StringBuilder();
-            sb.append(this.name).append("\t");
+            sb.append(this.name).append(":\t");
             if (initial == null) {
                 int space = 4;
                 for (int i : lens) space = space * i;
-                sb.append("\n\t.space").append(space);
+                sb.append("\n\t.space ").append(space);
             } else {
                 sb.append(initial.genMIPSData(lens));
             }

@@ -1,6 +1,11 @@
 package llvm_ir.Values.Instruction.terminatorInstr;
 
+import BackEnd.MIPS.Assembly.*;
+import BackEnd.MIPS.MipsController;
+import BackEnd.MIPS.Register;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstInteger;
+import llvm_ir.Values.Instruction.CallInstr;
 import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.VoidType;
@@ -29,6 +34,29 @@ public class ReturnInstr extends Instr {
             name = "";
         } else {
             name = operands.get(0).getName();
+        }
+    }
+
+    @Override
+    public void genMIPS() {
+        CommentAsm asm = new CommentAsm(this.toString());
+        MipsController.getInstance().addAsm(asm);
+        if (type instanceof VoidType) {
+            JrAsm jr = new JrAsm(Register.RA);
+            MipsController.getInstance().addAsm(jr);
+        } else {
+            if (operands.get(0).isUseReg()) {
+                MoveAsm move = new MoveAsm(Register.V0, operands.get(0).getRegister());
+                MipsController.getInstance().addAsm(move);
+            } else if (operands.get(0) instanceof ConstInteger constInteger) {
+                LiAsm liAsm = new LiAsm(Register.V0, constInteger.getVal());
+                MipsController.getInstance().addAsm(liAsm);
+            } else {
+                MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.V0, Register.SP, operands.get(0).getOffset());
+                MipsController.getInstance().addAsm(lw);
+            }
+            JrAsm jr = new JrAsm(Register.RA);
+            MipsController.getInstance().addAsm(jr);
         }
     }
 }

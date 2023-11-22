@@ -1,6 +1,7 @@
 package llvm_ir.Values;
 
 import BackEnd.MIPS.Assembly.Data;
+import BackEnd.MIPS.Assembly.LabelAsm;
 import BackEnd.MIPS.MipsController;
 import FrontEnd.Symbol.Initial;
 import FrontEnd.Symbol.VarSymbol;
@@ -16,6 +17,8 @@ public class GlobalVar extends Value {
 
     private final ArrayList<Integer> lens;
 
+    private final LabelAsm label;
+
     private final boolean isConst;
 
     private final Initial initial;
@@ -27,6 +30,7 @@ public class GlobalVar extends Value {
         this.isConst = symbol.isConst();
         initial = symbol.getInitial();
         symbol.setLlvmValue(this);
+        this.label = new LabelAsm("global_" + symbol.getSymbolName());
     }
 
     public int getDim() {
@@ -38,9 +42,9 @@ public class GlobalVar extends Value {
         String isGlobal = isConst ? "constant " : "global ";
         if (getDim() == 0) {
             if (initial == null) return name + " = " + "dso_local " + isGlobal + "i32 0";
-            else return name + " = "  + "dso_local " +  isGlobal + "i32 " + initial;
+            else return name + " = " + "dso_local " + isGlobal + "i32 " + initial;
         } else if (getDim() == 1) {
-            if(initial == null) {
+            if (initial == null) {
                 return name + " = " + "dso_local " + isGlobal + "[" + lens.get(0) + " x i32] zeroinitializer";
             } else {
                 return name + " = " + "dso_local " + isGlobal + initial.GlobalVarLLVMir(lens, new Integer32Type());
@@ -60,5 +64,9 @@ public class GlobalVar extends Value {
         this.data = data;
         MipsController.getInstance().addGlobalVar(data);
         this.isDistributed = true;
+    }
+
+    public LabelAsm getLabel() {
+        return label;
     }
 }

@@ -17,4 +17,8 @@ public class HLAsm extends Asm {
 
     private Register rs;
 
+    @Override
+    public String toString() {
+        return "\t" + op + "\t" + rs;
+    }
 }

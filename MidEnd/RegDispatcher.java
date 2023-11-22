@@ -56,6 +56,10 @@ public class RegDispatcher {
         this.freeRegs = Register.tempRegs();
         this.usedRegs = new LinkedHashSet<>();
         this.freeRegs = Register.argsRegs();
+        this.Val2Reg = new HashMap<>();
+        this.Val2Offset = new HashMap<>();
+        this.Reg2Val = new HashMap<>();
+        this.OffsetMap = new HashMap<>();
     }
 
     public void setModule(Module module) {
@@ -122,5 +126,9 @@ public class RegDispatcher {
 
     public void allocSpaceForReg() {
         currentOffset = currentOffset - 4;
+    }
+
+    public int getUsedRegsSize() {
+        return usedRegs.size() * 4 + 8;
     }
 }

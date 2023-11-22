@@ -1,0 +1,2180 @@
+.data
+global_MAX_VERTICES:	.word 	100
+global_MAX_EDGES:	.word 	500
+global_INT_MAX:	.word 	2147483647
+global_edges:	
+	.space 6000
+global_head:	
+	.space 400
+global_edgeCount:	
+	.space 4
+global_heap:	
+	.space 800
+global_heapSize:	
+	.space 4
+str_0:	.asciiz   "Shortest distances from source "
+str_1:	.asciiz   ":\n"
+str_2:	.asciiz   "Vertex "
+str_3:	.asciiz   ": Distance = "
+str_4:	.asciiz   "\n"
+str_5:	.asciiz   "Enter number of vertices: "
+str_6:	.asciiz   "Enter number of edges: "
+str_7:	.asciiz   "Enter edges with weights (src dest weight):\n"
+str_8:	.asciiz   "Enter source vertex: "
+.text
+	jal	entry
+	j	end
+func_initGraph:
+initGraph_0:
+	# %2 = alloca i32
+	addi	$t0, $sp, -4
+	# store i32 %0, i32* %2
+	sw	$a0, 0($t0)
+	# %3 = alloca i32
+	addi	$t1, $sp, -8
+	# store i32 0, i32* %3
+	sw	$zero, 0($t1)
+	# br label %4
+	j	initGraph_1
+
+initGraph_1:
+	# %5 = load i32 , i32* %3
+	lw	$t2, 0($t1)
+	# %6 = load i32 , i32* %2
+	lw	$t3, 0($t0)
+	# %7 = icmp slt i32 %5, %6
+	slt	$t4, $t2, $t3
+	# br i1 %7, label %8, label %14
+	bne	$zero, $t4, initGraph_2
+	beq	$zero, $t4, initGraph_4
+
+initGraph_2:
+	# %9 = load i32 , i32* %3
+	lw	$t5, 0($t1)
+	# %10 = getelementptr [100 x i32], [100 x i32]* @head, i32 0, i32 %9
+	li	$k1, 4
+	mult	$t5, $k1
+	mflo	$k1
+	la	$k0, global_head
+	addu	$k0, $k0, $k1
+	move	$t6, $k0
+	# store i32 -1, i32* %10
+	li	$k0, -1
+	sw	$k0, 0($t6)
+	# br label %11
+	j	initGraph_3
+
+initGraph_3:
+	# %12 = load i32 , i32* %3
+	lw	$t7, 0($t1)
+	# %13 = add i32 %12, 1
+	addi	$k0, $t7, 1
+	move	$s0, $k0
+	# store i32 %13, i32* %3
+	sw	$s0, 0($t1)
+	# br label %4
+	j	initGraph_1
+
+initGraph_4:
+	# store i32 0, i32* @edgeCount
+	la	$k1, global_edgeCount
+	sw	$zero, 0($k1)
+	# ret void
+	jr	$ra
+
+
+func_addEdge:
+addEdge_0:
+	# %4 = alloca i32
+	addi	$t0, $sp, -4
+	# store i32 %0, i32* %4
+	sw	$a0, 0($t0)
+	# %5 = alloca i32
+	addi	$t1, $sp, -8
+	# store i32 %1, i32* %5
+	sw	$a1, 0($t1)
+	# %6 = alloca i32
+	addi	$t2, $sp, -12
+	# store i32 %2, i32* %6
+	sw	$a2, 0($t2)
+	# %7 = load i32 , i32* %5
+	lw	$t3, 0($t1)
+	# %8 = load i32 , i32* @edgeCount
+	la	$k0, global_edgeCount
+	lw	$t4, 0($k0)
+	# %9 = getelementptr [500 x [3 x i32]], [500 x [3 x i32]]* @edges, i32 0, i32 %8
+	li	$k1, 12
+	mult	$t4, $k1
+	mflo	$k1
+	la	$k0, global_edges
+	addu	$k0, $k0, $k1
+	move	$t5, $k0
+	# %10 = getelementptr [3 x i32], [3 x i32]* %9, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	addu	$k0, $t5, $k1
+	move	$t6, $k0
+	# store i32 %7, i32* %10
+	sw	$t3, 0($t6)
+	# %11 = load i32 , i32* %6
+	lw	$t7, 0($t2)
+	# %12 = load i32 , i32* @edgeCount
+	la	$k0, global_edgeCount
+	lw	$s0, 0($k0)
+	# %13 = getelementptr [500 x [3 x i32]], [500 x [3 x i32]]* @edges, i32 0, i32 %12
+	li	$k1, 12
+	mult	$s0, $k1
+	mflo	$k1
+	la	$k0, global_edges
+	addu	$k0, $k0, $k1
+	move	$s1, $k0
+	# %14 = getelementptr [3 x i32], [3 x i32]* %13, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $s1, $k1
+	move	$s2, $k0
+	# store i32 %11, i32* %14
+	sw	$t7, 0($s2)
+	# %15 = load i32 , i32* %4
+	lw	$s3, 0($t0)
+	# %16 = getelementptr [100 x i32], [100 x i32]* @head, i32 0, i32 %15
+	li	$k1, 4
+	mult	$s3, $k1
+	mflo	$k1
+	la	$k0, global_head
+	addu	$k0, $k0, $k1
+	move	$s4, $k0
+	# %17 = load i32 , i32* %16
+	lw	$s5, 0($s4)
+	# %18 = load i32 , i32* @edgeCount
+	la	$k0, global_edgeCount
+	lw	$s6, 0($k0)
+	# %19 = getelementptr [500 x [3 x i32]], [500 x [3 x i32]]* @edges, i32 0, i32 %18
+	li	$k1, 12
+	mult	$s6, $k1
+	mflo	$k1
+	la	$k0, global_edges
+	addu	$k0, $k0, $k1
+	move	$s7, $k0
+	# %20 = getelementptr [3 x i32], [3 x i32]* %19, i32 0, i32 2
+	li	$k0, 2
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $s7, $k1
+	move	$t8, $k0
+	# store i32 %17, i32* %20
+	sw	$s5, 0($t8)
+	# %21 = load i32 , i32* @edgeCount
+	la	$k0, global_edgeCount
+	lw	$t9, 0($k0)
+	# %22 = load i32 , i32* %4
+	lw	$k0, 0($t0)
+	sw	$k0, -16($sp)
+	# %23 = getelementptr [100 x i32], [100 x i32]* @head, i32 0, i32 %22
+	lw	$k0, -16($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_head
+	addu	$k0, $k0, $k1
+	sw	$k0, -20($sp)
+	# store i32 %21, i32* %23
+	lw	$k1, -20($sp)
+	sw	$t9, 0($k1)
+	# %24 = load i32 , i32* @edgeCount
+	la	$k0, global_edgeCount
+	lw	$k0, 0($k0)
+	sw	$k0, -24($sp)
+	# %25 = add i32 %24, 1
+	lw	$k0, -24($sp)
+	addi	$k0, $k0, 1
+	sw	$k0, -28($sp)
+	# store i32 %25, i32* @edgeCount
+	lw	$k0, -28($sp)
+	la	$k1, global_edgeCount
+	sw	$k0, 0($k1)
+	# ret void
+	jr	$ra
+
+
+func_initPriorityQueue:
+initPriorityQueue_0:
+	# store i32 0, i32* @heapSize
+	la	$k1, global_heapSize
+	sw	$zero, 0($k1)
+	# ret void
+	jr	$ra
+
+
+func_swapNodes:
+swapNodes_0:
+	# %3 = alloca i32
+	addi	$t0, $sp, -4
+	# store i32 %0, i32* %3
+	sw	$a0, 0($t0)
+	# %4 = alloca i32
+	addi	$t1, $sp, -8
+	# store i32 %1, i32* %4
+	sw	$a1, 0($t1)
+	# %5 = alloca i32
+	addi	$t2, $sp, -12
+	# %6 = load i32 , i32* %3
+	lw	$t3, 0($t0)
+	# %7 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %6
+	li	$k1, 8
+	mult	$t3, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$t4, $k0
+	# %8 = getelementptr [2 x i32], [2 x i32]* %7, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	addu	$k0, $t4, $k1
+	move	$t5, $k0
+	# %9 = load i32 , i32* %8
+	lw	$t6, 0($t5)
+	# store i32 %9, i32* %5
+	sw	$t6, 0($t2)
+	# %10 = alloca i32
+	addi	$t7, $sp, -16
+	# %11 = load i32 , i32* %3
+	lw	$s0, 0($t0)
+	# %12 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %11
+	li	$k1, 8
+	mult	$s0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$s1, $k0
+	# %13 = getelementptr [2 x i32], [2 x i32]* %12, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $s1, $k1
+	move	$s2, $k0
+	# %14 = load i32 , i32* %13
+	lw	$s3, 0($s2)
+	# store i32 %14, i32* %10
+	sw	$s3, 0($t7)
+	# %15 = load i32 , i32* %4
+	lw	$s4, 0($t1)
+	# %16 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %15
+	li	$k1, 8
+	mult	$s4, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$s5, $k0
+	# %17 = getelementptr [2 x i32], [2 x i32]* %16, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	addu	$k0, $s5, $k1
+	move	$s6, $k0
+	# %18 = load i32 , i32* %17
+	lw	$s7, 0($s6)
+	# %19 = load i32 , i32* %3
+	lw	$t8, 0($t0)
+	# %20 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %19
+	li	$k1, 8
+	mult	$t8, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$t9, $k0
+	# %21 = getelementptr [2 x i32], [2 x i32]* %20, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	addu	$k0, $t9, $k1
+	sw	$k0, -20($sp)
+	# store i32 %18, i32* %21
+	lw	$k1, -20($sp)
+	sw	$s7, 0($k1)
+	# %22 = load i32 , i32* %4
+	lw	$k0, 0($t1)
+	sw	$k0, -24($sp)
+	# %23 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %22
+	lw	$k0, -24($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -28($sp)
+	# %24 = getelementptr [2 x i32], [2 x i32]* %23, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -28($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -32($sp)
+	# %25 = load i32 , i32* %24
+	lw	$k0, -32($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -36($sp)
+	# %26 = load i32 , i32* %3
+	lw	$k0, 0($t0)
+	sw	$k0, -40($sp)
+	# %27 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %26
+	lw	$k0, -40($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -44($sp)
+	# %28 = getelementptr [2 x i32], [2 x i32]* %27, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -44($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -48($sp)
+	# store i32 %25, i32* %28
+	lw	$k0, -36($sp)
+	lw	$k1, -48($sp)
+	sw	$k0, 0($k1)
+	# %29 = load i32 , i32* %5
+	lw	$k0, 0($t2)
+	sw	$k0, -52($sp)
+	# %30 = load i32 , i32* %4
+	lw	$k0, 0($t1)
+	sw	$k0, -56($sp)
+	# %31 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %30
+	lw	$k0, -56($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -60($sp)
+	# %32 = getelementptr [2 x i32], [2 x i32]* %31, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	lw	$k0, -60($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -64($sp)
+	# store i32 %29, i32* %32
+	lw	$k0, -52($sp)
+	lw	$k1, -64($sp)
+	sw	$k0, 0($k1)
+	# %33 = load i32 , i32* %10
+	lw	$k0, 0($t7)
+	sw	$k0, -68($sp)
+	# %34 = load i32 , i32* %4
+	lw	$k0, 0($t1)
+	sw	$k0, -72($sp)
+	# %35 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %34
+	lw	$k0, -72($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -76($sp)
+	# %36 = getelementptr [2 x i32], [2 x i32]* %35, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -76($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -80($sp)
+	# store i32 %33, i32* %36
+	lw	$k0, -68($sp)
+	lw	$k1, -80($sp)
+	sw	$k0, 0($k1)
+	# ret void
+	jr	$ra
+
+
+func_minHeapify:
+minHeapify_0:
+	# %3 = alloca i32
+	addi	$t0, $sp, -4
+	# store i32 %0, i32* %3
+	sw	$a0, 0($t0)
+	# %4 = alloca i32
+	addi	$t1, $sp, -8
+	# store i32 %1, i32* %4
+	sw	$a1, 0($t1)
+	# %5 = alloca i32
+	addi	$t2, $sp, -12
+	# %6 = load i32 , i32* %3
+	lw	$t3, 0($t0)
+	# store i32 %6, i32* %5
+	sw	$t3, 0($t2)
+	# %7 = alloca i32
+	addi	$t4, $sp, -16
+	# %8 = alloca i32
+	addi	$t5, $sp, -20
+	# br label %9
+	j	minHeapify_1
+
+minHeapify_1:
+	# br label %10
+	j	minHeapify_2
+
+minHeapify_2:
+	# %11 = load i32 , i32* %3
+	lw	$t6, 0($t0)
+	# %12 = mul i32 2, %11
+	li	$k0, 2
+	mult	$k0, $t6
+	mflo	$k0
+	move	$t7, $k0
+	# %13 = add i32 %12, 1
+	addi	$k0, $t7, 1
+	move	$s0, $k0
+	# store i32 %13, i32* %7
+	sw	$s0, 0($t4)
+	# %14 = load i32 , i32* %3
+	lw	$s1, 0($t0)
+	# %15 = mul i32 2, %14
+	li	$k0, 2
+	mult	$k0, $s1
+	mflo	$k0
+	move	$s2, $k0
+	# %16 = add i32 %15, 2
+	addi	$k0, $s2, 2
+	move	$s3, $k0
+	# store i32 %16, i32* %8
+	sw	$s3, 0($t5)
+	# %17 = load i32 , i32* %7
+	lw	$s4, 0($t4)
+	# %18 = load i32 , i32* %4
+	lw	$s5, 0($t1)
+	# %19 = icmp slt i32 %17, %18
+	slt	$s6, $s4, $s5
+	# br i1 %19, label %20, label %32
+	bne	$zero, $s6, minHeapify_3
+	beq	$zero, $s6, minHeapify_5
+
+minHeapify_3:
+	# %21 = load i32 , i32* %7
+	lw	$s7, 0($t4)
+	# %22 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %21
+	li	$k1, 8
+	mult	$s7, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$t8, $k0
+	# %23 = getelementptr [2 x i32], [2 x i32]* %22, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t8, $k1
+	move	$t9, $k0
+	# %24 = load i32 , i32* %23
+	lw	$k0, 0($t9)
+	sw	$k0, -24($sp)
+	# %25 = load i32 , i32* %5
+	lw	$k0, 0($t2)
+	sw	$k0, -28($sp)
+	# %26 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %25
+	lw	$k0, -28($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -32($sp)
+	# %27 = getelementptr [2 x i32], [2 x i32]* %26, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -32($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -36($sp)
+	# %28 = load i32 , i32* %27
+	lw	$k0, -36($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -40($sp)
+	# %29 = icmp slt i32 %24, %28
+	lw	$k0, -24($sp)
+	lw	$k1, -40($sp)
+	slt	$k0, $k0, $k1
+	sw	$k0, -44($sp)
+	# br i1 %29, label %30, label %32
+	lw	$k0, -44($sp)
+	bne	$zero, $k0, minHeapify_4
+	beq	$zero, $k0, minHeapify_5
+
+minHeapify_4:
+	# %31 = load i32 , i32* %7
+	lw	$k0, 0($t4)
+	sw	$k0, -48($sp)
+	# store i32 %31, i32* %5
+	lw	$k0, -48($sp)
+	sw	$k0, 0($t2)
+	# br label %32
+	j	minHeapify_5
+
+minHeapify_5:
+	# %33 = load i32 , i32* %8
+	lw	$k0, 0($t5)
+	sw	$k0, -52($sp)
+	# %34 = load i32 , i32* %4
+	lw	$k0, 0($t1)
+	sw	$k0, -56($sp)
+	# %35 = icmp slt i32 %33, %34
+	lw	$k0, -52($sp)
+	lw	$k1, -56($sp)
+	slt	$k0, $k0, $k1
+	sw	$k0, -60($sp)
+	# br i1 %35, label %36, label %48
+	lw	$k0, -60($sp)
+	bne	$zero, $k0, minHeapify_6
+	beq	$zero, $k0, minHeapify_8
+
+minHeapify_6:
+	# %37 = load i32 , i32* %8
+	lw	$k0, 0($t5)
+	sw	$k0, -64($sp)
+	# %38 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %37
+	lw	$k0, -64($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -68($sp)
+	# %39 = getelementptr [2 x i32], [2 x i32]* %38, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -68($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -72($sp)
+	# %40 = load i32 , i32* %39
+	lw	$k0, -72($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -76($sp)
+	# %41 = load i32 , i32* %5
+	lw	$k0, 0($t2)
+	sw	$k0, -80($sp)
+	# %42 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %41
+	lw	$k0, -80($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -84($sp)
+	# %43 = getelementptr [2 x i32], [2 x i32]* %42, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -84($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -88($sp)
+	# %44 = load i32 , i32* %43
+	lw	$k0, -88($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -92($sp)
+	# %45 = icmp slt i32 %40, %44
+	lw	$k0, -76($sp)
+	lw	$k1, -92($sp)
+	slt	$k0, $k0, $k1
+	sw	$k0, -96($sp)
+	# br i1 %45, label %46, label %48
+	lw	$k0, -96($sp)
+	bne	$zero, $k0, minHeapify_7
+	beq	$zero, $k0, minHeapify_8
+
+minHeapify_7:
+	# %47 = load i32 , i32* %8
+	lw	$k0, 0($t5)
+	sw	$k0, -100($sp)
+	# store i32 %47, i32* %5
+	lw	$k0, -100($sp)
+	sw	$k0, 0($t2)
+	# br label %48
+	j	minHeapify_8
+
+minHeapify_8:
+	# %49 = load i32 , i32* %5
+	lw	$k0, 0($t2)
+	sw	$k0, -104($sp)
+	# %50 = load i32 , i32* %3
+	lw	$k0, 0($t0)
+	sw	$k0, -108($sp)
+	# %51 = icmp ne i32 %49, %50
+	lw	$k0, -104($sp)
+	lw	$k1, -108($sp)
+	sne	$k0, $k0, $k1
+	sw	$k0, -112($sp)
+	# br i1 %51, label %52, label %56
+	lw	$k0, -112($sp)
+	bne	$zero, $k0, minHeapify_9
+	beq	$zero, $k0, minHeapify_10
+
+minHeapify_9:
+	# %53 = load i32 , i32* %3
+	lw	$k0, 0($t0)
+	sw	$k0, -116($sp)
+	# %54 = load i32 , i32* %5
+	lw	$k0, 0($t2)
+	sw	$k0, -120($sp)
+	# call void @swapNodes(i32 %53, i32 %54)
+	lw	$a0, -116($sp)
+	lw	$a1, -120($sp)
+	sw	$sp, -124($sp)
+	sw	$ra, -128($sp)
+	sw	$t0, -132($sp)
+	sw	$t1, -136($sp)
+	sw	$t2, -140($sp)
+	sw	$t3, -144($sp)
+	sw	$t4, -148($sp)
+	sw	$t5, -152($sp)
+	sw	$t6, -156($sp)
+	sw	$t7, -160($sp)
+	sw	$s0, -164($sp)
+	sw	$s1, -168($sp)
+	sw	$s2, -172($sp)
+	sw	$s3, -176($sp)
+	sw	$s4, -180($sp)
+	sw	$s5, -184($sp)
+	sw	$s6, -188($sp)
+	sw	$s7, -192($sp)
+	sw	$t8, -196($sp)
+	sw	$t9, -200($sp)
+	addi	$sp, $sp, -200
+	jal	func_swapNodes
+	lw	$t9, 0($sp)
+	lw	$t8, 4($sp)
+	lw	$s7, 8($sp)
+	lw	$s6, 12($sp)
+	lw	$s5, 16($sp)
+	lw	$s4, 20($sp)
+	lw	$s3, 24($sp)
+	lw	$s2, 28($sp)
+	lw	$s1, 32($sp)
+	lw	$s0, 36($sp)
+	lw	$t7, 40($sp)
+	lw	$t6, 44($sp)
+	lw	$t5, 48($sp)
+	lw	$t4, 52($sp)
+	lw	$t3, 56($sp)
+	lw	$t2, 60($sp)
+	lw	$t1, 64($sp)
+	lw	$t0, 68($sp)
+	lw	$ra, 72($sp)
+	lw	$sp, 76($sp)
+	# %55 = load i32 , i32* %5
+	lw	$k0, 0($t2)
+	sw	$k0, -204($sp)
+	# store i32 %55, i32* %3
+	lw	$k0, -204($sp)
+	sw	$k0, 0($t0)
+	# br label %58
+	j	minHeapify_12
+
+minHeapify_10:
+	# br label %60
+	j	minHeapify_14
+
+minHeapify_11:
+	# br label %58
+	j	minHeapify_12
+
+minHeapify_12:
+	# br label %59
+	j	minHeapify_13
+
+minHeapify_13:
+	# br label %9
+	j	minHeapify_1
+
+minHeapify_14:
+	# ret void
+	jr	$ra
+
+
+func_extractMin:
+extractMin_0:
+	# %1 = alloca i32
+	addi	$t0, $sp, -4
+	# %2 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 0
+	li	$k1, 8
+	mult	$zero, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$t1, $k0
+	# %3 = getelementptr [2 x i32], [2 x i32]* %2, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	addu	$k0, $t1, $k1
+	move	$t2, $k0
+	# %4 = load i32 , i32* %3
+	lw	$t3, 0($t2)
+	# store i32 %4, i32* %1
+	sw	$t3, 0($t0)
+	# %5 = load i32 , i32* @heapSize
+	la	$k0, global_heapSize
+	lw	$t4, 0($k0)
+	# %6 = sub i32 %5, 1
+	subi	$k0, $t4, 1
+	move	$t5, $k0
+	# %7 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %6
+	li	$k1, 8
+	mult	$t5, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$t6, $k0
+	# %8 = getelementptr [2 x i32], [2 x i32]* %7, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	addu	$k0, $t6, $k1
+	move	$t7, $k0
+	# %9 = load i32 , i32* %8
+	lw	$s0, 0($t7)
+	# %10 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 0
+	li	$k1, 8
+	mult	$zero, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$s1, $k0
+	# %11 = getelementptr [2 x i32], [2 x i32]* %10, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	addu	$k0, $s1, $k1
+	move	$s2, $k0
+	# store i32 %9, i32* %11
+	sw	$s0, 0($s2)
+	# %12 = load i32 , i32* @heapSize
+	la	$k0, global_heapSize
+	lw	$s3, 0($k0)
+	# %13 = sub i32 %12, 1
+	subi	$k0, $s3, 1
+	move	$s4, $k0
+	# %14 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %13
+	li	$k1, 8
+	mult	$s4, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$s5, $k0
+	# %15 = getelementptr [2 x i32], [2 x i32]* %14, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $s5, $k1
+	move	$s6, $k0
+	# %16 = load i32 , i32* %15
+	lw	$s7, 0($s6)
+	# %17 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 0
+	li	$k1, 8
+	mult	$zero, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$t8, $k0
+	# %18 = getelementptr [2 x i32], [2 x i32]* %17, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t8, $k1
+	move	$t9, $k0
+	# store i32 %16, i32* %18
+	sw	$s7, 0($t9)
+	# %19 = load i32 , i32* @heapSize
+	la	$k0, global_heapSize
+	lw	$k0, 0($k0)
+	sw	$k0, -8($sp)
+	# %20 = sub i32 %19, 1
+	lw	$k0, -8($sp)
+	subi	$k0, $k0, 1
+	sw	$k0, -12($sp)
+	# store i32 %20, i32* @heapSize
+	lw	$k0, -12($sp)
+	la	$k1, global_heapSize
+	sw	$k0, 0($k1)
+	# %21 = load i32 , i32* @heapSize
+	la	$k0, global_heapSize
+	lw	$k0, 0($k0)
+	sw	$k0, -16($sp)
+	# call void @minHeapify(i32 0, i32 %21)
+	move	$a0, $zero
+	lw	$a1, -16($sp)
+	sw	$sp, -20($sp)
+	sw	$ra, -24($sp)
+	sw	$t0, -28($sp)
+	sw	$t1, -32($sp)
+	sw	$t2, -36($sp)
+	sw	$t3, -40($sp)
+	sw	$t4, -44($sp)
+	sw	$t5, -48($sp)
+	sw	$t6, -52($sp)
+	sw	$t7, -56($sp)
+	sw	$s0, -60($sp)
+	sw	$s1, -64($sp)
+	sw	$s2, -68($sp)
+	sw	$s3, -72($sp)
+	sw	$s4, -76($sp)
+	sw	$s5, -80($sp)
+	sw	$s6, -84($sp)
+	sw	$s7, -88($sp)
+	sw	$t8, -92($sp)
+	sw	$t9, -96($sp)
+	addi	$sp, $sp, -96
+	jal	func_minHeapify
+	lw	$t9, 0($sp)
+	lw	$t8, 4($sp)
+	lw	$s7, 8($sp)
+	lw	$s6, 12($sp)
+	lw	$s5, 16($sp)
+	lw	$s4, 20($sp)
+	lw	$s3, 24($sp)
+	lw	$s2, 28($sp)
+	lw	$s1, 32($sp)
+	lw	$s0, 36($sp)
+	lw	$t7, 40($sp)
+	lw	$t6, 44($sp)
+	lw	$t5, 48($sp)
+	lw	$t4, 52($sp)
+	lw	$t3, 56($sp)
+	lw	$t2, 60($sp)
+	lw	$t1, 64($sp)
+	lw	$t0, 68($sp)
+	lw	$ra, 72($sp)
+	lw	$sp, 76($sp)
+	# %22 = load i32 , i32* %1
+	lw	$k0, 0($t0)
+	sw	$k0, -100($sp)
+	# ret i32 %22
+	lw	$v0, -100($sp)
+	jr	$ra
+
+extractMin_1:
+
+
+func_decreaseKey:
+decreaseKey_0:
+	# %3 = alloca i32
+	addi	$t0, $sp, -4
+	# store i32 %0, i32* %3
+	sw	$a0, 0($t0)
+	# %4 = alloca i32
+	addi	$t1, $sp, -8
+	# store i32 %1, i32* %4
+	sw	$a1, 0($t1)
+	# %5 = alloca i32
+	addi	$t2, $sp, -12
+	# store i32 0, i32* %5
+	sw	$zero, 0($t2)
+	# br label %6
+	j	decreaseKey_1
+
+decreaseKey_1:
+	# br label %7
+	j	decreaseKey_2
+
+decreaseKey_2:
+	# %8 = load i32 , i32* %5
+	lw	$t3, 0($t2)
+	# %9 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %8
+	li	$k1, 8
+	mult	$t3, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$t4, $k0
+	# %10 = getelementptr [2 x i32], [2 x i32]* %9, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	addu	$k0, $t4, $k1
+	move	$t5, $k0
+	# %11 = load i32 , i32* %10
+	lw	$t6, 0($t5)
+	# %12 = load i32 , i32* %3
+	lw	$t7, 0($t0)
+	# %13 = icmp eq i32 %11, %12
+	seq	$s0, $t6, $t7
+	# br i1 %13, label %14, label %20
+	bne	$zero, $s0, decreaseKey_3
+	beq	$zero, $s0, decreaseKey_5
+
+decreaseKey_3:
+	# %15 = load i32 , i32* %4
+	lw	$s1, 0($t1)
+	# %16 = load i32 , i32* %5
+	lw	$s2, 0($t2)
+	# %17 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %16
+	li	$k1, 8
+	mult	$s2, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	move	$s3, $k0
+	# %18 = getelementptr [2 x i32], [2 x i32]* %17, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $s3, $k1
+	move	$s4, $k0
+	# store i32 %15, i32* %18
+	sw	$s1, 0($s4)
+	# br label %24
+	j	decreaseKey_7
+
+decreaseKey_4:
+	# br label %20
+	j	decreaseKey_5
+
+decreaseKey_5:
+	# %21 = load i32 , i32* %5
+	lw	$s5, 0($t2)
+	# %22 = add i32 %21, 1
+	addi	$k0, $s5, 1
+	move	$s6, $k0
+	# store i32 %22, i32* %5
+	sw	$s6, 0($t2)
+	# br label %23
+	j	decreaseKey_6
+
+decreaseKey_6:
+	# br label %6
+	j	decreaseKey_1
+
+decreaseKey_7:
+	# br label %25
+	j	decreaseKey_8
+
+decreaseKey_8:
+	# %26 = load i32 , i32* %5
+	lw	$s7, 0($t2)
+	# %27 = icmp ne i32 %26, 0
+	sne	$t8, $s7, $zero
+	# br i1 %27, label %28, label %49
+	bne	$zero, $t8, decreaseKey_9
+	beq	$zero, $t8, decreaseKey_12
+
+decreaseKey_9:
+	# %29 = load i32 , i32* %5
+	lw	$t9, 0($t2)
+	# %30 = sub i32 %29, 1
+	subi	$k0, $t9, 1
+	sw	$k0, -16($sp)
+	# %31 = sdiv i32 %30, 2
+	lw	$k0, -16($sp)
+	li	$k1, 2
+	div	$k0, $k1
+	mflo	$k0
+	sw	$k0, -20($sp)
+	# %32 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %31
+	lw	$k0, -20($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -24($sp)
+	# %33 = getelementptr [2 x i32], [2 x i32]* %32, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -24($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -28($sp)
+	# %34 = load i32 , i32* %33
+	lw	$k0, -28($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -32($sp)
+	# %35 = load i32 , i32* %5
+	lw	$k0, 0($t2)
+	sw	$k0, -36($sp)
+	# %36 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %35
+	lw	$k0, -36($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -40($sp)
+	# %37 = getelementptr [2 x i32], [2 x i32]* %36, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -40($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -44($sp)
+	# %38 = load i32 , i32* %37
+	lw	$k0, -44($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -48($sp)
+	# %39 = icmp sgt i32 %34, %38
+	lw	$k0, -32($sp)
+	lw	$k1, -48($sp)
+	sgt	$k0, $k0, $k1
+	sw	$k0, -52($sp)
+	# br i1 %39, label %40, label %49
+	lw	$k0, -52($sp)
+	bne	$zero, $k0, decreaseKey_10
+	beq	$zero, $k0, decreaseKey_12
+
+decreaseKey_10:
+	# %41 = load i32 , i32* %5
+	lw	$k0, 0($t2)
+	sw	$k0, -56($sp)
+	# %42 = load i32 , i32* %5
+	lw	$k0, 0($t2)
+	sw	$k0, -60($sp)
+	# %43 = sub i32 %42, 1
+	lw	$k0, -60($sp)
+	subi	$k0, $k0, 1
+	sw	$k0, -64($sp)
+	# %44 = sdiv i32 %43, 2
+	lw	$k0, -64($sp)
+	li	$k1, 2
+	div	$k0, $k1
+	mflo	$k0
+	sw	$k0, -68($sp)
+	# call void @swapNodes(i32 %41, i32 %44)
+	lw	$a0, -56($sp)
+	lw	$a1, -68($sp)
+	sw	$sp, -72($sp)
+	sw	$ra, -76($sp)
+	sw	$t0, -80($sp)
+	sw	$t1, -84($sp)
+	sw	$t2, -88($sp)
+	sw	$t3, -92($sp)
+	sw	$t4, -96($sp)
+	sw	$t5, -100($sp)
+	sw	$t6, -104($sp)
+	sw	$t7, -108($sp)
+	sw	$s0, -112($sp)
+	sw	$s1, -116($sp)
+	sw	$s2, -120($sp)
+	sw	$s3, -124($sp)
+	sw	$s4, -128($sp)
+	sw	$s5, -132($sp)
+	sw	$s6, -136($sp)
+	sw	$s7, -140($sp)
+	sw	$t8, -144($sp)
+	sw	$t9, -148($sp)
+	addi	$sp, $sp, -148
+	jal	func_swapNodes
+	lw	$t9, 0($sp)
+	lw	$t8, 4($sp)
+	lw	$s7, 8($sp)
+	lw	$s6, 12($sp)
+	lw	$s5, 16($sp)
+	lw	$s4, 20($sp)
+	lw	$s3, 24($sp)
+	lw	$s2, 28($sp)
+	lw	$s1, 32($sp)
+	lw	$s0, 36($sp)
+	lw	$t7, 40($sp)
+	lw	$t6, 44($sp)
+	lw	$t5, 48($sp)
+	lw	$t4, 52($sp)
+	lw	$t3, 56($sp)
+	lw	$t2, 60($sp)
+	lw	$t1, 64($sp)
+	lw	$t0, 68($sp)
+	lw	$ra, 72($sp)
+	lw	$sp, 76($sp)
+	# %45 = load i32 , i32* %5
+	lw	$k0, 0($t2)
+	sw	$k0, -152($sp)
+	# %46 = sub i32 %45, 1
+	lw	$k0, -152($sp)
+	subi	$k0, $k0, 1
+	sw	$k0, -156($sp)
+	# %47 = sdiv i32 %46, 2
+	lw	$k0, -156($sp)
+	li	$k1, 2
+	div	$k0, $k1
+	mflo	$k0
+	sw	$k0, -160($sp)
+	# store i32 %47, i32* %5
+	lw	$k0, -160($sp)
+	sw	$k0, 0($t2)
+	# br label %48
+	j	decreaseKey_11
+
+decreaseKey_11:
+	# br label %25
+	j	decreaseKey_8
+
+decreaseKey_12:
+	# ret void
+	jr	$ra
+
+
+func_dijkstra:
+dijkstra_0:
+	# %3 = alloca i32
+	addi	$t0, $sp, -4
+	# store i32 %0, i32* %3
+	sw	$a0, 0($t0)
+	# %4 = alloca i32
+	addi	$t1, $sp, -8
+	# store i32 %1, i32* %4
+	sw	$a1, 0($t1)
+	# %5 = alloca [100 x i32]
+	addi	$t2, $sp, -408
+	# %6 = alloca [100 x i32]
+	addi	$t3, $sp, -808
+	# %7 = alloca i32
+	addi	$t4, $sp, -812
+	# store i32 0, i32* %7
+	sw	$zero, 0($t4)
+	# br label %8
+	j	dijkstra_1
+
+dijkstra_1:
+	# %9 = load i32 , i32* %7
+	lw	$t5, 0($t4)
+	# %10 = load i32 , i32* %4
+	lw	$t6, 0($t1)
+	# %11 = icmp slt i32 %9, %10
+	slt	$t7, $t5, $t6
+	# br i1 %11, label %12, label %20
+	bne	$zero, $t7, dijkstra_2
+	beq	$zero, $t7, dijkstra_4
+
+dijkstra_2:
+	# %13 = load i32 , i32* %7
+	lw	$s0, 0($t4)
+	# %14 = getelementptr [100 x i32], [100 x i32]* %5, i32 0, i32 %13
+	li	$k1, 4
+	mult	$s0, $k1
+	mflo	$k1
+	addu	$k0, $t2, $k1
+	move	$s1, $k0
+	# store i32 2147483647, i32* %14
+	li	$k0, 2147483647
+	sw	$k0, 0($s1)
+	# %15 = load i32 , i32* %7
+	lw	$s2, 0($t4)
+	# %16 = getelementptr [100 x i32], [100 x i32]* %6, i32 0, i32 %15
+	li	$k1, 4
+	mult	$s2, $k1
+	mflo	$k1
+	addu	$k0, $t3, $k1
+	move	$s3, $k0
+	# store i32 0, i32* %16
+	sw	$zero, 0($s3)
+	# br label %17
+	j	dijkstra_3
+
+dijkstra_3:
+	# %18 = load i32 , i32* %7
+	lw	$s4, 0($t4)
+	# %19 = add i32 %18, 1
+	addi	$k0, $s4, 1
+	move	$s5, $k0
+	# store i32 %19, i32* %7
+	sw	$s5, 0($t4)
+	# br label %8
+	j	dijkstra_1
+
+dijkstra_4:
+	# %21 = load i32 , i32* %3
+	lw	$s6, 0($t0)
+	# %22 = getelementptr [100 x i32], [100 x i32]* %5, i32 0, i32 %21
+	li	$k1, 4
+	mult	$s6, $k1
+	mflo	$k1
+	addu	$k0, $t2, $k1
+	move	$s7, $k0
+	# store i32 0, i32* %22
+	sw	$zero, 0($s7)
+	# call void @initPriorityQueue()
+	sw	$sp, -816($sp)
+	sw	$ra, -820($sp)
+	sw	$t0, -824($sp)
+	sw	$t1, -828($sp)
+	sw	$t2, -832($sp)
+	sw	$t3, -836($sp)
+	sw	$t4, -840($sp)
+	sw	$t5, -844($sp)
+	sw	$t6, -848($sp)
+	sw	$t7, -852($sp)
+	sw	$s0, -856($sp)
+	sw	$s1, -860($sp)
+	sw	$s2, -864($sp)
+	sw	$s3, -868($sp)
+	sw	$s4, -872($sp)
+	sw	$s5, -876($sp)
+	sw	$s6, -880($sp)
+	sw	$s7, -884($sp)
+	addi	$sp, $sp, -884
+	jal	func_initPriorityQueue
+	lw	$s7, 0($sp)
+	lw	$s6, 4($sp)
+	lw	$s5, 8($sp)
+	lw	$s4, 12($sp)
+	lw	$s3, 16($sp)
+	lw	$s2, 20($sp)
+	lw	$s1, 24($sp)
+	lw	$s0, 28($sp)
+	lw	$t7, 32($sp)
+	lw	$t6, 36($sp)
+	lw	$t5, 40($sp)
+	lw	$t4, 44($sp)
+	lw	$t3, 48($sp)
+	lw	$t2, 52($sp)
+	lw	$t1, 56($sp)
+	lw	$t0, 60($sp)
+	lw	$ra, 64($sp)
+	lw	$sp, 68($sp)
+	# store i32 0, i32* %7
+	sw	$zero, 0($t4)
+	# br label %23
+	j	dijkstra_5
+
+dijkstra_5:
+	# %24 = load i32 , i32* %7
+	lw	$t8, 0($t4)
+	# %25 = load i32 , i32* %4
+	lw	$t9, 0($t1)
+	# %26 = icmp slt i32 %24, %25
+	slt	$k0, $t8, $t9
+	sw	$k0, -888($sp)
+	# br i1 %26, label %27, label %43
+	lw	$k0, -888($sp)
+	bne	$zero, $k0, dijkstra_6
+	beq	$zero, $k0, dijkstra_8
+
+dijkstra_6:
+	# %28 = load i32 , i32* %7
+	lw	$k0, 0($t4)
+	sw	$k0, -892($sp)
+	# %29 = load i32 , i32* %7
+	lw	$k0, 0($t4)
+	sw	$k0, -896($sp)
+	# %30 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %29
+	lw	$k0, -896($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -900($sp)
+	# %31 = getelementptr [2 x i32], [2 x i32]* %30, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	lw	$k0, -900($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -904($sp)
+	# store i32 %28, i32* %31
+	lw	$k0, -892($sp)
+	lw	$k1, -904($sp)
+	sw	$k0, 0($k1)
+	# %32 = load i32 , i32* %7
+	lw	$k0, 0($t4)
+	sw	$k0, -908($sp)
+	# %33 = getelementptr [100 x i32], [100 x i32]* %5, i32 0, i32 %32
+	lw	$k0, -908($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t2, $k1
+	sw	$k0, -912($sp)
+	# %34 = load i32 , i32* %33
+	lw	$k0, -912($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -916($sp)
+	# %35 = load i32 , i32* %7
+	lw	$k0, 0($t4)
+	sw	$k0, -920($sp)
+	# %36 = getelementptr [100 x [2 x i32]], [100 x [2 x i32]]* @heap, i32 0, i32 %35
+	lw	$k0, -920($sp)
+	li	$k1, 8
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_heap
+	addu	$k0, $k0, $k1
+	sw	$k0, -924($sp)
+	# %37 = getelementptr [2 x i32], [2 x i32]* %36, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -924($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -928($sp)
+	# store i32 %34, i32* %37
+	lw	$k0, -916($sp)
+	lw	$k1, -928($sp)
+	sw	$k0, 0($k1)
+	# %38 = load i32 , i32* @heapSize
+	la	$k0, global_heapSize
+	lw	$k0, 0($k0)
+	sw	$k0, -932($sp)
+	# %39 = add i32 %38, 1
+	lw	$k0, -932($sp)
+	addi	$k0, $k0, 1
+	sw	$k0, -936($sp)
+	# store i32 %39, i32* @heapSize
+	lw	$k0, -936($sp)
+	la	$k1, global_heapSize
+	sw	$k0, 0($k1)
+	# br label %40
+	j	dijkstra_7
+
+dijkstra_7:
+	# %41 = load i32 , i32* %7
+	lw	$k0, 0($t4)
+	sw	$k0, -940($sp)
+	# %42 = add i32 %41, 1
+	lw	$k0, -940($sp)
+	addi	$k0, $k0, 1
+	sw	$k0, -944($sp)
+	# store i32 %42, i32* %7
+	lw	$k0, -944($sp)
+	sw	$k0, 0($t4)
+	# br label %23
+	j	dijkstra_5
+
+dijkstra_8:
+	# br label %44
+	j	dijkstra_9
+
+dijkstra_9:
+	# br label %45
+	j	dijkstra_10
+
+dijkstra_10:
+	# %46 = alloca i32
+	addi	$k0, $sp, -948
+	sw	$k0, -952($sp)
+	# %47 = call i32 @extractMin()
+	sw	$sp, -960($sp)
+	sw	$ra, -964($sp)
+	sw	$t0, -968($sp)
+	sw	$t1, -972($sp)
+	sw	$t2, -976($sp)
+	sw	$t3, -980($sp)
+	sw	$t4, -984($sp)
+	sw	$t5, -988($sp)
+	sw	$t6, -992($sp)
+	sw	$t7, -996($sp)
+	sw	$s0, -1000($sp)
+	sw	$s1, -1004($sp)
+	sw	$s2, -1008($sp)
+	sw	$s3, -1012($sp)
+	sw	$s4, -1016($sp)
+	sw	$s5, -1020($sp)
+	sw	$s6, -1024($sp)
+	sw	$s7, -1028($sp)
+	sw	$t8, -1032($sp)
+	sw	$t9, -1036($sp)
+	addi	$sp, $sp, -1036
+	jal	func_extractMin
+	lw	$t9, 0($sp)
+	lw	$t8, 4($sp)
+	lw	$s7, 8($sp)
+	lw	$s6, 12($sp)
+	lw	$s5, 16($sp)
+	lw	$s4, 20($sp)
+	lw	$s3, 24($sp)
+	lw	$s2, 28($sp)
+	lw	$s1, 32($sp)
+	lw	$s0, 36($sp)
+	lw	$t7, 40($sp)
+	lw	$t6, 44($sp)
+	lw	$t5, 48($sp)
+	lw	$t4, 52($sp)
+	lw	$t3, 56($sp)
+	lw	$t2, 60($sp)
+	lw	$t1, 64($sp)
+	lw	$t0, 68($sp)
+	lw	$ra, 72($sp)
+	lw	$sp, 76($sp)
+	sw	$v0, -956($sp)
+	# store i32 %47, i32* %46
+	lw	$k0, -956($sp)
+	lw	$k1, -952($sp)
+	sw	$k0, 0($k1)
+	# %48 = load i32 , i32* %46
+	lw	$k0, -952($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1040($sp)
+	# %49 = getelementptr [100 x i32], [100 x i32]* %6, i32 0, i32 %48
+	lw	$k0, -1040($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t3, $k1
+	sw	$k0, -1044($sp)
+	# store i32 1, i32* %49
+	li	$k0, 1
+	lw	$k1, -1044($sp)
+	sw	$k0, 0($k1)
+	# %50 = alloca i32
+	addi	$k0, $sp, -1048
+	sw	$k0, -1052($sp)
+	# %51 = load i32 , i32* %46
+	lw	$k0, -952($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1056($sp)
+	# %52 = getelementptr [100 x i32], [100 x i32]* @head, i32 0, i32 %51
+	lw	$k0, -1056($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_head
+	addu	$k0, $k0, $k1
+	sw	$k0, -1060($sp)
+	# %53 = load i32 , i32* %52
+	lw	$k0, -1060($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1064($sp)
+	# store i32 %53, i32* %50
+	lw	$k0, -1064($sp)
+	lw	$k1, -1052($sp)
+	sw	$k0, 0($k1)
+	# br label %54
+	j	dijkstra_11
+
+dijkstra_11:
+	# %55 = load i32 , i32* %50
+	lw	$k0, -1052($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1068($sp)
+	# %56 = icmp ne i32 %55, -1
+	lw	$k0, -1068($sp)
+	li	$k1, -1
+	sne	$k0, $k0, $k1
+	sw	$k0, -1072($sp)
+	# br i1 %56, label %57, label %106
+	lw	$k0, -1072($sp)
+	bne	$zero, $k0, dijkstra_12
+	beq	$zero, $k0, dijkstra_18
+
+dijkstra_12:
+	# %58 = alloca i32
+	addi	$k0, $sp, -1076
+	sw	$k0, -1080($sp)
+	# %59 = load i32 , i32* %50
+	lw	$k0, -1052($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1084($sp)
+	# %60 = getelementptr [500 x [3 x i32]], [500 x [3 x i32]]* @edges, i32 0, i32 %59
+	lw	$k0, -1084($sp)
+	li	$k1, 12
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_edges
+	addu	$k0, $k0, $k1
+	sw	$k0, -1088($sp)
+	# %61 = getelementptr [3 x i32], [3 x i32]* %60, i32 0, i32 0
+	li	$k1, 4
+	mult	$zero, $k1
+	mflo	$k1
+	lw	$k0, -1088($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -1092($sp)
+	# %62 = load i32 , i32* %61
+	lw	$k0, -1092($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1096($sp)
+	# store i32 %62, i32* %58
+	lw	$k0, -1096($sp)
+	lw	$k1, -1080($sp)
+	sw	$k0, 0($k1)
+	# %63 = load i32 , i32* %58
+	lw	$k0, -1080($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1100($sp)
+	# %64 = getelementptr [100 x i32], [100 x i32]* %6, i32 0, i32 %63
+	lw	$k0, -1100($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t3, $k1
+	sw	$k0, -1104($sp)
+	# %65 = load i32 , i32* %64
+	lw	$k0, -1104($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1108($sp)
+	# %66 = icmp eq i32 %65, 0
+	lw	$k0, -1108($sp)
+	seq	$k0, $k0, $zero
+	sw	$k0, -1112($sp)
+	# br i1 %66, label %67, label %100
+	lw	$k0, -1112($sp)
+	bne	$zero, $k0, dijkstra_13
+	beq	$zero, $k0, dijkstra_16
+
+dijkstra_13:
+	# %68 = load i32 , i32* %46
+	lw	$k0, -952($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1116($sp)
+	# %69 = getelementptr [100 x i32], [100 x i32]* %5, i32 0, i32 %68
+	lw	$k0, -1116($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t2, $k1
+	sw	$k0, -1120($sp)
+	# %70 = load i32 , i32* %69
+	lw	$k0, -1120($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1124($sp)
+	# %71 = icmp ne i32 %70, 2147483647
+	lw	$k0, -1124($sp)
+	li	$k1, 2147483647
+	sne	$k0, $k0, $k1
+	sw	$k0, -1128($sp)
+	# br i1 %71, label %72, label %100
+	lw	$k0, -1128($sp)
+	bne	$zero, $k0, dijkstra_14
+	beq	$zero, $k0, dijkstra_16
+
+dijkstra_14:
+	# %73 = load i32 , i32* %46
+	lw	$k0, -952($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1132($sp)
+	# %74 = getelementptr [100 x i32], [100 x i32]* %5, i32 0, i32 %73
+	lw	$k0, -1132($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t2, $k1
+	sw	$k0, -1136($sp)
+	# %75 = load i32 , i32* %74
+	lw	$k0, -1136($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1140($sp)
+	# %76 = load i32 , i32* %50
+	lw	$k0, -1052($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1144($sp)
+	# %77 = getelementptr [500 x [3 x i32]], [500 x [3 x i32]]* @edges, i32 0, i32 %76
+	lw	$k0, -1144($sp)
+	li	$k1, 12
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_edges
+	addu	$k0, $k0, $k1
+	sw	$k0, -1148($sp)
+	# %78 = getelementptr [3 x i32], [3 x i32]* %77, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -1148($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -1152($sp)
+	# %79 = load i32 , i32* %78
+	lw	$k0, -1152($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1156($sp)
+	# %80 = add i32 %75, %79
+	lw	$k0, -1140($sp)
+	lw	$k1, -1156($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -1160($sp)
+	# %81 = load i32 , i32* %58
+	lw	$k0, -1080($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1164($sp)
+	# %82 = getelementptr [100 x i32], [100 x i32]* %5, i32 0, i32 %81
+	lw	$k0, -1164($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t2, $k1
+	sw	$k0, -1168($sp)
+	# %83 = load i32 , i32* %82
+	lw	$k0, -1168($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1172($sp)
+	# %84 = icmp slt i32 %80, %83
+	lw	$k0, -1160($sp)
+	lw	$k1, -1172($sp)
+	slt	$k0, $k0, $k1
+	sw	$k0, -1176($sp)
+	# br i1 %84, label %85, label %100
+	lw	$k0, -1176($sp)
+	bne	$zero, $k0, dijkstra_15
+	beq	$zero, $k0, dijkstra_16
+
+dijkstra_15:
+	# %86 = load i32 , i32* %46
+	lw	$k0, -952($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1180($sp)
+	# %87 = getelementptr [100 x i32], [100 x i32]* %5, i32 0, i32 %86
+	lw	$k0, -1180($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t2, $k1
+	sw	$k0, -1184($sp)
+	# %88 = load i32 , i32* %87
+	lw	$k0, -1184($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1188($sp)
+	# %89 = load i32 , i32* %50
+	lw	$k0, -1052($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1192($sp)
+	# %90 = getelementptr [500 x [3 x i32]], [500 x [3 x i32]]* @edges, i32 0, i32 %89
+	lw	$k0, -1192($sp)
+	li	$k1, 12
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_edges
+	addu	$k0, $k0, $k1
+	sw	$k0, -1196($sp)
+	# %91 = getelementptr [3 x i32], [3 x i32]* %90, i32 0, i32 1
+	li	$k0, 1
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -1196($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -1200($sp)
+	# %92 = load i32 , i32* %91
+	lw	$k0, -1200($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1204($sp)
+	# %93 = add i32 %88, %92
+	lw	$k0, -1188($sp)
+	lw	$k1, -1204($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -1208($sp)
+	# %94 = load i32 , i32* %58
+	lw	$k0, -1080($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1212($sp)
+	# %95 = getelementptr [100 x i32], [100 x i32]* %5, i32 0, i32 %94
+	lw	$k0, -1212($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t2, $k1
+	sw	$k0, -1216($sp)
+	# store i32 %93, i32* %95
+	lw	$k0, -1208($sp)
+	lw	$k1, -1216($sp)
+	sw	$k0, 0($k1)
+	# %96 = load i32 , i32* %58
+	lw	$k0, -1080($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1220($sp)
+	# %97 = load i32 , i32* %58
+	lw	$k0, -1080($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1224($sp)
+	# %98 = getelementptr [100 x i32], [100 x i32]* %5, i32 0, i32 %97
+	lw	$k0, -1224($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t2, $k1
+	sw	$k0, -1228($sp)
+	# %99 = load i32 , i32* %98
+	lw	$k0, -1228($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1232($sp)
+	# call void @decreaseKey(i32 %96, i32 %99)
+	lw	$a0, -1220($sp)
+	lw	$a1, -1232($sp)
+	sw	$sp, -1236($sp)
+	sw	$ra, -1240($sp)
+	sw	$t0, -1244($sp)
+	sw	$t1, -1248($sp)
+	sw	$t2, -1252($sp)
+	sw	$t3, -1256($sp)
+	sw	$t4, -1260($sp)
+	sw	$t5, -1264($sp)
+	sw	$t6, -1268($sp)
+	sw	$t7, -1272($sp)
+	sw	$s0, -1276($sp)
+	sw	$s1, -1280($sp)
+	sw	$s2, -1284($sp)
+	sw	$s3, -1288($sp)
+	sw	$s4, -1292($sp)
+	sw	$s5, -1296($sp)
+	sw	$s6, -1300($sp)
+	sw	$s7, -1304($sp)
+	sw	$t8, -1308($sp)
+	sw	$t9, -1312($sp)
+	addi	$sp, $sp, -1312
+	jal	func_decreaseKey
+	lw	$t9, 0($sp)
+	lw	$t8, 4($sp)
+	lw	$s7, 8($sp)
+	lw	$s6, 12($sp)
+	lw	$s5, 16($sp)
+	lw	$s4, 20($sp)
+	lw	$s3, 24($sp)
+	lw	$s2, 28($sp)
+	lw	$s1, 32($sp)
+	lw	$s0, 36($sp)
+	lw	$t7, 40($sp)
+	lw	$t6, 44($sp)
+	lw	$t5, 48($sp)
+	lw	$t4, 52($sp)
+	lw	$t3, 56($sp)
+	lw	$t2, 60($sp)
+	lw	$t1, 64($sp)
+	lw	$t0, 68($sp)
+	lw	$ra, 72($sp)
+	lw	$sp, 76($sp)
+	# br label %100
+	j	dijkstra_16
+
+dijkstra_16:
+	# %101 = load i32 , i32* %50
+	lw	$k0, -1052($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1316($sp)
+	# %102 = getelementptr [500 x [3 x i32]], [500 x [3 x i32]]* @edges, i32 0, i32 %101
+	lw	$k0, -1316($sp)
+	li	$k1, 12
+	mult	$k0, $k1
+	mflo	$k1
+	la	$k0, global_edges
+	addu	$k0, $k0, $k1
+	sw	$k0, -1320($sp)
+	# %103 = getelementptr [3 x i32], [3 x i32]* %102, i32 0, i32 2
+	li	$k0, 2
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	lw	$k0, -1320($sp)
+	addu	$k0, $k0, $k1
+	sw	$k0, -1324($sp)
+	# %104 = load i32 , i32* %103
+	lw	$k0, -1324($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1328($sp)
+	# store i32 %104, i32* %50
+	lw	$k0, -1328($sp)
+	lw	$k1, -1052($sp)
+	sw	$k0, 0($k1)
+	# br label %105
+	j	dijkstra_17
+
+dijkstra_17:
+	# br label %54
+	j	dijkstra_11
+
+dijkstra_18:
+	# %107 = load i32 , i32* @heapSize
+	la	$k0, global_heapSize
+	lw	$k0, 0($k0)
+	sw	$k0, -1332($sp)
+	# %108 = icmp sle i32 %107, 0
+	lw	$k0, -1332($sp)
+	sle	$k0, $k0, $zero
+	sw	$k0, -1336($sp)
+	# br i1 %108, label %109, label %111
+	lw	$k0, -1336($sp)
+	bne	$zero, $k0, dijkstra_19
+	beq	$zero, $k0, dijkstra_21
+
+dijkstra_19:
+	# br label %113
+	j	dijkstra_23
+
+dijkstra_20:
+	# br label %111
+	j	dijkstra_21
+
+dijkstra_21:
+	# br label %112
+	j	dijkstra_22
+
+dijkstra_22:
+	# br label %44
+	j	dijkstra_9
+
+dijkstra_23:
+	# %114 = load i32 , i32* %3
+	lw	$k0, 0($t0)
+	sw	$k0, -1340($sp)
+	# call void @putch(i32 83)
+	sw	$a0, -1344($sp)
+	la	$a0, str_0
+	li	$v0, 4
+	syscall
+	lw	$a0, -1344($sp)
+	# call void @putint(i32 %114)
+	sw	$a0, -1344($sp)
+	lw	$a0, -1340($sp)
+	li	$v0, 1
+	syscall
+	lw	$a0, -1344($sp)
+	# call void @putch(i32 58)
+	sw	$a0, -1344($sp)
+	la	$a0, str_1
+	li	$v0, 4
+	syscall
+	lw	$a0, -1344($sp)
+	# store i32 0, i32* %7
+	sw	$zero, 0($t4)
+	# br label %115
+	j	dijkstra_24
+
+dijkstra_24:
+	# %116 = load i32 , i32* %7
+	lw	$k0, 0($t4)
+	sw	$k0, -1344($sp)
+	# %117 = load i32 , i32* %4
+	lw	$k0, 0($t1)
+	sw	$k0, -1348($sp)
+	# %118 = icmp slt i32 %116, %117
+	lw	$k0, -1344($sp)
+	lw	$k1, -1348($sp)
+	slt	$k0, $k0, $k1
+	sw	$k0, -1352($sp)
+	# br i1 %118, label %119, label %127
+	lw	$k0, -1352($sp)
+	bne	$zero, $k0, dijkstra_25
+	beq	$zero, $k0, dijkstra_27
+
+dijkstra_25:
+	# %120 = load i32 , i32* %7
+	lw	$k0, 0($t4)
+	sw	$k0, -1356($sp)
+	# %121 = load i32 , i32* %7
+	lw	$k0, 0($t4)
+	sw	$k0, -1360($sp)
+	# %122 = getelementptr [100 x i32], [100 x i32]* %5, i32 0, i32 %121
+	lw	$k0, -1360($sp)
+	li	$k1, 4
+	mult	$k0, $k1
+	mflo	$k1
+	addu	$k0, $t2, $k1
+	sw	$k0, -1364($sp)
+	# %123 = load i32 , i32* %122
+	lw	$k0, -1364($sp)
+	lw	$k1, 0($k0)
+	sw	$k1, -1368($sp)
+	# call void @putch(i32 86)
+	sw	$a0, -1372($sp)
+	la	$a0, str_2
+	li	$v0, 4
+	syscall
+	lw	$a0, -1372($sp)
+	# call void @putint(i32 %120)
+	sw	$a0, -1372($sp)
+	lw	$a0, -1356($sp)
+	li	$v0, 1
+	syscall
+	lw	$a0, -1372($sp)
+	# call void @putch(i32 58)
+	sw	$a0, -1372($sp)
+	la	$a0, str_3
+	li	$v0, 4
+	syscall
+	lw	$a0, -1372($sp)
+	# call void @putint(i32 %123)
+	sw	$a0, -1372($sp)
+	lw	$a0, -1368($sp)
+	li	$v0, 1
+	syscall
+	lw	$a0, -1372($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -1372($sp)
+	la	$a0, str_4
+	li	$v0, 4
+	syscall
+	lw	$a0, -1372($sp)
+	# br label %124
+	j	dijkstra_26
+
+dijkstra_26:
+	# %125 = load i32 , i32* %7
+	lw	$k0, 0($t4)
+	sw	$k0, -1372($sp)
+	# %126 = add i32 %125, 1
+	lw	$k0, -1372($sp)
+	addi	$k0, $k0, 1
+	sw	$k0, -1376($sp)
+	# store i32 %126, i32* %7
+	lw	$k0, -1376($sp)
+	sw	$k0, 0($t4)
+	# br label %115
+	j	dijkstra_24
+
+dijkstra_27:
+	# ret void
+	jr	$ra
+
+
+entry:
+func_main:
+main_0:
+	# %1 = alloca i32
+	addi	$t0, $sp, -4
+	# %2 = alloca i32
+	addi	$t1, $sp, -8
+	# %3 = alloca i32
+	addi	$t2, $sp, -12
+	# call void @putch(i32 69)
+	sw	$a0, -16($sp)
+	la	$a0, str_5
+	li	$v0, 4
+	syscall
+	lw	$a0, -16($sp)
+	# %4 = call i32 @getint()
+	li	$v0, 5
+	syscall
+	move	$t3, $v0
+	# store i32 %4, i32* %1
+	sw	$t3, 0($t0)
+	# %5 = load i32 , i32* %1
+	lw	$t4, 0($t0)
+	# call void @initGraph(i32 %5)
+	move	$a0, $t4
+	sw	$sp, -16($sp)
+	sw	$ra, -20($sp)
+	sw	$t0, -24($sp)
+	sw	$t1, -28($sp)
+	sw	$t2, -32($sp)
+	sw	$t3, -36($sp)
+	sw	$t4, -40($sp)
+	addi	$sp, $sp, -40
+	jal	func_initGraph
+	lw	$t4, 0($sp)
+	lw	$t3, 4($sp)
+	lw	$t2, 8($sp)
+	lw	$t1, 12($sp)
+	lw	$t0, 16($sp)
+	lw	$ra, 20($sp)
+	lw	$sp, 24($sp)
+	# call void @putch(i32 69)
+	sw	$a0, -44($sp)
+	la	$a0, str_6
+	li	$v0, 4
+	syscall
+	lw	$a0, -44($sp)
+	# %6 = call i32 @getint()
+	li	$v0, 5
+	syscall
+	move	$t5, $v0
+	# store i32 %6, i32* %2
+	sw	$t5, 0($t1)
+	# call void @putch(i32 69)
+	sw	$a0, -44($sp)
+	la	$a0, str_7
+	li	$v0, 4
+	syscall
+	lw	$a0, -44($sp)
+	# %7 = alloca i32
+	addi	$t6, $sp, -44
+	# store i32 0, i32* %7
+	sw	$zero, 0($t6)
+	# br label %8
+	j	main_1
+
+main_1:
+	# %9 = load i32 , i32* %7
+	lw	$t7, 0($t6)
+	# %10 = load i32 , i32* %2
+	lw	$s0, 0($t1)
+	# %11 = icmp slt i32 %9, %10
+	slt	$s1, $t7, $s0
+	# br i1 %11, label %12, label %25
+	bne	$zero, $s1, main_2
+	beq	$zero, $s1, main_4
+
+main_2:
+	# %13 = alloca i32
+	addi	$s2, $sp, -48
+	# %14 = alloca i32
+	addi	$s3, $sp, -52
+	# %15 = alloca i32
+	addi	$s4, $sp, -56
+	# %16 = call i32 @getint()
+	li	$v0, 5
+	syscall
+	move	$s5, $v0
+	# store i32 %16, i32* %13
+	sw	$s5, 0($s2)
+	# %17 = call i32 @getint()
+	li	$v0, 5
+	syscall
+	move	$s6, $v0
+	# store i32 %17, i32* %14
+	sw	$s6, 0($s3)
+	# %18 = call i32 @getint()
+	li	$v0, 5
+	syscall
+	move	$s7, $v0
+	# store i32 %18, i32* %15
+	sw	$s7, 0($s4)
+	# %19 = load i32 , i32* %13
+	lw	$t8, 0($s2)
+	# %20 = load i32 , i32* %14
+	lw	$t9, 0($s3)
+	# %21 = load i32 , i32* %15
+	lw	$k0, 0($s4)
+	sw	$k0, -60($sp)
+	# call void @addEdge(i32 %19, i32 %20, i32 %21)
+	move	$a0, $t8
+	move	$a1, $t9
+	lw	$a2, -60($sp)
+	sw	$sp, -64($sp)
+	sw	$ra, -68($sp)
+	sw	$t0, -72($sp)
+	sw	$t1, -76($sp)
+	sw	$t2, -80($sp)
+	sw	$t3, -84($sp)
+	sw	$t4, -88($sp)
+	sw	$t5, -92($sp)
+	sw	$t6, -96($sp)
+	sw	$t7, -100($sp)
+	sw	$s0, -104($sp)
+	sw	$s1, -108($sp)
+	sw	$s2, -112($sp)
+	sw	$s3, -116($sp)
+	sw	$s4, -120($sp)
+	sw	$s5, -124($sp)
+	sw	$s6, -128($sp)
+	sw	$s7, -132($sp)
+	sw	$t8, -136($sp)
+	sw	$t9, -140($sp)
+	addi	$sp, $sp, -140
+	jal	func_addEdge
+	lw	$t9, 0($sp)
+	lw	$t8, 4($sp)
+	lw	$s7, 8($sp)
+	lw	$s6, 12($sp)
+	lw	$s5, 16($sp)
+	lw	$s4, 20($sp)
+	lw	$s3, 24($sp)
+	lw	$s2, 28($sp)
+	lw	$s1, 32($sp)
+	lw	$s0, 36($sp)
+	lw	$t7, 40($sp)
+	lw	$t6, 44($sp)
+	lw	$t5, 48($sp)
+	lw	$t4, 52($sp)
+	lw	$t3, 56($sp)
+	lw	$t2, 60($sp)
+	lw	$t1, 64($sp)
+	lw	$t0, 68($sp)
+	lw	$ra, 72($sp)
+	lw	$sp, 76($sp)
+	# br label %22
+	j	main_3
+
+main_3:
+	# %23 = load i32 , i32* %7
+	lw	$k0, 0($t6)
+	sw	$k0, -144($sp)
+	# %24 = add i32 %23, 1
+	lw	$k0, -144($sp)
+	addi	$k0, $k0, 1
+	sw	$k0, -148($sp)
+	# store i32 %24, i32* %7
+	lw	$k0, -148($sp)
+	sw	$k0, 0($t6)
+	# br label %8
+	j	main_1
+
+main_4:
+	# call void @putch(i32 69)
+	sw	$a0, -152($sp)
+	la	$a0, str_8
+	li	$v0, 4
+	syscall
+	lw	$a0, -152($sp)
+	# %26 = call i32 @getint()
+	li	$v0, 5
+	syscall
+	sw	$v0, -152($sp)
+	# store i32 %26, i32* %3
+	lw	$k0, -152($sp)
+	sw	$k0, 0($t2)
+	# %27 = load i32 , i32* %3
+	lw	$k0, 0($t2)
+	sw	$k0, -156($sp)
+	# %28 = load i32 , i32* %1
+	lw	$k0, 0($t0)
+	sw	$k0, -160($sp)
+	# call void @dijkstra(i32 %27, i32 %28)
+	lw	$a0, -156($sp)
+	lw	$a1, -160($sp)
+	sw	$sp, -164($sp)
+	sw	$ra, -168($sp)
+	sw	$t0, -172($sp)
+	sw	$t1, -176($sp)
+	sw	$t2, -180($sp)
+	sw	$t3, -184($sp)
+	sw	$t4, -188($sp)
+	sw	$t5, -192($sp)
+	sw	$t6, -196($sp)
+	sw	$t7, -200($sp)
+	sw	$s0, -204($sp)
+	sw	$s1, -208($sp)
+	sw	$s2, -212($sp)
+	sw	$s3, -216($sp)
+	sw	$s4, -220($sp)
+	sw	$s5, -224($sp)
+	sw	$s6, -228($sp)
+	sw	$s7, -232($sp)
+	sw	$t8, -236($sp)
+	sw	$t9, -240($sp)
+	addi	$sp, $sp, -240
+	jal	func_dijkstra
+	lw	$t9, 0($sp)
+	lw	$t8, 4($sp)
+	lw	$s7, 8($sp)
+	lw	$s6, 12($sp)
+	lw	$s5, 16($sp)
+	lw	$s4, 20($sp)
+	lw	$s3, 24($sp)
+	lw	$s2, 28($sp)
+	lw	$s1, 32($sp)
+	lw	$s0, 36($sp)
+	lw	$t7, 40($sp)
+	lw	$t6, 44($sp)
+	lw	$t5, 48($sp)
+	lw	$t4, 52($sp)
+	lw	$t3, 56($sp)
+	lw	$t2, 60($sp)
+	lw	$t1, 64($sp)
+	lw	$t0, 68($sp)
+	lw	$ra, 72($sp)
+	lw	$sp, 76($sp)
+	# ret i32 0
+	move	$v0, $zero
+	jr	$ra
+
+main_5:
+end:
+
+

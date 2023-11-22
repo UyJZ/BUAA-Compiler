@@ -1,5 +1,6 @@
 package llvm_ir.Values.Instruction;
 
+import BackEnd.MIPS.Register;
 import llvm_ir.IRController;
 import llvm_ir.User;
 import llvm_ir.Value;

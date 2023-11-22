@@ -17,4 +17,9 @@ public class BranchITAsm extends ITAsm {
         this.op = op;
         this.label = label;
     }
+
+    @Override
+    public String toString() {
+        return "\t" + op + "\t" + rs + ", " + rt + ", " + label.getName();
+    }
 }

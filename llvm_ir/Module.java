@@ -63,9 +63,11 @@ public class Module extends Value {
         LabelAsm entry = new LabelAsm("entry");
         LabelAsm end = new LabelAsm("end");
         JalAsm jal = new JalAsm(entry);
+        MipsController.getInstance().addAsm(jal);
         JAsm j = new JAsm(end);
+        MipsController.getInstance().addAsm(j);
         for (Function f : functionList) {
-            if (f.isMainFunc()) MipsController.getInstance().addAsm(entry);
+            if (f.isMainFunc()) MipsController.getInstance().addEntry(entry);
             f.genMIPS();
         }
         MipsController.getInstance().addAsm(end);

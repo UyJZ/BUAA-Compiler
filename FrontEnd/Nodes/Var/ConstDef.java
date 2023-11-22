@@ -77,7 +77,6 @@ public class ConstDef extends Node {
         try {
             SymbolManager.getInstance().addSymbol(symbol);
         } catch (RenameException e) {
-            ErrorChecker.AddError(new Error(children.get(0).getEndLine(), ErrorType.b));
         }
         if (SymbolManager.getInstance().isGlobal()) {
             GlobalVar globalVar = new GlobalVar(symbol);

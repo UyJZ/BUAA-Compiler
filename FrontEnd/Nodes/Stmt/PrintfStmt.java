@@ -55,21 +55,21 @@ public class PrintfStmt extends Stmt {
             if (i + 1 < s.length() && s.charAt(i) == '%' && s.charAt(i + 1) == 'd') {
                 ArrayList<Value> p = new ArrayList<>();
                 Value v = instrs.get(start++);
-                p.add(new Param(new Integer32Type(), v.getName()));
+                p.add(v);
                 FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("putint");
                 CallInstr callInstr = new CallInstr(new VoidType(), funcSymbol.getLLVMirValue(), p);
                 i++;
                 IRController.getInstance().addInstr(callInstr);
             } else if (i + 1 < s.length() && s.charAt(i) == '\\' && s.charAt(i + 1) == 'n') {
                 ArrayList<Value> p = new ArrayList<>();
-                p.add(new Param(new Integer32Type(), String.valueOf((int) '\n')));
+                p.add(new ConstInteger(10));
                 FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("putch");
                 CallInstr callInstr = new CallInstr(new VoidType(), funcSymbol.getLLVMirValue(), p);
                 IRController.getInstance().addInstr(callInstr);
                 i++;
             } else {
                 ArrayList<Value> p = new ArrayList<>();
-                p.add(new Param(new Integer32Type(), String.valueOf((int) s.charAt(i))));
+                p.add(new ConstInteger((int) s.charAt(i)));
                 FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("putch");
                 CallInstr callInstr = new CallInstr(new VoidType(), funcSymbol.getLLVMirValue(), p);
                 IRController.getInstance().addInstr(callInstr);

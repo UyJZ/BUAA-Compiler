@@ -171,9 +171,10 @@ public class Function extends Value {
     private void distributeForArgs() {
         for (Param param : paramArrayList) {
             if (!param.isDistributed()) {
-                if (freeRegs.isEmpty()) {
+                if (freeArgRegs.isEmpty()) {
                     offset -= 4;
                     param.setOffset(offset);
+                    RegDispatcher.getInstance().allocSpaceForReg();
                 } else {
                     Register reg = freeArgRegs.iterator().next();
                     freeArgRegs.remove(reg);

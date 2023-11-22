@@ -7,4 +7,13 @@ public class LabelAsm extends Asm {
     public LabelAsm(String s) {
         name = s;
     }
+
+    @Override
+    public String toString() {
+        return name + ":";
+    }
+
+    public String getName() {
+        return name;
+    }
 }

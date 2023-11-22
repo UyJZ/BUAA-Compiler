@@ -21,4 +21,14 @@ public class BlockAsm {
     public void addAsm(Asm asm) {
         AsmList.add(asm);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(labelAsm).append('\n');
+        for (Asm asm : AsmList) {
+            stringBuilder.append(asm).append("\n");
+        }
+        return stringBuilder.toString();
+    }
 }

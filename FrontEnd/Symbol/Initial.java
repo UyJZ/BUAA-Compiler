@@ -135,12 +135,12 @@ public class Initial {
     public String genMIPSData(ArrayList<Integer> lens) {
         StringBuilder sb = new StringBuilder();
         if (dim == 0) {
-            sb.append(".word\t").append(values.get(0).get(0));
+            sb.append(".word \t").append(values.get(0).get(0));
         } else if (dim == 1) {
-            sb.append("\t.word\t");
+            sb.append("\t.word \t");
             for (int i : values.get(0)) sb.append(i).append(", ");
             if (lens.get(0) > values.get(0).size()) {
-                sb.append("\n\t.space\t").append(4 * (lens.get(0) - values.get(0).size()));
+                sb.append("\n\t.space \t").append(4 * (lens.get(0) - values.get(0).size()));
             }
         } else {
             assert dim == 2;
@@ -162,7 +162,7 @@ public class Initial {
                 sb.append(OneDimArrays.get(i).getMIPSVal()).append("\n");
             }
             if (allZeroPos < lens.get(0)) {
-                sb.append("\t.space").append(4 * (lens.get(1) * (lens.get(0) - allZeroPos)));
+                sb.append("\t.space ").append(4 * (lens.get(1) * (lens.get(0) - allZeroPos)));
             }
         }
         return sb.toString();
@@ -228,15 +228,15 @@ public class Initial {
         public String getMIPSVal() {
             StringBuilder sb = new StringBuilder();
             if (allZero) {
-                sb.append("\t.space\t").append(len * 4);
+                sb.append("\t.space \t").append(len * 4);
             } else {
-                sb.append("\t.word\t");
+                sb.append("\t.word \t");
                 for (int i = 0; i < values.size(); i++) {
                     sb.append(values.get(i));
                     if (i != values.size() - 1) sb.append(", ");
                 }
                 if (len > values.size())
-                    sb.append("\n\t.space\t").append(4 * (len - values.size()));
+                    sb.append("\n\t.space \t").append(4 * (len - values.size()));
             }
             return sb.toString();
         }

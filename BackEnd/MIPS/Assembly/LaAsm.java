@@ -11,4 +11,9 @@ public class LaAsm extends Asm {
         this.rt = rt;
         this.label = label;
     }
+
+    @Override
+    public String toString() {
+        return "\tla\t" + rt + ", " + label.getName();
+    }
 }

@@ -1,9 +1,6 @@
 package llvm_ir.Values.Instruction;
 
-import BackEnd.MIPS.Assembly.AluITAsm;
-import BackEnd.MIPS.Assembly.AluRTAsm;
-import BackEnd.MIPS.Assembly.BranchITAsm;
-import BackEnd.MIPS.Assembly.MemITAsm;
+import BackEnd.MIPS.Assembly.*;
 import BackEnd.MIPS.MipsController;
 import BackEnd.MIPS.Register;
 import Config.tasks;
@@ -41,6 +38,8 @@ public class AllocaInst extends Instr {
 
     @Override
     public void genMIPS() {
+        CommentAsm asm = new CommentAsm(this.toString());
+        MipsController.getInstance().addAsm(asm);
         //很明确，需要做两件事情，给值申请内存，给指针申请寄存器
         //首先，给值申请内存
         RegDispatcher.getInstance().distributeMemForAlloc(this);

@@ -3,9 +3,9 @@ package Config;
 public class tasks {
     public static boolean isLexerAnalysis = false;
     public static boolean isParserAnalysis = false;
-    public static boolean isErrorHandle = false;
+    public static boolean isErrorHandle = true;
 
-    public static boolean isMIPSoutput = false;
+    public static boolean isMIPSoutput = true;
 
     public static boolean isOptimize = false;
 
@@ -16,6 +16,8 @@ public class tasks {
     private static String ParserOutputPath = "output.txt";
 
     public static String ErrorHandleOutputPath = "error.txt";
+
+    public static String MIPSOutputPath = "mips.txt";
 
     public static String getInputPath() {
         return "testfile.txt";

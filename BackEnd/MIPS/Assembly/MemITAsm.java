@@ -19,5 +19,12 @@ public class MemITAsm extends ITAsm {
         super(rt, rs, imm);
         this.offset = imm;
         this.op = op;
+        this.rs = rs;
+        this.rt = rt;
+    }
+
+    @Override
+    public String toString() {
+        return "\t" + op + "\t" + rt + ", " + offset + "(" + rs + ")";
     }
 }

@@ -7,4 +7,9 @@ public class JAsm extends Asm{
         super();
         this.label = label;
     }
+
+    @Override
+    public String toString() {
+        return "\tj\t" + label.getName();
+    }
 }

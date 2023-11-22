@@ -11,4 +11,9 @@ public class LiAsm extends Asm {
         this.rt = rt;
         this.imm = imm;
     }
+
+    @Override
+    public String toString() {
+        return "\tli\t" + rt + ", " + imm;
+    }
 }

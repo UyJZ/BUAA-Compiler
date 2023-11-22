@@ -85,17 +85,6 @@ public class LVal extends Node {
             for (Node n : children) if (n instanceof Exp) values.add(n.genLLVMir());
             if (values.size() == 0) {
                 Value rootPtr = symbol.getLLVMirValue();
-                /*
-                if (symbol.isParam()) {
-                    LoadInstr instr = new LoadInstr(rootPtr);
-                    IRController.getInstance().addInstr(instr);
-                    return instr;
-                } else {
-                    GEPInstr gepInstr = new GEPInstr(rootPtr, new ConstInteger(0), new ConstInteger(0));
-                    IRController.getInstance().addInstr(gepInstr);
-                    return gepInstr;
-                }
-                 */
                 if (symbol.isParam()) {
                     LoadInstr instr = new LoadInstr(rootPtr);
                     IRController.getInstance().addInstr(instr);

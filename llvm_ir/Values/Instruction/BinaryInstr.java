@@ -6,6 +6,7 @@ import BackEnd.MIPS.Register;
 import MidEnd.RegDispatcher;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstBool;
 import llvm_ir.Values.ConstInteger;
 import llvm_ir.llvmType.LLVMType;
 import Config.tasks;
@@ -30,6 +31,7 @@ public class BinaryInstr extends Instr {
     public BinaryInstr(LLVMType type, Value operand, op opcode) { //for -x or +x
         super(type, tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
         this.opcode = opcode;
+        this.operands.add(new ConstInteger(0));
         this.operands.add(operand);
     }
 
@@ -55,6 +57,8 @@ public class BinaryInstr extends Instr {
 
     @Override
     public void genMIPS() {
+        CommentAsm asm0 = new CommentAsm(this.toString());
+        MipsController.getInstance().addAsm(asm0);
         //结果先统一存在K0里面
         Value operand1 = operands.get(0);
         Value operand2 = operands.get(1);
@@ -65,7 +69,18 @@ public class BinaryInstr extends Instr {
         ALU.add(op.OR);
         ALU.add(op.AND);
         if (ALU.contains(opcode)) {
-            if (operand1 instanceof ConstInteger || operand2 instanceof ConstInteger) {
+            if ((operand1 instanceof ConstInteger constInteger) && (operand2 instanceof ConstInteger constInteger1)) {
+                int val = 0;
+                switch (opcode) {
+                    case ADD -> val = constInteger.getVal() + constInteger1.getVal();
+                    case SUB -> val = constInteger.getVal() - constInteger1.getVal();
+                    case AND -> val = constInteger.getVal() & constInteger1.getVal();
+                    case OR -> val = constInteger.getVal() | constInteger1.getVal();
+                }
+                LiAsm li = new LiAsm(Register.K0, val);
+                MipsController.getInstance().addAsm(li);
+            } else if ((operand1 instanceof ConstInteger constInteger && constInteger.getVal() != 0) ||
+                    (operand2 instanceof ConstInteger constInteger1 && constInteger1.getVal() != 0)) {
                 AluITAsm.Op aluOp = null;
                 switch (opcode) {
                     case ADD -> aluOp = AluITAsm.Op.addi;
@@ -101,7 +116,7 @@ public class BinaryInstr extends Instr {
             } else {
                 AluRTAsm.Op aluOp = null;
                 switch (opcode) {
-                    case ADD -> aluOp = AluRTAsm.Op.add;
+                    case ADD -> aluOp = AluRTAsm.Op.addu;
                     case SUB -> aluOp = AluRTAsm.Op.sub;
                     case AND -> aluOp = AluRTAsm.Op.and;
                     case OR -> aluOp = AluRTAsm.Op.or;
@@ -126,7 +141,7 @@ public class BinaryInstr extends Instr {
                 MipsController.getInstance().addAsm(asm);
             }
         } else {
-            MulDivAsm.Op op;
+            MulDivAsm.Op op = null;
             switch (opcode) {
                 case MUL -> op = MulDivAsm.Op.mult;
                 case SDIV, SREM -> op = MulDivAsm.Op.div;
@@ -155,7 +170,7 @@ public class BinaryInstr extends Instr {
                 MipsController.getInstance().addAsm(lw);
                 r2 = Register.K1;
             }
-            MulDivAsm mulDivAsm = new MulDivAsm(r1, r2);
+            MulDivAsm mulDivAsm = new MulDivAsm(op, r1, r2);
             MipsController.getInstance().addAsm(mulDivAsm);
             if (opcode == BinaryInstr.op.SREM) {
                 HLAsm mfhi = new HLAsm(HLAsm.Op.mfhi, Register.K0);

@@ -1,8 +1,158 @@
-const int a[10][10] = {{1, 2, 3}, {1}};
+const int MAX_VERTICES = 100;
+const int MAX_EDGES = 500;
+const int INT_MAX = 2147483647;
+
+int edges[MAX_EDGES][3];
+int head[MAX_VERTICES];
+int edgeCount;
+
+int heap[MAX_VERTICES][2]; // [vertex, distance]
+int heapSize;
+
+void initGraph(int vertices) {
+    int i;
+    for (i = 0; i < vertices; i = i + 1) {
+        head[i] = -1;
+    }
+    edgeCount = 0;
+}
+
+void addEdge(int src,int dest,int weight) {
+    edges[edgeCount][0] = dest;
+    edges[edgeCount][1] = weight;
+    edges[edgeCount][2] = head[src];
+    head[src] = edgeCount;
+    edgeCount = edgeCount + 1;
+}
+
+void initPriorityQueue() {
+    heapSize = 0;
+}
+
+void swapNodes(int a, int b) {
+    int temp0 = heap[a][0];
+    int temp1 = heap[a][1];
+    heap[a][0] = heap[b][0];
+    heap[a][1] = heap[b][1];
+    heap[b][0] = temp0;
+    heap[b][1] = temp1;
+}
+
+void minHeapify(int idx, int size) {
+    int smallest = idx;
+    int left, right;
+
+    for (;;) {
+        left = 2 * idx + 1;
+        right = 2 * idx + 2;
+
+        if (left < size && heap[left][1] < heap[smallest][1])
+            smallest = left;
+
+        if (right < size && heap[right][1] < heap[smallest][1])
+            smallest = right;
+
+        if (smallest != idx) {
+            swapNodes(idx, smallest);
+            idx = smallest;
+        } else {
+            break;
+        }
+    }
+}
+
+int extractMin() {
+    int minVertex = heap[0][0];
+    heap[0][0] = heap[heapSize - 1][0];
+    heap[0][1] = heap[heapSize - 1][1];
+    heapSize = heapSize - 1;
+    minHeapify(0, heapSize);
+    return minVertex;
+}
+
+void decreaseKey(int v,int dist) {
+    int i = 0;
+    for (;;) {
+        if (heap[i][0] == v) {
+            heap[i][1] = dist;
+            break;
+        }
+        i = i + 1;
+    }
+
+    for (;i && heap[(i - 1) / 2][1] > heap[i][1];) {
+        swapNodes(i, (i - 1) / 2);
+        i = (i - 1) / 2;
+    }
+}
+
+void dijkstra(int src,int vertices) {
+    int dist[MAX_VERTICES];
+    int visited[MAX_VERTICES];
+
+    int i;
+    for (i = 0; i < vertices; i = i + 1) {
+        dist[i] = INT_MAX;
+        visited[i] = 0; // 0 for false, 1 for true
+    }
+
+    dist[src] = 0;
+    initPriorityQueue();
+
+    for (i = 0; i < vertices; i = i + 1) {
+        heap[i][0] = i;
+        heap[i][1] = dist[i];
+        heapSize = heapSize + 1;
+    }
+
+    for (;;) {
+        int u = extractMin();
+        visited[u] = 1; // Set visited to true
+
+        int edge = head[u];
+        for (;edge != -1;) {
+            int v = edges[edge][0];
+            if (visited[v] == 0 && dist[u] != INT_MAX && (dist[u] + edges[edge][1]) < dist[v]) {
+                dist[v] = dist[u] + edges[edge][1];
+                decreaseKey(v, dist[v]);
+            }
+            edge = edges[edge][2];
+        }
+
+        if (heapSize <= 0)
+            break;
+    }
+
+    printf("Shortest distances from source %d:\n", src);
+    for (i = 0; i < vertices; i = i + 1) {
+        printf("Vertex %d: Distance = %d\n", i, dist[i]);
+    }
+}
 
 int main() {
-if (!1) {
-printf("%d", 1);
-}
-return a[3][0];
+    int vertices, numEdges, src;
+    printf("Enter number of vertices: ");
+    vertices = getint();
+
+    initGraph(vertices);
+
+    printf("Enter number of edges: ");
+    numEdges = getint();
+
+    printf("Enter edges with weights (src dest weight):\n");
+    int i;
+    for (i = 0; i < numEdges; i = i + 1) {
+        int src, dest, weight;
+        src = getint();
+        dest = getint();
+        weight = getint();
+        addEdge(src, dest, weight);
+    }
+
+    printf("Enter source vertex: ");
+    src = getint();
+
+    dijkstra(src, vertices);
+
+    return 0;
 }

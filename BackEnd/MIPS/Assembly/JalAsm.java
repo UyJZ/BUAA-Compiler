@@ -7,4 +7,9 @@ public class JalAsm extends Asm {
         super();
         this.label = label;
     }
+
+    @Override
+    public String toString() {
+        return "\tjal\t" + label.getName();
+    }
 }

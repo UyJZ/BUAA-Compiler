@@ -1,5 +1,6 @@
 package Config;
 
+import BackEnd.MIPS.MipsController;
 import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Lexer.Lexer;
 import FrontEnd.Lexer.Token;
@@ -30,7 +31,7 @@ public class CompilerHandler {
         } else if (tasks.isParserAnalysis) {
             ParserController parserController = new ParserController(lexer.getTokenStream());
             parserController.parse().print(ps);
-        } else if (tasks.isErrorHandle && !tasks.isLLVMoutput) {
+        } else if (tasks.isErrorHandle && !tasks.isLLVMoutput && !tasks.isMIPSoutput) {
             ParserController parserController = new ParserController(lexer.getTokenStream());
             parserController.parse().checkError();
             ErrorChecker.showErrorMsg(ps);
@@ -47,6 +48,24 @@ public class CompilerHandler {
                     IRController.getInstance().setName();
                 }
                 IRController.getInstance().Output(ps);
+            }
+        } else if (tasks.isMIPSoutput) {
+            ParserController parserController = new ParserController(lexer.getTokenStream());
+            Node c = parserController.parse();
+            c.checkError();
+            ErrorChecker.showErrorMsg(new PrintStream(new FileOutputStream("error.txt")));
+            if (ErrorChecker.getErrors().size() == 0) {
+                SymbolManager.getInstance().flush();
+                c.genLLVMir();
+                if (tasks.isOptimize) {
+                    IRController.getInstance().setName();
+                }
+                PrintStream ps1 = new PrintStream(new FileOutputStream("llvm_ir.txt"));
+                PrintStream ps2 = new PrintStream(new FileOutputStream("mips.txt"));
+                IRController.getInstance().Output(ps1);
+                MipsController.getInstance().setModule(IRController.getInstance().getModule());
+                MipsController.getInstance().run();
+                MipsController.getInstance().print(ps2);
             }
         }
     }
