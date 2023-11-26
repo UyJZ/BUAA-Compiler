@@ -1,158 +1,149 @@
-const int MAX_VERTICES = 100;
-const int MAX_EDGES = 500;
-const int INT_MAX = 2147483647;
+//69_expr_eval.sy
+const int TOKEN_NUM = 0, TOKEN_OTHER = 1;
+int last_char = 32, num, other;
+int cur_token;
+  int oprs[256], ops[256];
 
-int edges[MAX_EDGES][3];
-int head[MAX_VERTICES];
-int edgeCount;
-
-int heap[MAX_VERTICES][2]; // [vertex, distance]
-int heapSize;
-
-void initGraph(int vertices) {
-    int i;
-    for (i = 0; i < vertices; i = i + 1) {
-        head[i] = -1;
-    }
-    edgeCount = 0;
+int next_char() {
+  last_char = getint();
+  return last_char;
 }
 
-void addEdge(int src,int dest,int weight) {
-    edges[edgeCount][0] = dest;
-    edges[edgeCount][1] = weight;
-    edges[edgeCount][2] = head[src];
-    head[src] = edgeCount;
-    edgeCount = edgeCount + 1;
+int is_space(int c) {
+  if (c == 32 || c == 10) {
+    return 1;
+  }
+  else {
+    return 0;
+  }
 }
 
-void initPriorityQueue() {
-    heapSize = 0;
+int is_num(int c) {
+  if (c >= 48 && c <= 57) {
+    return 1;
+  }
+  else {
+    return 0;
+  }
 }
 
-void swapNodes(int a, int b) {
-    int temp0 = heap[a][0];
-    int temp1 = heap[a][1];
-    heap[a][0] = heap[b][0];
-    heap[a][1] = heap[b][1];
-    heap[b][0] = temp0;
-    heap[b][1] = temp1;
+int next_token() {
+  for (;is_space(last_char);) next_char();
+  if (is_num(last_char)) {
+    num = last_char - 48;
+    for (;is_num(next_char());) {
+      num = num * 10 + last_char - 48;
+    }
+    cur_token = TOKEN_NUM;
+  }
+  else {
+    other = last_char;
+    next_char();
+    cur_token = TOKEN_OTHER;
+  }
+  return cur_token;
 }
 
-void minHeapify(int idx, int size) {
-    int smallest = idx;
-    int left, right;
-
-    for (;;) {
-        left = 2 * idx + 1;
-        right = 2 * idx + 2;
-
-        if (left < size && heap[left][1] < heap[smallest][1])
-            smallest = left;
-
-        if (right < size && heap[right][1] < heap[smallest][1])
-            smallest = right;
-
-        if (smallest != idx) {
-            swapNodes(idx, smallest);
-            idx = smallest;
-        } else {
-            break;
-        }
-    }
+int panic() {
+  printf("%d", 112);
+  printf("%d", 97);
+  printf("%d", 110);
+  printf("%d", 105);
+  printf("%d", 99);
+  printf("%d", 33);
+  printf("%d", 10);
+  return -1;
 }
 
-int extractMin() {
-    int minVertex = heap[0][0];
-    heap[0][0] = heap[heapSize - 1][0];
-    heap[0][1] = heap[heapSize - 1][1];
-    heapSize = heapSize - 1;
-    minHeapify(0, heapSize);
-    return minVertex;
+int get_op_prec(int op) {
+  // +, -
+  if (op == 43 || op == 45) return 10;
+  // *, /, %
+  if (op == 42 || op == 47 || op == 37) return 20;
+  // other
+  return 0;
 }
 
-void decreaseKey(int v,int dist) {
-    int i = 0;
-    for (;;) {
-        if (heap[i][0] == v) {
-            heap[i][1] = dist;
-            break;
-        }
-        i = i + 1;
-    }
-
-    for (;i && heap[(i - 1) / 2][1] > heap[i][1];) {
-        swapNodes(i, (i - 1) / 2);
-        i = (i - 1) / 2;
-    }
+void stack_push(int s[], int v) {
+  s[0] = s[0] + 1;
+  s[s[0]] = v;
 }
 
-void dijkstra(int src,int vertices) {
-    int dist[MAX_VERTICES];
-    int visited[MAX_VERTICES];
+int stack_pop(int s[]) {
+  int last = s[s[0]];
+  s[0] = s[0] - 1;
+  return last;
+}
 
-    int i;
-    for (i = 0; i < vertices; i = i + 1) {
-        dist[i] = INT_MAX;
-        visited[i] = 0; // 0 for false, 1 for true
+int stack_peek(int s[]) {
+  return s[s[0]];
+}
+
+int stack_size(int s[]) {
+  return s[0];
+}
+
+int eval_op(int op, int lhs, int rhs) {
+  // +
+  if (op == 43) return lhs + rhs;
+  // -
+  if (op == 45) return lhs - rhs;
+  // *
+  if (op == 42) return lhs * rhs;
+  // /
+  if (op == 47) return lhs / rhs;
+  // %
+  if (op == 37) return lhs % rhs;
+  // other
+  return 0;
+}
+
+int eval() {
+
+  // get the first value
+  if (cur_token != TOKEN_NUM) return panic();
+  stack_push(oprs, num);
+  next_token();
+  // evaluate
+  for (;cur_token == TOKEN_OTHER;) {
+    // get operator
+    int op = other;
+    if (!get_op_prec(op)) break;
+    next_token();
+    // handle operator
+    for (;stack_size(ops) && get_op_prec(stack_peek(ops)) >= get_op_prec(op);) {
+      // evaluate the current operation
+      int cur_op = stack_pop(ops);
+      int rhs = stack_pop(oprs), lhs = stack_pop(oprs);
+      stack_push(oprs, eval_op(cur_op, lhs, rhs));
     }
-
-    dist[src] = 0;
-    initPriorityQueue();
-
-    for (i = 0; i < vertices; i = i + 1) {
-        heap[i][0] = i;
-        heap[i][1] = dist[i];
-        heapSize = heapSize + 1;
-    }
-
-    for (;;) {
-        int u = extractMin();
-        visited[u] = 1; // Set visited to true
-
-        int edge = head[u];
-        for (;edge != -1;) {
-            int v = edges[edge][0];
-            if (visited[v] == 0 && dist[u] != INT_MAX && (dist[u] + edges[edge][1]) < dist[v]) {
-                dist[v] = dist[u] + edges[edge][1];
-                decreaseKey(v, dist[v]);
-            }
-            edge = edges[edge][2];
-        }
-
-        if (heapSize <= 0)
-            break;
-    }
-
-    printf("Shortest distances from source %d:\n", src);
-    for (i = 0; i < vertices; i = i + 1) {
-        printf("Vertex %d: Distance = %d\n", i, dist[i]);
-    }
+    stack_push(ops, op);
+    // get next expression
+    if (cur_token != TOKEN_NUM) return panic();
+    stack_push(oprs, num);
+    next_token();
+  }
+  // eat ';'
+  next_token();
+  // clear the operator stack
+  for (;stack_size(ops);) {
+    int cur_op = stack_pop(ops);
+    int rhs = stack_pop(oprs), lhs = stack_pop(oprs);
+    stack_push(oprs, eval_op(cur_op, lhs, rhs));
+  }
+  return stack_peek(oprs);
 }
 
 int main() {
-    int vertices, numEdges, src;
-    printf("Enter number of vertices: ");
-    vertices = getint();
+  int count = getint();
+  getint();
+  next_token();
+  for (;count;) {
 
-    initGraph(vertices);
-
-    printf("Enter number of edges: ");
-    numEdges = getint();
-
-    printf("Enter edges with weights (src dest weight):\n");
-    int i;
-    for (i = 0; i < numEdges; i = i + 1) {
-        int src, dest, weight;
-        src = getint();
-        dest = getint();
-        weight = getint();
-        addEdge(src, dest, weight);
-    }
-
-    printf("Enter source vertex: ");
-    src = getint();
-
-    dijkstra(src, vertices);
-
-    return 0;
+    printf("%d", eval());
+    printf("%d", 10);
+    count = count - 1;
+  }
+	printf("%d", 0);
+  return 0;
 }

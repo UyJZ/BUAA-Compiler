@@ -3,7 +3,7 @@ package Config;
 public class tasks {
     public static boolean isLexerAnalysis = false;
     public static boolean isParserAnalysis = false;
-    public static boolean isErrorHandle = true;
+    public static boolean isErrorHandle = false;
 
     public static boolean isMIPSoutput = true;
 

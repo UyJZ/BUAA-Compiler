@@ -5,6 +5,7 @@ import Enums.SyntaxVarType;
 import Enums.tokenType;
 import FrontEnd.ErrorManager.Error;
 import FrontEnd.ErrorManager.ErrorChecker;
+import FrontEnd.Nodes.Var.Number;
 import FrontEnd.Symbol.Symbol;
 import FrontEnd.Symbol.SymbolManager;
 import FrontEnd.Nodes.Exp.Exp;
@@ -39,7 +40,7 @@ public class LVal extends Node {
     @Override
     public int getDim() {
         int dim = SymbolManager.getInstance().getDimByName(name);
-        for (Node child : children) if (child instanceof Exp) dim--;
+        for (Node child : children) if (child instanceof Exp || child instanceof Number) dim--;
         return dim;
     }
 

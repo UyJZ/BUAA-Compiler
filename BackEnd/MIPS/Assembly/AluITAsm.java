@@ -5,7 +5,11 @@ import BackEnd.MIPS.Register;
 public class AluITAsm extends ITAsm {
 
     public enum Op {
-        addi, addiu, slti, sltiu, andi, ori, xori, lui, sll, srl, subi
+        addi, addiu, slti, sltiu, andi, ori, xori, lui, sll, srl, subiu
+    }
+
+    public static boolean isOutOfRange(int n) {
+        return n < -32768 || n > 32767;
     }
 
     private Op op;

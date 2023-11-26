@@ -52,8 +52,10 @@ public class CompilerHandler {
         } else if (tasks.isMIPSoutput) {
             ParserController parserController = new ParserController(lexer.getTokenStream());
             Node c = parserController.parse();
-            c.checkError();
-            ErrorChecker.showErrorMsg(new PrintStream(new FileOutputStream("error.txt")));
+            if (tasks.isErrorHandle) {
+                c.checkError();
+                ErrorChecker.showErrorMsg(new PrintStream(new FileOutputStream("error.txt")));
+            }
             if (ErrorChecker.getErrors().size() == 0) {
                 SymbolManager.getInstance().flush();
                 c.genLLVMir();

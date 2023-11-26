@@ -60,7 +60,7 @@ public class ConstDef extends Node {
         }
         Initial initValue = null;
         for (Node child : children) {
-            if (child instanceof ConstInitVal && SymbolManager.getInstance().isGlobal()) {
+            if (child instanceof ConstInitVal) {
                 initValue = ((ConstInitVal) child).getVal();
             }
         }

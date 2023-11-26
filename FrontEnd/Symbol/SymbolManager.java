@@ -83,7 +83,9 @@ public class SymbolManager {
     }
 
     public int getDimByName(String name) {
-        for (SymbolTable s : symbolTableStack) {
+        List<SymbolTable> list = new ArrayList<>(symbolTableStack);
+        Collections.reverse(list);
+        for (SymbolTable s : list) {
             if (s.containsName(name)) return s.getSymbol(name).getDim();
         }
         if (funcMap.get(name) != null) return funcMap.get(name).getFuncSymbol(name).getDim();
