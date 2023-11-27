@@ -26,6 +26,7 @@ public class BranchInstr extends Instr {
         this.label1 = label1;
         this.label2 = label2;
         this.judge = judge;
+        this.addValue(judge);
     }
 
     public BranchInstr(LLVMType type, BasicBlock label1) {

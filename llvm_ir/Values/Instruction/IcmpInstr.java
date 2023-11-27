@@ -28,9 +28,9 @@ public class IcmpInstr extends Instr {
         super(new BoolType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
         this.operand1 = operand1;
         this.operand2 = operand2;
-        this.operands.add(operand1);
-        this.operands.add(operand2);
         this.opcode = cmpOp;
+        this.addValue(operand1);
+        this.addValue(operand2);
     }
 
     @Override

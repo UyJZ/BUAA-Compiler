@@ -17,7 +17,7 @@ public class ReturnInstr extends Instr {
 
     public ReturnInstr(LLVMType type, Value value) {
         super(type, value.getName());
-        this.operands.add(value);
+        this.addValue(value);
     }
 
     @Override

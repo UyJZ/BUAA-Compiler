@@ -11,4 +11,16 @@ public class Use{
         this.user = user;
         this.value = value;
     }
+
+    public User getUser() {
+        return this.user;
+    }
+
+    public Value getValue() {
+        return this.value;
+    }
+
+    public void setValue(Value value) {
+        this.value = value;
+    }
 }

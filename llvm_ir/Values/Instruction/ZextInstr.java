@@ -16,7 +16,7 @@ public class ZextInstr extends Instr {
     public ZextInstr(LLVMType type1, LLVMType type2, Value operand) {
         super(type2, tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
         this.operand = operand;
-        this.operands.add(operand);
+        this.addValue(operand);
         this.type1 = type1;
     }
 

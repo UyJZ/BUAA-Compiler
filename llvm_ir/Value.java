@@ -22,6 +22,8 @@ public class Value {
 
     protected Data data;
 
+    protected boolean isExist;
+
     protected int offset;
 
     public String getId() {
@@ -33,6 +35,7 @@ public class Value {
         this.name = name;
         this.userList = new ArrayList<>();
         isDistributed = false;
+        isExist = true;
     }
 
     public String getName() {
@@ -85,5 +88,13 @@ public class Value {
 
     public void genConStr() {
         return;
+    }
+
+    public void delete() {
+        isExist = false;
+    }
+
+    public boolean isExist() {
+        return isExist;
     }
 }

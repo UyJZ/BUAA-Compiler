@@ -52,6 +52,8 @@ public class AddExp extends Node {
                         return null;
                     }
                 }
+            } else if (operand2 instanceof ConstInteger constInteger && constInteger.getVal() == 0) {
+                return operand1;
             }
             switch (((TokenNode) children.get(1)).getTokenType()) {
                 case PLUS -> {

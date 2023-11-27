@@ -38,6 +38,14 @@ public class IRController {
         useList.add(use);
     }
 
+    public void replaceUse(User user, Value old, Value new_) {
+        for (Use use : useList) {
+            if (use.getUser() == user && use.getValue() == old) {
+                use.setValue(new_);
+            }
+        }
+    }
+
     public static IRController getInstance() {
         return instance;
     }
@@ -71,7 +79,7 @@ public class IRController {
     }
 
     public void addNewBasicBlock(BasicBlock block) {
-        block.setName( tasks.isOptimize ? "" : genVirtualRegNum());
+        block.setName(tasks.isOptimize ? "" : genVirtualRegNum());
         currentFunction.addBasicBlock(block);
         currentBasicBlock = block;
     }

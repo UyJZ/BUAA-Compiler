@@ -6,6 +6,7 @@ import BackEnd.MIPS.Register;
 import MidEnd.RegDispatcher;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.Instruction.AllocaInst;
 import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.Values.Instruction.terminatorInstr.ReturnInstr;
 import llvm_ir.llvmType.BasicBlockType;
@@ -164,7 +165,7 @@ public class Function extends Value {
         distributeForArgs();
         for (BasicBlock b : blockArrayList) {
             b.genMIPS();
-    }
+        }
         RegDispatcher.getInstance().leaveFunc();
     }
 
@@ -190,5 +191,17 @@ public class Function extends Value {
         for (BasicBlock b : blockArrayList) {
             b.genConStr();
         }
+    }
+
+    public void deleteBlock(BasicBlock block) {
+        blockArrayList.remove(block);
+    }
+
+    public ArrayList<AllocaInst> getValForSSA() {
+        ArrayList<AllocaInst> v = new ArrayList<>();
+        for (BasicBlock block : blockArrayList) {
+            v.addAll(block.getValForSSA());
+        }
+        return v;
     }
 }

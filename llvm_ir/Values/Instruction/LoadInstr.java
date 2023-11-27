@@ -22,7 +22,7 @@ public class LoadInstr extends Instr {
     public LoadInstr(Value ptr) {
         super(((PointerType) ptr.getType()).getElementType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
         this.ptr = ptr;
-        this.operands.add(ptr);
+        this.addValue(ptr);
     }
 
     @Override
@@ -74,6 +74,10 @@ public class LoadInstr extends Instr {
             MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, Register.K1, Register.SP, this.offset);
             MipsController.getInstance().addAsm(sw);
         }
+    }
+
+    public Value getPtr() {
+        return ptr;
     }
 
 }

@@ -35,8 +35,9 @@ public class GEPInstr extends Instr {
         indexs.add(index);
         this.ptr = ptr;
         this.type = genOutType((PointerType) ptr.getType());
-        this.operands.add(ptr);
-        this.operands.add(index);
+        this.addValue(ptr);
+        this.addValue(index0);
+        this.addValue(index);
     }
 
     public GEPInstr(Value ptr, Value index) {
@@ -44,9 +45,9 @@ public class GEPInstr extends Instr {
         indexs = new ArrayList<>();
         indexs.add(index);
         this.ptr = ptr;
-        this.operands.add(ptr);
         this.type = genOutType((PointerType) ptr.getType());
-        this.operands.add(index);
+        this.addValue(ptr);
+        this.addValue(index);
     }
 
     @Override

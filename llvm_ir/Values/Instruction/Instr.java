@@ -23,8 +23,4 @@ public class Instr extends User {
     public boolean hasOutput() {
         return !(this instanceof StoreInstr || this instanceof BranchInstr || this instanceof ReturnInstr);
     }
-
-    public ArrayList<Value> getOperands() {
-        return operands;
-    }
 }

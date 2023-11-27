@@ -79,4 +79,8 @@ public class Module extends Value {
             function.genConStr();
         }
     }
+
+    public ArrayList<Function> getFunctionList() {
+        return functionList;
+    }
 }

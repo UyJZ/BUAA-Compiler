@@ -22,8 +22,8 @@ public class StoreInstr extends Instr {
         super(new VoidType(), "");
         this.from = from;
         this.to = to;
-        this.operands.add(from);
-        this.operands.add(to);
+        this.addValue(from);
+        this.addValue(to);
     }
 
     @Override
@@ -64,5 +64,13 @@ public class StoreInstr extends Instr {
         }
         MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, fromReg, toReg, 0);
         MipsController.getInstance().addAsm(sw);
+    }
+
+    public Value getDst() {
+        return to;
+    }
+
+    public Value getSrc() {
+        return from;
     }
 }

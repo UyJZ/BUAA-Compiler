@@ -50,8 +50,8 @@ public class CallInstr extends Instr {
         isInputInstr = functionName.equals("@getint");
         isOutputInstr = functionName.equals("@putint") || functionName.equals("@putch") || functionName.equals("@putstr");
         isOutputStrInstr = functionName.equals("@putstr") || functionName.equals("@putch");
-        if (!isIOInstr) this.operands.add(func);
-        this.operands.addAll(params);
+        if (!isIOInstr) this.addValue(func);
+        for (Value v : params) this.addValue(v);
         if (functionName.equals("@putch")) {
             val = ((ConstInteger) params.get(0)).getVal();
         }
