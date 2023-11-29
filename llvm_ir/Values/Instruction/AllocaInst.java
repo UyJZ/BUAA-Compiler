@@ -15,12 +15,21 @@ import java.nio.channels.Pipe;
 public class AllocaInst extends Instr {
 
     private int elementOffset;
+
+    public static int allocaNum = 0;
+
+    private int allocOrder = 0;
     //this offset will be stored in the value of reg or sp + offset
     //you can take this out by lw targetReg 0(reg) or
     //lw tempReg offset($sp) + lw targetReg 0(tempReg)
 
     public AllocaInst(LLVMType type) {
         super(new PointerType(type), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
+        allocOrder = allocaNum++;
+    }
+
+    public int getAllocaNum() {
+        return allocOrder;
     }
 
     public void setElementOffset(int offset) {

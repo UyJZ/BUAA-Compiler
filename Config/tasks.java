@@ -7,7 +7,7 @@ public class tasks {
 
     public static boolean isMIPSoutput = true;
 
-    public static boolean isOptimize = false;
+    public static boolean isOptimize = true;
 
     public static boolean isLLVMoutput = false;
 

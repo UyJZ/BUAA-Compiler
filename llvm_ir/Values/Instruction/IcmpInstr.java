@@ -15,9 +15,6 @@ import llvm_ir.llvmType.BoolType;
 
 public class IcmpInstr extends Instr {
 
-    private final Value operand1;
-    private final Value operand2;
-
     public enum CmpOp {
         eq, ne, ugt, uge, ult, ule, sgt, sge, slt, sle
     }
@@ -26,8 +23,6 @@ public class IcmpInstr extends Instr {
 
     public IcmpInstr(Value operand1, Value operand2, CmpOp cmpOp) {
         super(new BoolType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
-        this.operand1 = operand1;
-        this.operand2 = operand2;
         this.opcode = cmpOp;
         this.addValue(operand1);
         this.addValue(operand2);
@@ -35,11 +30,13 @@ public class IcmpInstr extends Instr {
 
     @Override
     public String toString() {
-        return name + " = " + "icmp " + opcode.toString() + " " + operand1.getType().toString() + " " + operand1.getName() + ", " + operand2.getName();
+        return name + " = " + "icmp " + opcode.toString() + " " + operands.get(0).getType().toString() + " " + operands.get(0).getName() + ", " + operands.get(1).getName();
     }
 
     @Override
     public void genMIPS() {
+        Value operand1 = operands.get(0);
+        Value operand2 = operands.get(1);
         CommentAsm commentAsm = new CommentAsm(this.toString());
         MipsController.getInstance().addAsm(commentAsm);
         Register r1;

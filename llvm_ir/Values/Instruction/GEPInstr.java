@@ -16,11 +16,8 @@ import java.util.ArrayList;
 
 public class GEPInstr extends Instr {
 
-    private Value ptr;
-
-    private ArrayList<Value> indexs;
-
     private LLVMType genOutType(PointerType type) {
+        ArrayList<Value> indexs = new ArrayList<>(this.operands.subList(1, this.operands.size()));
         LLVMType type1 = type.getElementType();
         if (indexs.size() == 2) {
             assert type1 instanceof ArrayType;
@@ -30,31 +27,26 @@ public class GEPInstr extends Instr {
 
     public GEPInstr(Value ptr, ConstInteger index0, Value index) {
         super(new LLVMType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
-        indexs = new ArrayList<>();
-        indexs.add(index0);
-        indexs.add(index);
-        this.ptr = ptr;
-        this.type = genOutType((PointerType) ptr.getType());
         this.addValue(ptr);
         this.addValue(index0);
         this.addValue(index);
+        this.type = genOutType((PointerType) ptr.getType());
     }
 
     public GEPInstr(Value ptr, Value index) {
         super(new LLVMType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
-        indexs = new ArrayList<>();
-        indexs.add(index);
-        this.ptr = ptr;
-        this.type = genOutType((PointerType) ptr.getType());
         this.addValue(ptr);
         this.addValue(index);
+        this.type = genOutType((PointerType) ptr.getType());
     }
 
     @Override
     public String toString() {
+        ArrayList<Value> indexs = new ArrayList<>(this.operands.subList(1, this.operands.size()));
+        Value ptr = operands.get(0);
         if (indexs.size() == 1)
-            return name + " = getelementptr " + ((PointerType) ptr.getType()).getElementType() + ", " + ptr.getType() + " " + ptr.getName() + ", i32 " + indexs.get(0).getName();
-        return name + " = getelementptr " + ((PointerType) ptr.getType()).getElementType() + ", " + ptr.getType() + " " + ptr.getName() + ", i32 0, i32 " + indexs.get(1).getName();
+            return name + " = getelementptr " + ((PointerType) ptr.getType()).getElementType() + ", " + ptr.getType() + " " + ptr.getName() + ", i32 " + operands.get(1).getName();
+        return name + " = getelementptr " + ((PointerType) ptr.getType()).getElementType() + ", " + ptr.getType() + " " + ptr.getName() + ", i32 0, i32 " + operands.get(2).getName();
     }
 
 
@@ -71,6 +63,8 @@ public class GEPInstr extends Instr {
      */
     @Override
     public void genMIPS() {
+        Value ptr = operands.get(0);
+        ArrayList<Value> indexs = new ArrayList<>(this.operands.subList(1, this.operands.size()));
         CommentAsm asm = new CommentAsm(this.toString());
         MipsController.getInstance().addAsm(asm);
         RegDispatcher.getInstance().distributeRegFor(this);

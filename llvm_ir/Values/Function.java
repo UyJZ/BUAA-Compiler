@@ -204,4 +204,8 @@ public class Function extends Value {
         }
         return v;
     }
+
+    public void removeBlock(BasicBlock block) {
+        blockArrayList.remove(block);
+    }
 }

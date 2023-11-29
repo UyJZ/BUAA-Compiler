@@ -25,7 +25,7 @@ public class ReturnInstr extends Instr {
         if (type instanceof VoidType) {
             return "ret " + type.toString();
         } else {
-            return "ret " + type.toString() + " " + name;
+            return "ret " + type.toString() + " " + operands.get(0).getName();
         }
     }
 

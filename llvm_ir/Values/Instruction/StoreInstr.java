@@ -12,23 +12,17 @@ public class StoreInstr extends Instr {
 
     private int val;
 
-    private final Value to;
-
     private LLVMType type2;
-
-    private final Value from;
 
     public StoreInstr(Value from, Value to) {
         super(new VoidType(), "");
-        this.from = from;
-        this.to = to;
         this.addValue(from);
         this.addValue(to);
     }
 
     @Override
     public String toString() {
-        return "store " + from.getType().toString() + " " + from.getName() + ", " + to.getType().toString() + " " + to.getName();
+        return "store " + operands.get(0).getType().toString() + " " + operands.get(0).getName() + ", " + operands.get(1).getType().toString() + " " + operands.get(1).getName();
     }
 
     @Override
@@ -37,6 +31,8 @@ public class StoreInstr extends Instr {
         MipsController.getInstance().addAsm(commentAsm);
         Register fromReg;
         Register toReg;
+        Value from = operands.get(0);
+        Value to = operands.get(1);
         if (from.isUseReg()) {
             fromReg = from.getRegister();
         } else if (from instanceof ConstInteger constInteger) {
@@ -67,10 +63,10 @@ public class StoreInstr extends Instr {
     }
 
     public Value getDst() {
-        return to;
+        return operands.get(1);
     }
 
     public Value getSrc() {
-        return from;
+        return operands.get(0);
     }
 }

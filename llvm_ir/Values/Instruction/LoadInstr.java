@@ -17,21 +17,20 @@ import llvm_ir.llvmType.PointerType;
 
 public class LoadInstr extends Instr {
 
-    private Value ptr;
-
     public LoadInstr(Value ptr) {
         super(((PointerType) ptr.getType()).getElementType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
-        this.ptr = ptr;
         this.addValue(ptr);
     }
 
     @Override
     public String toString() {
+        Value ptr = operands.get(0);
         return name + " = load " + type + " , " + type + "* " + ptr.getName();
     }
 
     @Override
     public void genMIPS() {
+        Value ptr = operands.get(0);
         CommentAsm commentAsm = new CommentAsm(this.toString());
         MipsController.getInstance().addAsm(commentAsm);
         RegDispatcher.getInstance().distributeRegFor(this);
@@ -77,7 +76,7 @@ public class LoadInstr extends Instr {
     }
 
     public Value getPtr() {
-        return ptr;
+        return operands.get(0);
     }
 
 }

@@ -1,149 +1,72 @@
-//69_expr_eval.sy
-const int TOKEN_NUM = 0, TOKEN_OTHER = 1;
-int last_char = 32, num, other;
-int cur_token;
-  int oprs[256], ops[256];
+int a[510];
+int prime[510];
+const int reflect1[16] = {-711942876, -1060809599, 1758839997, 423174272,
+	1412407466, 375872692, 1543568839, 915987033,
+	698198080, -2143283456, 2059223660, -34179219,
+	378910912, 1498631475, -1853883889, 1640319187
+};
+const int reflect2[5][5] = {
+	{-1152785601, 1891446969, 938484211, -1596516698, 1681072330},
+	{128222498, 1090169129, -347746822, -326257601, -1366930863},
+	{-823961496, 2103453081, -402114823, 2139806715, -732814375},
+	{1302967469, 1623817872, 898372270, -812618050, -1403178881},
+	{-1776328495, 958769364, 47496017, -1384738865, 1751940200}
+};
 
-int next_char() {
-  last_char = getint();
-  return last_char;
-}
+/*
 
-int is_space(int c) {
-  if (c == 32 || c == 10) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
-}
+ .----------------.  .----------------.  .----------------.  .-----------------. .----------------.  .----------------.
+| .--------------. || .--------------. || .--------------. || .--------------. || .--------------. || .--------------. |
+| |     ______   | || |  ____  ____  | || |  _________   | || | ____  _____  | || |  _______     | || |  _________   | |
+| |   .' ___  |  | || | |_   ||   _| | || | |_   ___  |  | || ||_   \|_   _| | || | |_   __ \    | || | |  _   _  |  | |
+| |  / .'   \_|  | || |   | |__| |   | || |   | |_  \_|  | || |  |   \ | |   | || |   | |__) |   | || | |_/ | | \_|  | |
+| |  | |         | || |   |  __  |   | || |   |  _|  _   | || |  | |\ \| |   | || |   |  __ /    | || |     | |      | |
+| |  \ `.___.'\  | || |  _| |  | |_  | || |  _| |___/ |  | || | _| |_\   |_  | || |  _| |  \ \_  | || |    _| |_     | |
+| |   `._____.'  | || | |____||____| | || | |_________|  | || ||_____|\____| | || | |____| |___| | || |   |_____|    | |
+| |              | || |              | || |              | || |              | || |              | || |              | |
+| '--------------' || '--------------' || '--------------' || '--------------' || '--------------' || '--------------' |
+ '----------------'  '----------------'  '----------------'  '----------------'  '----------------'  '----------------'
 
-int is_num(int c) {
-  if (c >= 48 && c <= 57) {
-    return 1;
-  }
-  else {
-    return 0;
-  }
-}
+*/
 
-int next_token() {
-  for (;is_space(last_char);) next_char();
-  if (is_num(last_char)) {
-    num = last_char - 48;
-    for (;is_num(next_char());) {
-      num = num * 10 + last_char - 48;
-    }
-    cur_token = TOKEN_NUM;
-  }
-  else {
-    other = last_char;
-    next_char();
-    cur_token = TOKEN_OTHER;
-  }
-  return cur_token;
-}
-
-int panic() {
-  printf("%d", 112);
-  printf("%d", 97);
-  printf("%d", 110);
-  printf("%d", 105);
-  printf("%d", 99);
-  printf("%d", 33);
-  printf("%d", 10);
-  return -1;
-}
-
-int get_op_prec(int op) {
-  // +, -
-  if (op == 43 || op == 45) return 10;
-  // *, /, %
-  if (op == 42 || op == 47 || op == 37) return 20;
-  // other
-  return 0;
-}
-
-void stack_push(int s[], int v) {
-  s[0] = s[0] + 1;
-  s[s[0]] = v;
-}
-
-int stack_pop(int s[]) {
-  int last = s[s[0]];
-  s[0] = s[0] - 1;
-  return last;
-}
-
-int stack_peek(int s[]) {
-  return s[s[0]];
-}
-
-int stack_size(int s[]) {
-  return s[0];
-}
-
-int eval_op(int op, int lhs, int rhs) {
-  // +
-  if (op == 43) return lhs + rhs;
-  // -
-  if (op == 45) return lhs - rhs;
-  // *
-  if (op == 42) return lhs * rhs;
-  // /
-  if (op == 47) return lhs / rhs;
-  // %
-  if (op == 37) return lhs % rhs;
-  // other
-  return 0;
-}
-
-int eval() {
-
-  // get the first value
-  if (cur_token != TOKEN_NUM) return panic();
-  stack_push(oprs, num);
-  next_token();
-  // evaluate
-  for (;cur_token == TOKEN_OTHER;) {
-    // get operator
-    int op = other;
-    if (!get_op_prec(op)) break;
-    next_token();
-    // handle operator
-    for (;stack_size(ops) && get_op_prec(stack_peek(ops)) >= get_op_prec(op);) {
-      // evaluate the current operation
-      int cur_op = stack_pop(ops);
-      int rhs = stack_pop(oprs), lhs = stack_pop(oprs);
-      stack_push(oprs, eval_op(cur_op, lhs, rhs));
-    }
-    stack_push(ops, op);
-    // get next expression
-    if (cur_token != TOKEN_NUM) return panic();
-    stack_push(oprs, num);
-    next_token();
-  }
-  // eat ';'
-  next_token();
-  // clear the operator stack
-  for (;stack_size(ops);) {
-    int cur_op = stack_pop(ops);
-    int rhs = stack_pop(oprs), lhs = stack_pop(oprs);
-    stack_push(oprs, eval_op(cur_op, lhs, rhs));
-  }
-  return stack_peek(oprs);
-}
 
 int main() {
-  int count = getint();
-  getint();
-  next_token();
-  for (;count;) {
-
-    printf("%d", eval());
-    printf("%d", 10);
-    count = count - 1;
-  }
-	printf("%d", 0);
-  return 0;
+	int i = 2, total;
+	total = getint();
+	for (;i < total;) {{{}{}
+		a[i] = 1;
+		i = i + 1;
+	{}{}}}
+	i = 2;
+	int con = 0;
+	for (;i < total;) {{{}{}
+		if (a[i]) {{{}{}
+			prime[con] = i;
+			con = con + 1;
+		{}{}}}
+		int j = 0;
+		for (;j < con && i * prime[j] <= total;) {{{}{}
+			a[i * prime[j]] = 0;
+			if (i % prime[j] == 0) break;
+			j = j + 1;
+		{}{}}}
+		i = i + 1;
+	{}{}}}
+	i = 0;
+	for (;114514;) {{{}{}
+		if (a[i]) printf("%d %d\n", i, (i % 2) * reflect1[i % 16]
+			+ ((i + 1) % 2) * reflect2[i % 5][i % 5]);
+		i = i + 1;;;;;;;;;;;;;;;
+		if (i < total) continue;
+		else break;;;;;;;;;;;;;;
+		continue;;;;;;;;;;;;;;;;
+		break;;;;;;;;;;;;;;;;;;;
+		continue;;;;;;;;;;;;;;;;
+		break;;;;;;;;;;;;;;;;;;;
+		continue;;;;;;;;;;;;;;;;
+		break;;;;;;;;;;;;;;;;;;;
+		continue;;;;;;;;;;;;;;;;
+		break;;;;;;;;;;;;;;;;;;;
+	{}{}}}
+	return 0;
 }

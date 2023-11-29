@@ -21,8 +21,6 @@ import java.util.LinkedHashSet;
 
 public class CallInstr extends Instr {
 
-    private final ArrayList<Value> params;
-
     private Function function;
 
     private final String functionName;
@@ -44,13 +42,11 @@ public class CallInstr extends Instr {
     public CallInstr(LLVMType type, Value func, ArrayList<Value> params) {
         //库函数
         super(type, type instanceof VoidType || tasks.isIsOptimize() ? "" : IRController.getInstance().genVirtualRegNum());
-        this.params = params;
         functionName = func.getName();
         isIOInstr = functionName.equals("@getint") || functionName.equals("@putint") || functionName.equals("@putch") || functionName.equals("@putstr");
         isInputInstr = functionName.equals("@getint");
         isOutputInstr = functionName.equals("@putint") || functionName.equals("@putch") || functionName.equals("@putstr");
         isOutputStrInstr = functionName.equals("@putstr") || functionName.equals("@putch");
-        if (!isIOInstr) this.addValue(func);
         for (Value v : params) this.addValue(v);
         if (functionName.equals("@putch")) {
             val = ((ConstInteger) params.get(0)).getVal();
@@ -66,9 +62,9 @@ public class CallInstr extends Instr {
         } else {
             sb.append(name).append(" = call ").append(type.toString()).append(" ").append(FuncName).append("(");
         }
-        for (int i = 0; i < params.size(); i++) {
-            sb.append(params.get(i).getType().toString()).append(" ").append(params.get(i).getName());
-            if (i != params.size() - 1) sb.append(", ");
+        for (int i = 0; i < operands.size(); i++) {
+            sb.append(operands.get(i).getType().toString()).append(" ").append(operands.get(i).getName());
+            if (i != operands.size() - 1) sb.append(", ");
         }
         sb.append(")");
         return sb.toString();
@@ -107,7 +103,7 @@ public class CallInstr extends Instr {
     }
 
     public ArrayList<Value> getParam() {
-        return params;
+        return operands;
     }
 
     public void setName() {
@@ -120,6 +116,7 @@ public class CallInstr extends Instr {
 
     @Override
     public void genMIPS() {
+        ArrayList<Value> params = new ArrayList<>(this.operands);
         CommentAsm asm = new CommentAsm(this.toString());
         MipsController.getInstance().addAsm(asm);
         if (isOutputInstr) {

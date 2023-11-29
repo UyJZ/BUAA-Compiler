@@ -10,7 +10,11 @@ public class Value {
 
     protected ArrayList<User> userList;
 
+    protected ArrayList<User> usedByList;
+
     protected String name;
+
+    public static int cnt = 0;
 
     protected LLVMType type;
 
@@ -24,6 +28,8 @@ public class Value {
 
     protected boolean isExist;
 
+    public int hash;
+
     protected int offset;
 
     public String getId() {
@@ -36,6 +42,8 @@ public class Value {
         this.userList = new ArrayList<>();
         isDistributed = false;
         isExist = true;
+        usedByList = new ArrayList<>();
+        hash = cnt++;
     }
 
     public String getName() {
@@ -97,4 +105,22 @@ public class Value {
     public boolean isExist() {
         return isExist;
     }
+
+    public void addUsedBy(User value) {
+        this.usedByList.add(value);
+    }
+
+    public void replacedBy(Value value) {
+        ArrayList<User> toAdd = new ArrayList<>();
+        for (User user : usedByList) {
+            boolean b = user.replaceValue(this, value);
+            if (b) {
+                toAdd.add(user);
+            }
+        }
+        for (User value1 : toAdd) {
+            value.addUsedBy(value1);
+        }
+    }
+
 }

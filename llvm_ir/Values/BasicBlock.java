@@ -15,6 +15,8 @@ import java.util.*;
 public class BasicBlock extends Value {
     private LabelAsm label;
 
+    private boolean isReachAble;
+
     private Function father;
 
     private Instr terminator;
@@ -32,6 +34,8 @@ public class BasicBlock extends Value {
     private LinkedHashSet<BasicBlock> dominateFrontier;
 
     private BasicBlock ImmDominator;
+
+    private LinkedHashSet<BasicBlock> ImmDominatee;
 
     private HashSet<Value> inSet;
 
@@ -53,7 +57,10 @@ public class BasicBlock extends Value {
         dominatee.add(this);
         dominators = new LinkedHashSet<>();
         strictDominatee = new LinkedHashSet<>();
+        strictDominator = new LinkedHashSet<>();
         dominateFrontier = new LinkedHashSet<>();
+        isReachAble = true;
+        ImmDominatee = new LinkedHashSet<>();
     }
 
 
@@ -213,23 +220,32 @@ public class BasicBlock extends Value {
         }
     }
 
-    public boolean isStrictDominator(BasicBlock block) {
-        return strictDominator.contains(block);
+    public void addDominatee(BasicBlock block) {
+        dominatee.add(block);
+    }
+
+    public void setDominators(LinkedHashSet<BasicBlock> dominators) {
+        this.dominators = new LinkedHashSet<>(dominators);
+        this.dominators.add(this);
+        for (BasicBlock block : dominators) {
+            block.addDominatee(this);
+        }
+    }
+
+    public boolean isStrictDominatorOf(BasicBlock block) {
+        return strictDominatee.contains(block);
     }
 
     public void DFSBuildStrictDominator(BasicBlock target, ArrayList<BasicBlock> road, ArrayList<ArrayList<BasicBlock>> roads) {
         if (this.equals(target)) {
             road.add(this);
             roads.add(new ArrayList<>(road));
-        } else if (road.contains(this)) {
-            road.add(this);
-            for (BasicBlock b : dominatee) {
-                if (!road.contains(b)) b.DFSBuildStrictDominator(target, road, roads);
-            }
             road.remove(this);
+        } else if (road.contains(this)) {
+            return;
         } else {
             road.add(this);
-            for (BasicBlock block : dominatee) {
+            for (BasicBlock block : posBlocks) {
                 block.DFSBuildStrictDominator(target, road, roads);
             }
             road.remove(this);
@@ -237,8 +253,9 @@ public class BasicBlock extends Value {
     }
 
     public void setStrictDominator(LinkedHashSet<BasicBlock> strictDominator) {
-        this.strictDominator = strictDominator;
-        for (BasicBlock block : strictDominator) {
+        this.strictDominator = new LinkedHashSet<>(strictDominator);
+        this.strictDominator.remove(this);
+        for (BasicBlock block : this.strictDominator) {
             block.addStrictDominatee(this);
         }
     }
@@ -253,13 +270,14 @@ public class BasicBlock extends Value {
         for (int i = 0; i < blocks.size(); i++) {
             boolean isImm = true;
             for (int j = 0; j < blocks.size(); j++) {
-                if (i != j && blocks.get(i).isStrictDominator(blocks.get(j))) {
+                if (i != j && blocks.get(i).isDominatorOf(blocks.get(j))) {
                     isImm = false;
                     break;
                 }
             }
             if (isImm) {
                 ImmDominator = blocks.get(i);
+                blocks.get(i).addImmDominatee(this);
                 break;
             }
         }
@@ -282,7 +300,7 @@ public class BasicBlock extends Value {
     }
 
     public void setDominateFrontier(LinkedHashSet<BasicBlock> set) {
-        dominateFrontier = set;
+        dominateFrontier = new LinkedHashSet<>(set);
     }
 
     public ArrayList<AllocaInst> getValForSSA() {
@@ -309,48 +327,110 @@ public class BasicBlock extends Value {
     }
 
     public void insertPhi(PhiInstr phi) {
+        for (Instr instr : instrs) {
+            if (instr instanceof PhiInstr phiInstr && phiInstr.getFather() == phi.getFather()) return;
+        }
         this.instrs.add(0, phi);
     }
 
     public void preOrderForRename(AllocaInst v, Stack<Value> stack) {
         int cnt = 0;
-        for (Instr instr : instrs) {
+        Iterator<Instr> iterator = instrs.iterator();
+        if (v.getAllocaNum() == 2) {
+            System.out.println("DEBUG");
+        }
+        while (iterator.hasNext()) {
+            Instr instr = iterator.next();
             if (instr instanceof AllocaInst allocaInst && allocaInst == v) {
                 allocaInst.delete();
-                instrs.remove(allocaInst);
+                iterator.remove();
             } else if (instr instanceof StoreInstr storeInstr && storeInstr.getDst() == v) {
                 stack.push(storeInstr.getSrc());
                 cnt++;
                 storeInstr.delete();
-                instrs.remove(storeInstr);
+                iterator.remove();
             } else if (instr instanceof LoadInstr loadInstr && loadInstr.getPtr() == v) {
                 //TODO:replace all load to the stack peek
-                for (Instr instr1 : instrs) {
-                    instr1.replaceValue(loadInstr, stack.peek());
+                if (loadInstr.hash == 20) {
+                    System.out.println("HERE");
                 }
                 loadInstr.delete();
-                instrs.remove(loadInstr);
+                iterator.remove();
+                /*
+                for (BasicBlock block : father.getBlockArrayList()) {
+                    for (Instr instr1 : block.getInstrs()) {
+                        instr1.replacedBy(stack.isEmpty() ? new UndefinedVal() : stack.peek());
+                    }
+                }
+                 */
+                loadInstr.replacedBy(stack.isEmpty() ? new UndefinedVal() : stack.peek());
             } else if (instr instanceof PhiInstr phiInstr && phiInstr.getFather() == v) {
                 stack.push(phiInstr);
                 cnt++;
             }
         }
-        for (BasicBlock block : dominatee) {
-            block.preOrderForRename(v, stack);
-        }
         for (BasicBlock block : posBlocks) {
-            block.addPhiOption(v, stack.peek());
+            if (stack.isEmpty()) {
+                System.out.println("HERE");
+            }
+            block.addPhiOption(v, stack.isEmpty() ? new UndefinedVal() : stack.peek(), this);
+        }
+        for (BasicBlock block : ImmDominatee) {
+            if (block == this) continue;
+            block.preOrderForRename(v, stack);
         }
         for (int i = 0; i < cnt; i++) {
             stack.pop();
         }
     }
 
-    public void addPhiOption(AllocaInst v, Value value) {
+    public void addPhiOption(AllocaInst v, Value value, BasicBlock block) {
         for (Instr instr : instrs) {
             if (instr instanceof PhiInstr phiInstr && phiInstr.getFather() == v) {
-                phiInstr.addOption(this, value);
+                phiInstr.addOption(block, value);
             }
         }
+    }
+
+    public void deleteBlock() {
+        this.isReachAble = false;
+        for (BasicBlock block : posBlocks) {
+            block.removePreBlock(this);
+        }
+        for (BasicBlock block : preBlocks) {
+            block.removePosBlock(this);
+        }
+    }
+
+    public void removePreBlock(BasicBlock block) {
+        preBlocks.remove(block);
+    }
+
+    public void removePosBlock(BasicBlock block) {
+        posBlocks.remove(block);
+    }
+
+    public void deleteInfo(BasicBlock block) {
+
+    }
+
+    public void setUnReachAble() {
+        this.isReachAble = false;
+    }
+
+    public boolean isReachAble() {
+        return isReachAble;
+    }
+
+    public boolean isDominatorOf(BasicBlock block) {
+        return dominatee.contains(block);
+    }
+
+    public ArrayList<Instr> getInstrs() {
+        return instrs;
+    }
+
+    public void addImmDominatee(BasicBlock block) {
+        ImmDominatee.add(block);
     }
 }

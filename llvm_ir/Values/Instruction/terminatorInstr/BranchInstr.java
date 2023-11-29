@@ -17,15 +17,12 @@ import java.util.ArrayList;
 
 public class BranchInstr extends Instr {
 
-    private final Value judge;
-
     private final BasicBlock label1, label2;
 
     public BranchInstr(LLVMType type, BasicBlock label1, BasicBlock label2, Value judge) {
         super(type, "");
         this.label1 = label1;
         this.label2 = label2;
-        this.judge = judge;
         this.addValue(judge);
     }
 
@@ -33,25 +30,24 @@ public class BranchInstr extends Instr {
         super(type, "");
         this.label1 = label1;
         this.label2 = null;
-        this.judge = null;
     }
 
     @Override
     public String toString() {
-        if (label2 == null && judge == null)
+        if (operands.size() == 0)
             return "br label " + label1.getName();
-        return "br " + new BoolType().toString() + " " + judge.getName() + ", label " + label1.getName() + ", label " + label2.getName();
+        return "br " + new BoolType().toString() + " " + operands.get(0).getName() + ", label " + label1.getName() + ", label " + label2.getName();
     }
 
     @Override
     public void genMIPS() {
         CommentAsm asm = new CommentAsm(this.toString());
         MipsController.getInstance().addAsm(asm);
-        if (label2 == null && judge == null) {
+        if (operands.size() == 0) {
             JAsm j = new JAsm(label1.getMIPSLabel());
             MipsController.getInstance().addAsm(j);
         } else {
-            assert (label2 != null && judge != null);
+            Value judge = operands.get(0);
             if (judge.isUseReg()) {
                 BranchITAsm bne = new BranchITAsm(BranchITAsm.Op.bne, judge.getRegister(), Register.ZERO, label1.getMIPSLabel());
                 MipsController.getInstance().addAsm(bne);

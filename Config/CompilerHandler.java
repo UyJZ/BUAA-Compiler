@@ -8,6 +8,7 @@ import FrontEnd.Nodes.CompUnit;
 import FrontEnd.Nodes.Node;
 import FrontEnd.Parser.ParserController;
 import FrontEnd.Symbol.SymbolManager;
+import MidEnd.Optimizer;
 import llvm_ir.IRController;
 
 import javax.swing.text.html.parser.Parser;
@@ -45,6 +46,8 @@ public class CompilerHandler {
                 SymbolManager.getInstance().flush();
                 c.genLLVMir();
                 if (tasks.isOptimize) {
+                    Optimizer optimizer = new Optimizer(IRController.getInstance().getModule());
+                    optimizer.run();
                     IRController.getInstance().setName();
                 }
                 IRController.getInstance().Output(ps);
