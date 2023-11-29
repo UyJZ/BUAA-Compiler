@@ -312,6 +312,14 @@ public class BasicBlock extends Value {
         return v;
     }
 
+    public ArrayList<AllocaInst> getAllAlloc() {
+        ArrayList<AllocaInst> v = new ArrayList<>();
+        for (Instr instr : instrs) {
+            if (instr instanceof AllocaInst allocaInst) v.add(allocaInst);
+        }
+        return v;
+    }
+
     public boolean isDefBlockFor(AllocaInst v) {
         for (Instr instr : instrs) {
             if (instr instanceof StoreInstr storeInstr && storeInstr.getDst().equals(v)) return true;

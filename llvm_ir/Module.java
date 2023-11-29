@@ -83,4 +83,12 @@ public class Module extends Value {
     public ArrayList<Function> getFunctionList() {
         return functionList;
     }
+
+    public void deleteFunc(Function function) {
+        functionList.remove(function);
+    }
+
+    public ArrayList<GlobalVar> getGlobalVarList() {
+        return globalVarList;
+    }
 }

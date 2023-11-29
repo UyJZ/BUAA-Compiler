@@ -42,7 +42,9 @@ public class SSABuilder {
                     for (BasicBlock y : x.getDominateFrontier()) {
                         if (!F.contains(y)) {
                             //TODO:add phi at the entry of y
-                            y.insertPhi(new PhiInstr(v.getElementType(), v));
+                            PhiInstr phi = new PhiInstr(v.getElementType(), v);
+                            y.insertPhi(phi);
+                            f.addDef(v, phi);
                             F.add(y);
                             if (!defBlocks.get(v).contains(y)) {
                                 W.add(y);

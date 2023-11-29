@@ -7,11 +7,10 @@ import MidEnd.RegDispatcher;
 import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.Instruction.AllocaInst;
+import llvm_ir.Values.Instruction.CallInstr;
 import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.Values.Instruction.terminatorInstr.ReturnInstr;
-import llvm_ir.llvmType.BasicBlockType;
-import llvm_ir.llvmType.LLVMType;
-import llvm_ir.llvmType.VoidType;
+import llvm_ir.llvmType.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -21,6 +20,8 @@ import java.util.LinkedHashSet;
 public class Function extends Value {
 
     private ArrayList<Param> paramArrayList;
+
+    private HashMap<AllocaInst, LinkedHashSet<Instr>> defMap;
 
     private boolean hasParam;
 
@@ -42,11 +43,18 @@ public class Function extends Value {
 
     private final boolean isSysCall;
 
+    private boolean hasPointer;
+
+    private boolean hasSyscall;
+
     private int ValOffset;
+
+    private LinkedHashSet<Function> callFunctions;
 
     public Function(LLVMType type, String name, boolean hasParam) {
         super(type, "@" + name);
         isMainFunc = name.equals("main");
+        callFunctions = new LinkedHashSet<>();
         paramArrayList = new ArrayList<>();
         blockArrayList = new ArrayList<>();
         this.hasParam = hasParam;
@@ -59,7 +67,9 @@ public class Function extends Value {
         usedRegs = new LinkedHashSet<>();
         freeRegs = Register.tempRegs();
         Val2Offset = new HashMap<>();
+        defMap = new HashMap<>();
         isSysCall = name.equals("getint") || name.equals("putint") || name.equals("putch") || name.equals("putstr");
+        hasPointer = false;
     }
 
     private ArrayList<BasicBlock> blockArrayList;
@@ -79,6 +89,9 @@ public class Function extends Value {
 
     public void addParam(Param param) {
         paramArrayList.add(param);
+        if (param.getType() instanceof PointerType || param.getType() instanceof ArrayType) {
+            hasPointer = true;
+        }
     }
 
     public ArrayList<Param> getParamArrayList() {
@@ -169,6 +182,10 @@ public class Function extends Value {
         RegDispatcher.getInstance().leaveFunc();
     }
 
+    public boolean isSysCall() {
+        return isSysCall;
+    }
+
     private void distributeForArgs() {
         for (Param param : paramArrayList) {
             if (!param.isDistributed()) {
@@ -205,7 +222,49 @@ public class Function extends Value {
         return v;
     }
 
+    public ArrayList<AllocaInst> getAllAlloc() {
+        ArrayList<AllocaInst> v = new ArrayList<>();
+        for (BasicBlock block : blockArrayList) {
+            v.addAll(block.getAllAlloc());
+        }
+        return v;
+    }
+
     public void removeBlock(BasicBlock block) {
         blockArrayList.remove(block);
+    }
+
+    public void addCalledFunc(Function function) {
+        callFunctions.add(function);
+        callFunctions.addAll(function.getCallFunctions());
+        //不可能出现循环调用所以无所谓
+    }
+
+    public LinkedHashSet<Function> getCallFunctions() {
+        return callFunctions;
+    }
+
+    public void addDef(AllocaInst v, Instr instr) {
+        if (!defMap.containsKey(v)) {
+            defMap.put(v, new LinkedHashSet<>());
+        }
+        defMap.get(v).add(instr);
+    }
+
+    public boolean hasPointer() {
+        return hasPointer;
+    }
+
+    public boolean HasSyscall() {
+        for (BasicBlock b : blockArrayList) {
+            for (Instr i : b.getInstrs()) {
+                if (i instanceof CallInstr callInstr && callInstr.isIOInstr()) {
+                    return true;
+                } else if (i instanceof  CallInstr callInstr && callInstr.getFunction().HasSyscall()) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

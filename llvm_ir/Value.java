@@ -2,9 +2,11 @@ package llvm_ir;
 
 import BackEnd.MIPS.Assembly.Data;
 import BackEnd.MIPS.Register;
+import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.llvmType.LLVMType;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 public class Value {
 
@@ -120,6 +122,19 @@ public class Value {
         }
         for (User value1 : toAdd) {
             value.addUsedBy(value1);
+        }
+    }
+
+    public void DFSForUseful(LinkedHashSet<Value> usefulInstr) {
+        if (usefulInstr.contains(this)) return;
+        usefulInstr.add(this);
+        if (this instanceof User user) {
+            for (Value v : user.getOperands()) {
+                v.DFSForUseful(usefulInstr);
+            }
+        }
+        for (Value v : this.usedByList) {
+            v.DFSForUseful(usefulInstr);
         }
     }
 

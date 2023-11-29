@@ -12,9 +12,7 @@ import llvm_ir.Value;
 import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Function;
 import llvm_ir.Values.Param;
-import llvm_ir.llvmType.Integer32Type;
-import llvm_ir.llvmType.LLVMType;
-import llvm_ir.llvmType.VoidType;
+import llvm_ir.llvmType.*;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -37,6 +35,8 @@ public class CallInstr extends Instr {
 
     private String ConstrName;
 
+    private boolean hasPointer;
+
     private int val;
 
     public CallInstr(LLVMType type, Value func, ArrayList<Value> params) {
@@ -51,6 +51,20 @@ public class CallInstr extends Instr {
         if (functionName.equals("@putch")) {
             val = ((ConstInteger) params.get(0)).getVal();
         }
+        if (!isIOInstr)
+            IRController.getInstance().getCurrentFunction().addCalledFunc((Function) func);
+        hasPointer = false;
+        for (Value v : params) {
+            if (v.getType() instanceof PointerType || v.getType() instanceof ArrayType) {
+                hasPointer = true;
+                break;
+            }
+        }
+        function = (Function) func;
+    }
+
+    public Function getFunction() {
+        return function;
     }
 
     @Override
