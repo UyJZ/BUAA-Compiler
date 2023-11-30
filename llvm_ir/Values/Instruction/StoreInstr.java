@@ -8,6 +8,8 @@ import llvm_ir.Values.ConstInteger;
 import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.VoidType;
 
+import java.util.HashMap;
+
 public class StoreInstr extends Instr {
 
     private int val;
@@ -68,5 +70,11 @@ public class StoreInstr extends Instr {
 
     public Value getSrc() {
         return operands.get(0);
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        return new StoreInstr(operands.get(0).copy(map), operands.get(1).copy(map));
     }
 }

@@ -6,11 +6,13 @@ import BackEnd.MIPS.Register;
 import Config.tasks;
 import MidEnd.RegDispatcher;
 import llvm_ir.IRController;
+import llvm_ir.Value;
 import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.PointerType;
 import Config.tasks.*;
 
 import java.nio.channels.Pipe;
+import java.util.HashMap;
 
 public class AllocaInst extends Instr {
 
@@ -68,5 +70,11 @@ public class AllocaInst extends Instr {
             MipsController.getInstance().addAsm(sw);
             //把值存到记录指向值的地址的那块地址上
         }
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        return new AllocaInst(((PointerType) type).getElementType());
     }
 }

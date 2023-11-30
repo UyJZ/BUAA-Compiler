@@ -9,6 +9,7 @@ import llvm_ir.llvmType.LLVMType;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 
 public class PhiInstr extends Instr {
 
@@ -27,8 +28,10 @@ public class PhiInstr extends Instr {
             operands.set(labels.indexOf(label), v);
             operands.set(labels.indexOf(label), v);
             setValue(labels.indexOf(label), v);
-        }
-        else {
+        } else {
+            if (label == null) {
+                System.out.println("null label");
+            }
             labels.add(label);
             addValue(v);
         }
@@ -41,14 +44,8 @@ public class PhiInstr extends Instr {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        if (father.getAllocaNum() == 0) {
-            System.out.println("DEBUG");
-        }
         sb.append(name).append(" = phi ").append(type).append(" ");
         for (int i = 0; i < operands.size(); i++) {
-            if (labels.get(i).getName().equals("0")) {
-                System.out.println(labels.get(i).getName());
-            }
             sb.append("[ ").append(operands.get(i).getName()).append(", ").append(labels.get(i).getName()).append(" ]");
             if (i != operands.size() - 1) {
                 sb.append(", ");
@@ -56,5 +53,19 @@ public class PhiInstr extends Instr {
         }
         sb.append("  ;").append(father.getAllocaNum());
         return sb.toString();
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        PhiInstr phiInstr = new PhiInstr(type, new AllocaInst(type));
+        for (int i = 0; i < operands.size(); i++) {
+            phiInstr.addOption((BasicBlock) labels.get(i).copy(map), operands.get(i).copy(map));
+        }
+        return phiInstr;
+    }
+
+    public ArrayList<BasicBlock> getLabels() {
+        return labels;
     }
 }

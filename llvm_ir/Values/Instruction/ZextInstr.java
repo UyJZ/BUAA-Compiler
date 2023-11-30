@@ -7,6 +7,8 @@ import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.llvmType.LLVMType;
 
+import java.util.HashMap;
+
 public class ZextInstr extends Instr {
 
     private final LLVMType type1;
@@ -31,5 +33,11 @@ public class ZextInstr extends Instr {
         this.useReg = operand.isUseReg();
         if (useReg) this.register = operand.getRegister();
         else this.offset = operand.getOffset();
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        return new ZextInstr(type1, type, operands.get(0).copy(map));
     }
 }

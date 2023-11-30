@@ -10,6 +10,7 @@ import llvm_ir.Values.ConstInteger;
 import llvm_ir.llvmType.LLVMType;
 import Config.tasks;
 
+import java.util.HashMap;
 import java.util.HashSet;
 
 public class BinaryInstr extends Instr {
@@ -193,5 +194,11 @@ public class BinaryInstr extends Instr {
             MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, tar, Register.SP, this.offset);
             MipsController.getInstance().addAsm(sw);
         }
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        return new BinaryInstr(type, operands.get(0).copy(map), operands.get(1).copy(map), opcode);
     }
 }

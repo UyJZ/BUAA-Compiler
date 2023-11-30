@@ -4,6 +4,8 @@ import BackEnd.MIPS.Register;
 import llvm_ir.Value;
 import llvm_ir.llvmType.Integer32Type;
 
+import java.util.HashMap;
+
 public class ConstInteger extends Value {
 
     private final int val;
@@ -19,5 +21,10 @@ public class ConstInteger extends Value {
 
     public int getVal() {
         return val;
+    }
+
+    @Override
+    public Value copy(HashMap<Value, Value> map) {
+        return new ConstInteger(val);
     }
 }

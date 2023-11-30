@@ -27,7 +27,7 @@ public class BreakStmt extends Stmt {
 
     @Override
     public Value genLLVMir() {
-        BranchInstr branchInstr = new BranchInstr(new LLVMType(), this.NextBlock);
+        BranchInstr branchInstr = new BranchInstr(this.NextBlock);
         IRController.getInstance().addInstr(branchInstr);
         IRController.getInstance().addNewBasicBlock(new BasicBlock());
         return null;

@@ -27,7 +27,7 @@ public class ContinueStmt extends Stmt {
 
     @Override
     public Value genLLVMir() {
-        BranchInstr branchInstr = new BranchInstr(new LLVMType(), this.Stmt2Block);
+        BranchInstr branchInstr = new BranchInstr(this.Stmt2Block);
         IRController.getInstance().addInstr(branchInstr);
         IRController.getInstance().addNewBasicBlock(new BasicBlock());
         return null;

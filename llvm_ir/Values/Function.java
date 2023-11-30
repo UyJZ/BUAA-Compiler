@@ -3,19 +3,17 @@ package llvm_ir.Values;
 import BackEnd.MIPS.Assembly.LabelAsm;
 import BackEnd.MIPS.MipsController;
 import BackEnd.MIPS.Register;
+import MidEnd.FuncInline;
+import MidEnd.GlobalForInline;
 import MidEnd.RegDispatcher;
 import llvm_ir.IRController;
 import llvm_ir.Value;
-import llvm_ir.Values.Instruction.AllocaInst;
-import llvm_ir.Values.Instruction.CallInstr;
-import llvm_ir.Values.Instruction.Instr;
+import llvm_ir.Values.Instruction.*;
+import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
 import llvm_ir.Values.Instruction.terminatorInstr.ReturnInstr;
 import llvm_ir.llvmType.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.*;
 
 public class Function extends Value {
 
@@ -38,6 +36,10 @@ public class Function extends Value {
     private LinkedHashSet<Register> usedRegs;
 
     private HashMap<Value, Integer> Val2Offset;
+
+    private boolean recursive;
+
+    private boolean inlineAble = true;
 
     private final boolean isMainFunc;
 
@@ -70,6 +72,7 @@ public class Function extends Value {
         defMap = new HashMap<>();
         isSysCall = name.equals("getint") || name.equals("putint") || name.equals("putch") || name.equals("putstr");
         hasPointer = false;
+        recursive = false;
     }
 
     private ArrayList<BasicBlock> blockArrayList;
@@ -126,6 +129,10 @@ public class Function extends Value {
 
     public String getName() {
         return name;
+    }
+
+    public void setRecursive() {
+        recursive = true;
     }
 
     public void setName() {
@@ -260,11 +267,143 @@ public class Function extends Value {
             for (Instr i : b.getInstrs()) {
                 if (i instanceof CallInstr callInstr && callInstr.isIOInstr()) {
                     return true;
-                } else if (i instanceof  CallInstr callInstr && callInstr.getFunction().HasSyscall()) {
+                } else if (i instanceof CallInstr callInstr && callInstr.getFunction().HasSyscall()) {
                     return true;
                 }
             }
         }
         return false;
+    }
+
+
+    public boolean isInlineAble() {
+        return inlineAble;
+    }
+
+    public void setInlineAble(boolean inlineAble) {
+        this.inlineAble = inlineAble;
+    }
+
+    public boolean isRecursive() {
+        return recursive;
+    }
+
+    public InlinedFunc inline(ArrayList<Value> params, BasicBlock outBlock, HashMap<Value, BasicBlock> v2b) {
+        ArrayList<GlobalVar> globalVars = GlobalForInline.globalVars;
+        ArrayList<BasicBlock> blocks = new ArrayList<>();
+        HashMap<Value, Value> map = new HashMap<>();
+        for (GlobalVar globalVar : globalVars) {
+            map.put(globalVar, globalVar);
+        }
+        for (BasicBlock block : blockArrayList) {
+            map.put(block, new BasicBlock());
+        }
+        for (int i = 0; i < paramArrayList.size(); i++) {
+            map.put(paramArrayList.get(i), params.get(i));
+        }
+        int len = blockArrayList.size();
+        ArrayList<PhiInstr> phiToRebuild = new ArrayList<>();
+        LinkedHashMap<BasicBlock, Value> returnMap = new LinkedHashMap<>();
+        for (int i = 0; i < len; i++) {
+            BasicBlock currentBlock = blockArrayList.get(i);
+            for (int j = 0; j < currentBlock.getInstrs().size(); j++) {
+                Instr instr = currentBlock.getInstrs().get(j);
+                if (instr instanceof CallInstr callInstr && !callInstr.getFunction().isSysCall && callInstr.getFunction().isInlineAble()) {
+                    ArrayList<Value> paramsForCall = new ArrayList<>();
+                    for (Value param : callInstr.getParam()) {
+                        paramsForCall.add(param.copy(map));
+                    }
+                    BasicBlock nextBlock = new BasicBlock();
+                    map.put(nextBlock, new BasicBlock());
+                    InlinedFunc funcInline = callInstr.getFunction().inline(paramsForCall, (BasicBlock) nextBlock.copy(map), v2b);
+                    ArrayList<BasicBlock> blocksToInsert = funcInline.getBlocks();
+                    if (!(funcInline.getType() instanceof VoidType)) {
+                        map.put(callInstr, funcInline.getPhi());
+                    }
+                    //TODO:先把call 变成 branch 然后再把block插入, 然后进行phi替换， 然后连上后面的部分
+                    BranchInstr branch = new BranchInstr(blocksToInsert.get(0));
+                    ((BasicBlock) currentBlock.copy(map)).addInstr(branch);
+                    v2b.put(branch, (BasicBlock) currentBlock.copy(map));
+                    blocks.add((BasicBlock) currentBlock.copy(map));
+                    //对他进行替换,然后插入phi指令
+                    //TODO:写的逻辑有点问题
+                    if (!(blocksToInsert.get(blocksToInsert.size() - 1).lastInstr() instanceof BranchInstr)) {
+                        blocksToInsert.get(blocksToInsert.size() - 1).addInstr(new BranchInstr((BasicBlock) nextBlock.copy(map)));
+                        v2b.put(blocksToInsert.get(blocksToInsert.size() - 1).lastInstr(), blocksToInsert.get(blocksToInsert.size() - 1));
+                    }
+                    blocks.addAll(blocksToInsert);
+                    for (BasicBlock block : blocksToInsert) {
+                        map.put(block, block);
+                        for (Instr instr1 : block.getInstrs()) {
+                            map.put(instr1, instr1);
+                        }
+                    }
+                    j++;
+                    if (callInstr.getType() instanceof VoidType) {
+                        for (; j < currentBlock.instrs.size(); j++) {
+                            nextBlock.addInstr(currentBlock.instrs.get(j));
+                        }
+                        currentBlock = nextBlock;
+                        j = -1;
+                    } else {
+                        ((BasicBlock) nextBlock.copy(map)).addInstr(funcInline.getPhi());
+                        v2b.put(funcInline.getPhi(), (BasicBlock) nextBlock.copy(map));
+                        map.put(funcInline.getPhi(), funcInline.getPhi());
+                        for (; j < currentBlock.instrs.size(); j++) {
+                            nextBlock.addInstr(currentBlock.instrs.get(j));
+                        }
+                        currentBlock = nextBlock;
+                        j = -1;
+                    }
+                } else if (instr instanceof ReturnInstr returnInstr) {
+                    if (!(type instanceof VoidType)) {
+                        returnMap.put((BasicBlock) (currentBlock.copy(map)), returnInstr.getReturnValue().copy(map));
+                    }
+                    BranchInstr b = new BranchInstr(outBlock);
+                    ((BasicBlock) (currentBlock.copy(map))).addInstr(b);
+                    v2b.put(b, (BasicBlock) (currentBlock.copy(map)));
+                    break;
+                } else if (instr instanceof PhiInstr phiInstr) {
+                    //TODO
+                    phiToRebuild.add(phiInstr);
+                    PhiInstr phiInstr1 = new PhiInstr(phiInstr.getType(), new AllocaInst(phiInstr.getType()));
+                    map.put(phiInstr, phiInstr1);
+                    ((BasicBlock) currentBlock.copy(map)).addInstr(phiInstr1);
+                    v2b.put(phiInstr1, (BasicBlock) currentBlock.copy(map));
+                } else {
+                    Instr copy = instr.copy(map);
+                    ((BasicBlock) (currentBlock.copy(map))).addInstr(copy);
+                    v2b.put(copy, (BasicBlock) currentBlock.copy(map));
+                    map.put(instr, copy);
+                }
+            }
+            blocks.add((BasicBlock) currentBlock.copy(map));
+        }
+        for (PhiInstr phiInstr : phiToRebuild) {
+            for (int i = 0; i < phiInstr.getOperands().size(); i++) {
+                if (phiInstr.getOperands().get(i) instanceof UndefinedVal || v2b.get(phiInstr.getOperands().get(i).copy(map)) == null) {
+                    System.out.println(phiInstr.getOperands().get(i).getClass());
+                    BasicBlock block = v2b.get(phiInstr.getLabels().get(i).lastInstr().copy(map));
+                    ((PhiInstr) phiInstr.copy(map)).addOption(block, phiInstr.getOperands().get(i).copy(map));
+                } else {
+                    ((PhiInstr) phiInstr.copy(map)).addOption(v2b.get(phiInstr.getOperands().get(i).copy(map)), phiInstr.getOperands().get(i).copy(map));
+                }
+            }
+        }
+        PhiInstr phi = new PhiInstr(type, new AllocaInst(type));
+        for (BasicBlock block : returnMap.keySet()) {
+            phi.addOption(block, returnMap.get(block));
+        }
+        if (!(blocks.get(blocks.size() - 1).getInstrs().get(blocks.get(blocks.size() - 1).getInstrs().size() - 1) instanceof BranchInstr)) {
+            BranchInstr branchInstr = new BranchInstr(outBlock);
+            blocks.get(blocks.size() - 1).addInstr(branchInstr);
+            v2b.put(branchInstr, blocks.get(blocks.size() - 1));
+
+        }
+        return new InlinedFunc(type, blocks, phi);
+    }
+
+    public void addBasicBlock(int pos, BasicBlock block) {
+        blockArrayList.add(pos, block);
     }
 }

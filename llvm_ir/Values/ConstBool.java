@@ -3,6 +3,8 @@ package llvm_ir.Values;
 import llvm_ir.Value;
 import llvm_ir.llvmType.BoolType;
 
+import java.util.HashMap;
+
 public class ConstBool extends ConstInteger {
     private final boolean val;
 
@@ -19,5 +21,10 @@ public class ConstBool extends ConstInteger {
 
     public int getVal() {
         return val ? 1 : 0;
+    }
+
+    @Override
+    public Value copy(HashMap<Value, Value> map) {
+        return new ConstBool(val);
     }
 }

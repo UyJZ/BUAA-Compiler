@@ -15,6 +15,8 @@ import llvm_ir.Values.GlobalVar;
 import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.PointerType;
 
+import java.util.HashMap;
+
 public class LoadInstr extends Instr {
 
     public LoadInstr(Value ptr) {
@@ -77,6 +79,12 @@ public class LoadInstr extends Instr {
 
     public Value getPtr() {
         return operands.get(0);
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        return new LoadInstr(operands.get(0).copy(map));
     }
 
 }

@@ -6,6 +6,7 @@ import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.llvmType.LLVMType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 
 public class Value {
@@ -136,6 +137,11 @@ public class Value {
         for (Value v : this.usedByList) {
             v.DFSForUseful(usefulInstr);
         }
+    }
+
+    public Value copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return map.get(this);
+        return null;
     }
 
 }

@@ -10,6 +10,7 @@ import llvm_ir.Values.Instruction.terminatorInstr.ReturnInstr;
 import llvm_ir.llvmType.LLVMType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 
 public class Instr extends User {
@@ -26,5 +27,8 @@ public class Instr extends User {
         return !(this instanceof StoreInstr || this instanceof BranchInstr || this instanceof ReturnInstr);
     }
 
-
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        return null;
+    }
 }

@@ -28,11 +28,11 @@ public class IfStmt extends Stmt {
             children.get(2).genLLVMir();
             IRController.getInstance().addNewBasicBlock(Stmt1);
             ((Stmt) children.get(4)).genLLVMir();
-            BranchInstr branchInstr = new BranchInstr(new LLVMType(), nextBlock);
+            BranchInstr branchInstr = new BranchInstr(nextBlock);
             IRController.getInstance().addInstr(branchInstr);
             IRController.getInstance().addNewBasicBlock(Stmt2);
             ((Stmt) children.get(6)).genLLVMir();
-            BranchInstr branchInstr1 = new BranchInstr(new LLVMType(), nextBlock);
+            BranchInstr branchInstr1 = new BranchInstr(nextBlock);
             IRController.getInstance().addInstr(branchInstr1);
             IRController.getInstance().addNewBasicBlock(nextBlock);
         } else {
@@ -42,7 +42,7 @@ public class IfStmt extends Stmt {
             children.get(2).genLLVMir();
             IRController.getInstance().addNewBasicBlock(Stmt1);
             children.get(4).genLLVMir();
-            BranchInstr branchInstr = new BranchInstr(new LLVMType(), nextBlock);
+            BranchInstr branchInstr = new BranchInstr(nextBlock);
             IRController.getInstance().addInstr(branchInstr);
             IRController.getInstance().addNewBasicBlock(nextBlock);
         }

@@ -13,6 +13,8 @@ import llvm_ir.Value;
 import llvm_ir.Values.ConstInteger;
 import llvm_ir.llvmType.BoolType;
 
+import java.util.HashMap;
+
 public class IcmpInstr extends Instr {
 
     public enum CmpOp {
@@ -82,5 +84,11 @@ public class IcmpInstr extends Instr {
             MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, Register.K0, Register.SP, offset);
             MipsController.getInstance().addAsm(sw);
         }
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        return new IcmpInstr(operands.get(0).copy(map), operands.get(1).copy(map), opcode);
     }
 }

@@ -62,12 +62,6 @@ public class IRController {
 
     public void addInstr(Instr instr) {
         currentBasicBlock.addInstr(instr);
-        if (instr instanceof BranchInstr branchInstr) {
-            for (BasicBlock block : branchInstr.getSuccessors()) {
-                block.addPreBlock(currentBasicBlock);
-                currentBasicBlock.addPosBlock(block);
-            }
-        }
     }
 
     public Function getCurrentFunction() {

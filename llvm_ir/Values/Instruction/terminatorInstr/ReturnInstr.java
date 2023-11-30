@@ -10,6 +10,8 @@ import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.VoidType;
 
+import java.util.HashMap;
+
 public class ReturnInstr extends Instr {
     public ReturnInstr(LLVMType type) {
         super(type, "");
@@ -57,6 +59,20 @@ public class ReturnInstr extends Instr {
             }
             JrAsm jr = new JrAsm(Register.RA);
             MipsController.getInstance().addAsm(jr);
+        }
+    }
+
+    public Value getReturnValue() {
+        return operands.get(0);
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        if (type instanceof VoidType) {
+            return new ReturnInstr(type);
+        } else {
+            return new ReturnInstr(type, operands.get(0).copy(map));
         }
     }
 }

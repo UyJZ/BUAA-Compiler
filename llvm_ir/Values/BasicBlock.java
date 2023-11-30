@@ -7,6 +7,7 @@ import BackEnd.MIPS.MipsController;
 import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.Instruction.*;
+import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
 import llvm_ir.llvmType.BasicBlockType;
 import llvm_ir.llvmType.Integer32Type;
 
@@ -92,6 +93,12 @@ public class BasicBlock extends Value {
     }
 
     public void addInstr(Instr instr) {
+        if (instr instanceof BranchInstr branchInstr) {
+            for (BasicBlock block : branchInstr.getSuccessors()) {
+                block.addPreBlock(this);
+                this.addPosBlock(block);
+            }
+        }
         instrs.add(instr);
     }
 
@@ -344,9 +351,6 @@ public class BasicBlock extends Value {
     public void preOrderForRename(AllocaInst v, Stack<Value> stack) {
         int cnt = 0;
         Iterator<Instr> iterator = instrs.iterator();
-        if (v.getAllocaNum() == 2) {
-            System.out.println("DEBUG");
-        }
         while (iterator.hasNext()) {
             Instr instr = iterator.next();
             if (instr instanceof AllocaInst allocaInst && allocaInst == v) {
@@ -359,9 +363,6 @@ public class BasicBlock extends Value {
                 iterator.remove();
             } else if (instr instanceof LoadInstr loadInstr && loadInstr.getPtr() == v) {
                 //TODO:replace all load to the stack peek
-                if (loadInstr.hash == 20) {
-                    System.out.println("HERE");
-                }
                 loadInstr.delete();
                 iterator.remove();
                 /*
@@ -378,9 +379,6 @@ public class BasicBlock extends Value {
             }
         }
         for (BasicBlock block : posBlocks) {
-            if (stack.isEmpty()) {
-                System.out.println("HERE");
-            }
             block.addPhiOption(v, stack.isEmpty() ? new UndefinedVal() : stack.peek(), this);
         }
         for (BasicBlock block : ImmDominatee) {
@@ -440,5 +438,21 @@ public class BasicBlock extends Value {
 
     public void addImmDominatee(BasicBlock block) {
         ImmDominatee.add(block);
+    }
+
+    public void removeInstr(Instr instr) {
+        if (instr instanceof BranchInstr && instrs.contains(instr)) {
+            for (BasicBlock block : posBlocks) {
+                block.removePreBlock(this);
+            }
+            posBlocks.clear();
+        }
+        instrs.remove(instr);
+    }
+
+    @Override
+    public Value copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return map.get(this);
+        return null;
     }
 }

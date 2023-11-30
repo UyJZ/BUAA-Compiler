@@ -15,6 +15,7 @@ import llvm_ir.Values.Param;
 import llvm_ir.llvmType.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 
 public class CallInstr extends Instr {
@@ -246,5 +247,15 @@ public class CallInstr extends Instr {
     private void PopForSyscall() {
         MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.A0, Register.SP, RegDispatcher.getInstance().getCurrentOffset() - 4);
         MipsController.getInstance().addAsm(lw);
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        ArrayList<Value> params = new ArrayList<>();
+        for (Value v : operands) {
+            params.add(v.copy(map));
+        }
+        return new CallInstr(type, function, params);
     }
 }

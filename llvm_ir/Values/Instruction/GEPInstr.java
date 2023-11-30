@@ -13,6 +13,7 @@ import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.PointerType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class GEPInstr extends Instr {
 
@@ -149,6 +150,16 @@ public class GEPInstr extends Instr {
         } else {
             MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, Register.K0, Register.SP, offset);
             MipsController.getInstance().addAsm(sw);
+        }
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        if (operands.size() == 2) {
+            return new GEPInstr(operands.get(0).copy(map), operands.get(1));
+        } else {
+            return new GEPInstr(operands.get(0).copy(map), (ConstInteger) operands.get(1), operands.get(2).copy(map));
         }
     }
 }

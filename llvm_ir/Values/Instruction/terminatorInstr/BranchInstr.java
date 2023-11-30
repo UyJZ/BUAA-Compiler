@@ -14,20 +14,21 @@ import llvm_ir.llvmType.BoolType;
 import llvm_ir.llvmType.LLVMType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class BranchInstr extends Instr {
 
     private final BasicBlock label1, label2;
 
-    public BranchInstr(LLVMType type, BasicBlock label1, BasicBlock label2, Value judge) {
-        super(type, "");
+    public BranchInstr(BasicBlock label1, BasicBlock label2, Value judge) {
+        super(new LLVMType(), "");
         this.label1 = label1;
         this.label2 = label2;
         this.addValue(judge);
     }
 
-    public BranchInstr(LLVMType type, BasicBlock label1) {
-        super(type, "");
+    public BranchInstr(BasicBlock label1) {
+        super(new LLVMType(), "");
         this.label1 = label1;
         this.label2 = null;
     }
@@ -77,5 +78,15 @@ public class BranchInstr extends Instr {
         successors.add(label1);
         if (label2 != null) successors.add(label2);
         return successors;
+    }
+
+    @Override
+    public Instr copy(HashMap<Value, Value> map) {
+        if (map.containsKey(this)) return (Instr) map.get(this);
+        if (operands.size() == 0) {
+            return new BranchInstr((BasicBlock) label1.copy(map));
+        } else {
+            return new BranchInstr((BasicBlock) label1.copy(map), (BasicBlock) label2.copy(map), operands.get(0).copy(map));
+        }
     }
 }

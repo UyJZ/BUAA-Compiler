@@ -49,26 +49,26 @@ public class ForLoopStmt extends Stmt {
         if (forStmt1 != null) {
             forStmt1.genLLVMir();
         }
-        BranchInstr branchInstr0 = new BranchInstr(new LLVMType(), Cond);
+        BranchInstr branchInstr0 = new BranchInstr(Cond);
         IRController.getInstance().addInstr(branchInstr0);
         IRController.getInstance().addNewBasicBlock(Cond);
         if (cond != null) {
             cond.setBlock(Stmt, nextBlock);
             cond.genLLVMir();
         } else {
-            BranchInstr branchInstr = new BranchInstr(new LLVMType(), Stmt);
+            BranchInstr branchInstr = new BranchInstr(Stmt);
             IRController.getInstance().addInstr(branchInstr);
         }
         IRController.getInstance().addNewBasicBlock(Stmt);
         stmt.setBlockForLoop(ForStmt2, nextBlock);
         stmt.genLLVMir();
-        BranchInstr branchInstr = new BranchInstr(new LLVMType(), ForStmt2);
+        BranchInstr branchInstr = new BranchInstr( ForStmt2);
         IRController.getInstance().addInstr(branchInstr);
         IRController.getInstance().addNewBasicBlock(ForStmt2);
         if (forStmt2 != null) {
             forStmt2.genLLVMir();
         }
-        BranchInstr branchInstr1 = new BranchInstr(new LLVMType(), Cond);
+        BranchInstr branchInstr1 = new BranchInstr(Cond);
         IRController.getInstance().addInstr(branchInstr1);
         IRController.getInstance().addNewBasicBlock(nextBlock);
         SymbolManager.getInstance().leaveLoopBlock();
