@@ -58,8 +58,8 @@ public class FuncInline {
             } else {
                 for (int i = 0; i < f.getBlockArrayList().size(); i++) {
                     BasicBlock currentBlock = f.getBlockArrayList().get(i);
-                    ArrayList<Instr> instrs = currentBlock.getInstrs();
-                    for (int j = 0;j < instrs.size(); j++) {
+                    for (int j = 0;j < currentBlock.getInstrs().size(); j++) {
+                        ArrayList<Instr> instrs = currentBlock.getInstrs();
                         if (instrs.get(j) instanceof CallInstr callInstr && inlineFunc.contains(callInstr.getFunction())) {
                             BasicBlock nextBlock = new BasicBlock();
                             InlinedFunc func = callInstr.getFunction().inline(callInstr.getParam(), nextBlock, new HashMap<>());
@@ -74,10 +74,11 @@ public class FuncInline {
                             currentBlock.removeInstr(instrs.get(j));
                             currentBlock.addInstr(new BranchInstr(func.getBlocks().get(0)));
                             for (int t = 0; t < func.getBlocks().size(); t++) {
-                                f.addBasicBlock(i + t, func.getBlocks().get(t));
+                                f.addBasicBlock(i + t + 1, func.getBlocks().get(t));
                             }
-                            f.addBasicBlock(i + func.getBlocks().size(), nextBlock);
+                            f.addBasicBlock(i + func.getBlocks().size() + 1, nextBlock);
                             i = i + func.getBlocks().size() - 1;
+                            currentBlock.replacedByInPhi(nextBlock);
                             break;
                         }
                     }

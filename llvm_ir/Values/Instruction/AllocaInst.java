@@ -9,9 +9,7 @@ import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.PointerType;
-import Config.tasks.*;
 
-import java.nio.channels.Pipe;
 import java.util.HashMap;
 
 public class AllocaInst extends Instr {
@@ -26,7 +24,7 @@ public class AllocaInst extends Instr {
     //lw tempReg offset($sp) + lw targetReg 0(tempReg)
 
     public AllocaInst(LLVMType type) {
-        super(new PointerType(type), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
+        super(new PointerType(type), tasks.isSetNameAfterGen ? "" : IRController.getInstance().genVirtualRegNum());
         allocOrder = allocaNum++;
     }
 

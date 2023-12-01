@@ -84,6 +84,12 @@ public class MulExp extends Node {
                 } else if (constInteger.getVal() == 1 && ((TokenNode) children.get(1)).getTokenType() == tokenType.MOD) {
                     return new ConstInteger(0);
                 }
+            } else if (operand1 == operand2) {
+                if (((TokenNode) children.get(1)).getTokenType() == tokenType.DIV) {
+                    return new ConstInteger(1);
+                } else if (((TokenNode) children.get(1)).getTokenType() == tokenType.MOD) {
+                    return new ConstInteger(0);
+                }
             }
             switch (((TokenNode) children.get(1)).getTokenType()) {
                 case MULT -> {

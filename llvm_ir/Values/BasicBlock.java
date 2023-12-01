@@ -11,6 +11,7 @@ import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
 import llvm_ir.llvmType.BasicBlockType;
 import llvm_ir.llvmType.Integer32Type;
 
+import javax.swing.text.Position;
 import java.util.*;
 
 public class BasicBlock extends Value {
@@ -44,7 +45,7 @@ public class BasicBlock extends Value {
 
     private HashSet<Value> defSet;
 
-    private final ArrayList<BasicBlock> posBlocks = new ArrayList<>();
+    private ArrayList<BasicBlock> posBlocks = new ArrayList<>();
 
     private final ArrayList<BasicBlock> preBlocks = new ArrayList<>();
     private boolean isFirstBlock;
@@ -100,6 +101,7 @@ public class BasicBlock extends Value {
             }
         }
         instrs.add(instr);
+        instr.setFatherBlock(this);
     }
 
 
@@ -454,5 +456,47 @@ public class BasicBlock extends Value {
     public Value copy(HashMap<Value, Value> map) {
         if (map.containsKey(this)) return map.get(this);
         return null;
+    }
+
+    public void merge(BasicBlock block) {
+        if (canMerged(block)) {
+            instrs.remove(lastInstr());
+            instrs.addAll(block.getInstrs());
+            block.replacedBy(this);
+            posBlocks = new ArrayList<>(block.getPosBlocks());
+        }
+    }
+
+    public void replacedByInPhi(BasicBlock block) {
+        for (Value v : usedByList) {
+            if (v instanceof PhiInstr phiInstr) {
+                phiInstr.replaceBlock(this, block);
+            }
+        }
+    }
+
+    public boolean canMerged(BasicBlock block) {
+        if ((posBlocks.size() == 1 && posBlocks.get(0) == block && block.getPosBlocks().size() == 1 && block.getPreBlocks().get(0) == this) ||
+                (posBlocks.size() == 1 && instrs.size() == 1 && instrs.get(0) instanceof BranchInstr && instrs.get(0).getOperands().get(0) == block)) {
+            return true;
+        }
+        return false;
+    }
+
+
+    public void proOrderForGVN(HashMap<String, Instr> GVNMap) {
+        for (Instr instr : instrs) {
+            if (instr instanceof IcmpInstr || instr instanceof BinaryInstr || instr instanceof GEPInstr) {
+                if (GVNMap.containsKey(instr.GVNHash())) {
+                    instr.replacedBy(GVNMap.get(instr.GVNHash()));
+                } else {
+                    GVNMap.put(instr.GVNHash(), instr);
+                }
+            }
+        }
+        for (BasicBlock block : ImmDominatee) {
+            if (block == this) continue;
+            block.proOrderForGVN(GVNMap);
+        }
     }
 }

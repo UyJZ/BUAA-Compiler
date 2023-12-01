@@ -2,6 +2,7 @@ package llvm_ir;
 
 import BackEnd.MIPS.Assembly.Data;
 import BackEnd.MIPS.Register;
+import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.llvmType.LLVMType;
 
@@ -31,7 +32,7 @@ public class Value {
 
     protected boolean isExist;
 
-    public int hash;
+    public String hash;
 
     protected int offset;
 
@@ -46,7 +47,10 @@ public class Value {
         isDistributed = false;
         isExist = true;
         usedByList = new ArrayList<>();
-        hash = cnt++;
+        if (this instanceof ConstInteger constInteger) {
+            hash = "_" + name;
+        } else
+            hash = "_H" + cnt++;
     }
 
     public String getName() {

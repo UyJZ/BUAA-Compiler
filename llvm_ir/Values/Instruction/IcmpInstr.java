@@ -24,7 +24,7 @@ public class IcmpInstr extends Instr {
     private final CmpOp opcode;
 
     public IcmpInstr(Value operand1, Value operand2, CmpOp cmpOp) {
-        super(new BoolType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
+        super(new BoolType(), tasks.isSetNameAfterGen ? "" : IRController.getInstance().genVirtualRegNum());
         this.opcode = cmpOp;
         this.addValue(operand1);
         this.addValue(operand2);
@@ -90,5 +90,23 @@ public class IcmpInstr extends Instr {
     public Instr copy(HashMap<Value, Value> map) {
         if (map.containsKey(this)) return (Instr) map.get(this);
         return new IcmpInstr(operands.get(0).copy(map), operands.get(1).copy(map), opcode);
+    }
+
+    @Override
+    public String GVNHash() {
+        StringBuilder sb = new StringBuilder();
+        if (opcode == CmpOp.eq || opcode == CmpOp.ne) {
+            if (operands.get(0).getName().compareTo(operands.get(1).getName()) < 0) {
+                sb.append(operands.get(0).getName()).append(" ").append(opcode.toString()).append(" ").append(operands.get(1).getName());
+            } else {
+                sb.append(operands.get(1).getName()).append(" ").append(opcode.toString()).append(" ").append(operands.get(0).getName());
+            }
+        } else if (opcode == CmpOp.sgt || opcode == CmpOp.sge) {
+            sb.append(operands.get(0).getName()).append(" ").append(opcode.toString()).append(" ").append(operands.get(1).getName());
+        } else {
+            CmpOp p = (opcode == CmpOp.slt) ? CmpOp.sgt : CmpOp.sge;
+            sb.append(operands.get(1).getName()).append(" ").append(p.toString()).append(" ").append(operands.get(0).getName());
+        }
+        return sb.toString();
     }
 }

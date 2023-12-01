@@ -21,6 +21,8 @@ public class Function extends Value {
 
     private HashMap<AllocaInst, LinkedHashSet<Instr>> defMap;
 
+    private HashMap<String, Instr> instrGVNMap;
+
     private boolean hasParam;
 
     private HashMap<Value, Register> Val2Reg;
@@ -73,6 +75,7 @@ public class Function extends Value {
         isSysCall = name.equals("getint") || name.equals("putint") || name.equals("putch") || name.equals("putstr");
         hasPointer = false;
         recursive = false;
+        instrGVNMap = new HashMap<>();
     }
 
     private ArrayList<BasicBlock> blockArrayList;
@@ -380,14 +383,14 @@ public class Function extends Value {
             blocks.add((BasicBlock) currentBlock.copy(map));
         }
         for (PhiInstr phiInstr : phiToRebuild) {
-            for (int i = 0; i < phiInstr.getOperands().size(); i++) {
-                if (phiInstr.getOperands().get(i) instanceof UndefinedVal || v2b.get(phiInstr.getOperands().get(i).copy(map)) == null) {
-                    System.out.println(phiInstr.getOperands().get(i).getClass());
-                    BasicBlock block = v2b.get(phiInstr.getLabels().get(i).lastInstr().copy(map));
-                    ((PhiInstr) phiInstr.copy(map)).addOption(block, phiInstr.getOperands().get(i).copy(map));
-                } else {
-                    ((PhiInstr) phiInstr.copy(map)).addOption(v2b.get(phiInstr.getOperands().get(i).copy(map)), phiInstr.getOperands().get(i).copy(map));
+            for (int i = 0; i < phiInstr.getValues().size(); i++) {
+                BasicBlock block = v2b.get(phiInstr.getLabels().get(i).lastInstr().copy(map));
+                if (phiInstr.getLabels().get(i).lastInstr().copy(map) instanceof BranchInstr branchInstr) {
+                    if (!branchInstr.getSuccessors().contains(v2b.get(phiInstr.copy(map)))) {
+                        System.out.println("error");
+                    }
                 }
+                ((PhiInstr) phiInstr.copy(map)).addOption(block, phiInstr.getValues().get(i).copy(map));
             }
         }
         PhiInstr phi = new PhiInstr(type, new AllocaInst(type));
@@ -398,12 +401,15 @@ public class Function extends Value {
             BranchInstr branchInstr = new BranchInstr(outBlock);
             blocks.get(blocks.size() - 1).addInstr(branchInstr);
             v2b.put(branchInstr, blocks.get(blocks.size() - 1));
-
         }
         return new InlinedFunc(type, blocks, phi);
     }
 
     public void addBasicBlock(int pos, BasicBlock block) {
         blockArrayList.add(pos, block);
+    }
+
+    public HashMap<String, Instr> getInstrGVNMap() {
+        return instrGVNMap;
     }
 }

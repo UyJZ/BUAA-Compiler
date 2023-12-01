@@ -25,17 +25,20 @@ public class BranchInstr extends Instr {
         this.label1 = label1;
         this.label2 = label2;
         this.addValue(judge);
+        this.addValue(label1);
+        this.addValue(label2);
     }
 
     public BranchInstr(BasicBlock label1) {
         super(new LLVMType(), "");
         this.label1 = label1;
         this.label2 = null;
+        this.addValue(label1);
     }
 
     @Override
     public String toString() {
-        if (operands.size() == 0)
+        if (operands.size() == 1)
             return "br label " + label1.getName();
         return "br " + new BoolType().toString() + " " + operands.get(0).getName() + ", label " + label1.getName() + ", label " + label2.getName();
     }
@@ -44,7 +47,7 @@ public class BranchInstr extends Instr {
     public void genMIPS() {
         CommentAsm asm = new CommentAsm(this.toString());
         MipsController.getInstance().addAsm(asm);
-        if (operands.size() == 0) {
+        if (operands.size() == 1) {
             JAsm j = new JAsm(label1.getMIPSLabel());
             MipsController.getInstance().addAsm(j);
         } else {
@@ -83,7 +86,7 @@ public class BranchInstr extends Instr {
     @Override
     public Instr copy(HashMap<Value, Value> map) {
         if (map.containsKey(this)) return (Instr) map.get(this);
-        if (operands.size() == 0) {
+        if (operands.size() == 1) {
             return new BranchInstr((BasicBlock) label1.copy(map));
         } else {
             return new BranchInstr((BasicBlock) label1.copy(map), (BasicBlock) label2.copy(map), operands.get(0).copy(map));

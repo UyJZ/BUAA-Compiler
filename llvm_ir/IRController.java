@@ -6,7 +6,6 @@ import llvm_ir.Values.BasicBlock;
 import llvm_ir.Values.Function;
 import llvm_ir.Values.GlobalVar;
 import llvm_ir.Values.Instruction.Instr;
-import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
 import llvm_ir.Values.Param;
 import llvm_ir.llvmType.LLVMType;
 
@@ -73,7 +72,7 @@ public class IRController {
     }
 
     public void addNewBasicBlock(BasicBlock block) {
-        block.setName(tasks.isOptimize ? "" : genVirtualRegNum());
+        block.setName(tasks.isSetNameAfterGen ? "" : genVirtualRegNum());
         currentFunction.addBasicBlock(block);
         currentBasicBlock = block;
     }

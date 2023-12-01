@@ -22,14 +22,14 @@ public class BinaryInstr extends Instr {
     private op opcode;
 
     public BinaryInstr(LLVMType type, Value oprand1, Value oprand2, op opcode) {
-        super(type, tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum()); //TODO:nameGen
+        super(type, tasks.isSetNameAfterGen ? "" : IRController.getInstance().genVirtualRegNum()); //TODO:nameGen
         this.opcode = opcode;
         this.addValue(oprand1);
         this.addValue(oprand2);
     }
 
     public BinaryInstr(LLVMType type, Value operand, op opcode) { //for -x or +x
-        super(type, tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
+        super(type, tasks.isSetNameAfterGen ? "" : IRController.getInstance().genVirtualRegNum());
         this.opcode = opcode;
         this.addValue(new ConstInteger(0));
         this.addValue(operand);
@@ -200,5 +200,22 @@ public class BinaryInstr extends Instr {
     public Instr copy(HashMap<Value, Value> map) {
         if (map.containsKey(this)) return (Instr) map.get(this);
         return new BinaryInstr(type, operands.get(0).copy(map), operands.get(1).copy(map), opcode);
+    }
+
+    @Override
+    public String GVNHash() {
+        StringBuilder sb = new StringBuilder();
+        if (opcode == op.MUL || opcode == op.OR || opcode == op.ADD || opcode == op.AND) {
+            if (opcode == op.MUL && operands.get(0) instanceof ConstInteger constInteger && constInteger.getVal() == 2) {
+                sb.append(operands.get(1).getName()).append(" ").append(op.ADD).append(" ").append(operands.get(1).getName());
+            } else if (operands.get(0).getName().compareTo(operands.get(1).getName()) < 0) {
+                sb.append(operands.get(0).getName()).append(" ").append(opcode).append(" ").append(operands.get(1).getName());
+            } else {
+                sb.append(operands.get(1).getName()).append(" ").append(opcode).append(" ").append(operands.get(0).getName());
+            }
+        } else {
+            sb.append(operands.get(0).getName()).append(" ").append(opcode).append(" ").append(operands.get(1).getName());
+        }
+        return sb.toString();
     }
 }

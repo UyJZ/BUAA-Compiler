@@ -11,7 +11,6 @@ import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Function;
-import llvm_ir.Values.Param;
 import llvm_ir.llvmType.*;
 
 import java.util.ArrayList;
@@ -42,7 +41,7 @@ public class CallInstr extends Instr {
 
     public CallInstr(LLVMType type, Value func, ArrayList<Value> params) {
         //库函数
-        super(type, type instanceof VoidType || tasks.isIsOptimize() ? "" : IRController.getInstance().genVirtualRegNum());
+        super(type, type instanceof VoidType || tasks.isIsSetNameAfterGen() ? "" : IRController.getInstance().genVirtualRegNum());
         functionName = func.getName();
         isIOInstr = functionName.equals("@getint") || functionName.equals("@putint") || functionName.equals("@putch") || functionName.equals("@putstr");
         isInputInstr = functionName.equals("@getint");

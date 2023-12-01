@@ -7,6 +7,8 @@ public class tasks {
 
     public static boolean isMIPSoutput = true;
 
+    public static boolean isSetNameAfterGen = true;
+
     public static boolean isOptimize = true;
 
     public static boolean isLLVMoutput = false;
@@ -54,7 +56,7 @@ public class tasks {
         return isLLVMoutput ? LLVMOutputPath : isErrorHandle ? ErrorHandleOutputPath : isLexerAnalysis ? LexerOutputPath : ParserOutputPath;
     }
 
-    public static boolean isIsOptimize() {
-        return isOptimize;
+    public static boolean isIsSetNameAfterGen() {
+        return isSetNameAfterGen;
     }
 }

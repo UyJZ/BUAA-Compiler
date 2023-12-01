@@ -27,7 +27,7 @@ public class GEPInstr extends Instr {
     }
 
     public GEPInstr(Value ptr, ConstInteger index0, Value index) {
-        super(new LLVMType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
+        super(new LLVMType(), tasks.isSetNameAfterGen ? "" : IRController.getInstance().genVirtualRegNum());
         this.addValue(ptr);
         this.addValue(index0);
         this.addValue(index);
@@ -35,7 +35,7 @@ public class GEPInstr extends Instr {
     }
 
     public GEPInstr(Value ptr, Value index) {
-        super(new LLVMType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
+        super(new LLVMType(), tasks.isSetNameAfterGen ? "" : IRController.getInstance().genVirtualRegNum());
         this.addValue(ptr);
         this.addValue(index);
         this.type = genOutType((PointerType) ptr.getType());
@@ -44,6 +44,9 @@ public class GEPInstr extends Instr {
     @Override
     public String toString() {
         ArrayList<Value> indexs = new ArrayList<>(this.operands.subList(1, this.operands.size()));
+        if (operands.get(1).getName().length() == 0) {
+            System.out.println("DEBUG");
+        }
         Value ptr = operands.get(0);
         if (indexs.size() == 1)
             return name + " = getelementptr " + ((PointerType) ptr.getType()).getElementType() + ", " + ptr.getType() + " " + ptr.getName() + ", i32 " + operands.get(1).getName();
@@ -157,9 +160,18 @@ public class GEPInstr extends Instr {
     public Instr copy(HashMap<Value, Value> map) {
         if (map.containsKey(this)) return (Instr) map.get(this);
         if (operands.size() == 2) {
-            return new GEPInstr(operands.get(0).copy(map), operands.get(1));
+            return new GEPInstr(operands.get(0).copy(map), operands.get(1).copy(map));
         } else {
             return new GEPInstr(operands.get(0).copy(map), (ConstInteger) operands.get(1), operands.get(2).copy(map));
         }
+    }
+
+    @Override
+    public String GVNHash() {
+        StringBuilder sb = new StringBuilder();
+        if (operands.size() == 2)
+            sb.append("GEP").append(operands.get(0).hash).append(operands.get(1).hash);
+        else sb.append("GEP").append(operands.get(0).hash).append(operands.get(1).hash).append(operands.get(2).hash);
+        return sb.toString();
     }
 }

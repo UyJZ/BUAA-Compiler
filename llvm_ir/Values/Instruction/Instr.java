@@ -14,6 +14,9 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 
 public class Instr extends User {
+
+    protected BasicBlock fatherBlock;
+
     public Instr(LLVMType type, String name) {
         super(type, name);
     }
@@ -29,6 +32,18 @@ public class Instr extends User {
 
     public Instr copy(HashMap<Value, Value> map) {
         if (map.containsKey(this)) return (Instr) map.get(this);
+        return null;
+    }
+
+    public void setFatherBlock(BasicBlock fatherBlock) {
+        this.fatherBlock = fatherBlock;
+    }
+
+    public BasicBlock getFatherBlock() {
+        return fatherBlock;
+    }
+
+    public String GVNHash() {
         return null;
     }
 }

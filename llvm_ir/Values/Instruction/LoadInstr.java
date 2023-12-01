@@ -7,12 +7,10 @@ import BackEnd.MIPS.Assembly.MoveAsm;
 import BackEnd.MIPS.MipsController;
 import BackEnd.MIPS.Register;
 import Config.tasks;
-import FrontEnd.Symbol.VarSymbol;
 import MidEnd.RegDispatcher;
 import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.GlobalVar;
-import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.PointerType;
 
 import java.util.HashMap;
@@ -20,7 +18,7 @@ import java.util.HashMap;
 public class LoadInstr extends Instr {
 
     public LoadInstr(Value ptr) {
-        super(((PointerType) ptr.getType()).getElementType(), tasks.isOptimize ? "" : IRController.getInstance().genVirtualRegNum());
+        super(((PointerType) ptr.getType()).getElementType(), tasks.isSetNameAfterGen ? "" : IRController.getInstance().genVirtualRegNum());
         this.addValue(ptr);
     }
 
