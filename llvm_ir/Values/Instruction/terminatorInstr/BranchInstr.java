@@ -92,4 +92,9 @@ public class BranchInstr extends Instr {
             return new BranchInstr((BasicBlock) label1.copy(map), (BasicBlock) label2.copy(map), operands.get(0).copy(map));
         }
     }
+
+    @Override
+    public boolean isPinnedInst() {
+        return true;
+    }
 }

@@ -9,10 +9,12 @@ import llvm_ir.Values.GlobalVar;
 import llvm_ir.Values.Instruction.AllocaInst;
 import llvm_ir.Values.Instruction.CallInstr;
 import llvm_ir.Values.Instruction.Instr;
+import llvm_ir.Values.Instruction.StoreInstr;
 import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
 import llvm_ir.Values.Instruction.terminatorInstr.ReturnInstr;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 
@@ -52,25 +54,18 @@ public class DeadCodeDeletion {
 
     private void deleteDeadCode() {
         for (Function function : module.getFunctionList()) {
-            ArrayList<AllocaInst> values = function.getAllAlloc();
-            LinkedHashSet<Value> usefulInstr = new LinkedHashSet<>();
+            HashSet<Instr> deadInstrSet = new HashSet<>();
+            HashSet<Instr> records = new HashSet<>();
             for (BasicBlock block : function.getBlockArrayList()) {
                 for (Instr instr : block.getInstrs()) {
-                    if (instr instanceof CallInstr || instr instanceof BranchInstr || instr instanceof ReturnInstr) {
-                        instr.DFSForUseful(usefulInstr);
+                    if (instr.canBeDeleted(deadInstrSet, records)) {
+                        deadInstrSet.add(instr);
                     }
                 }
             }
-            for (AllocaInst value : values) {
-                value.DFSForUseful(usefulInstr);
-            }
-            ArrayList<GlobalVar> globalVars = module.getGlobalVarList();
-            for (GlobalVar globalVar : globalVars) {
-                globalVar.DFSForUseful(usefulInstr);
-            }
             for (BasicBlock block : function.getBlockArrayList()) {
                 ArrayList<Instr> instrs = block.getInstrs();
-                instrs.removeIf(instr -> !usefulInstr.contains(instr));
+                instrs.removeIf(instr -> deadInstrSet.contains(instr));
             }
         }
     }

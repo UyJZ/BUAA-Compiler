@@ -96,16 +96,16 @@ public class IcmpInstr extends Instr {
     public String GVNHash() {
         StringBuilder sb = new StringBuilder();
         if (opcode == CmpOp.eq || opcode == CmpOp.ne) {
-            if (operands.get(0).getName().compareTo(operands.get(1).getName()) < 0) {
-                sb.append(operands.get(0).getName()).append(" ").append(opcode.toString()).append(" ").append(operands.get(1).getName());
+            if (operands.get(0).hash.compareTo(operands.get(1).hash) < 0) {
+                sb.append(operands.get(0).hash).append(" ").append(opcode.toString()).append(" ").append(operands.get(1).hash);
             } else {
-                sb.append(operands.get(1).getName()).append(" ").append(opcode.toString()).append(" ").append(operands.get(0).getName());
+                sb.append(operands.get(1).hash).append(" ").append(opcode.toString()).append(" ").append(operands.get(0).hash);
             }
         } else if (opcode == CmpOp.sgt || opcode == CmpOp.sge) {
-            sb.append(operands.get(0).getName()).append(" ").append(opcode.toString()).append(" ").append(operands.get(1).getName());
+            sb.append(operands.get(0).hash).append(" ").append(opcode.toString()).append(" ").append(operands.get(1).hash);
         } else {
             CmpOp p = (opcode == CmpOp.slt) ? CmpOp.sgt : CmpOp.sge;
-            sb.append(operands.get(1).getName()).append(" ").append(p.toString()).append(" ").append(operands.get(0).getName());
+            sb.append(operands.get(1).hash).append(" ").append(p.toString()).append(" ").append(operands.get(0).hash);
         }
         return sb.toString();
     }

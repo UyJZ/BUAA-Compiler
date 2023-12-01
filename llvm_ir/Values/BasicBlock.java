@@ -31,6 +31,10 @@ public class BasicBlock extends Value {
 
     private LinkedHashSet<BasicBlock> strictDominatee;
 
+    private HashMap<BasicBlock, ArrayList<ArrayList<BasicBlock>>> paths;
+
+    private HashMap<BasicBlock, LinkedHashSet<BasicBlock>> keyPaths;
+
     private LinkedHashSet<BasicBlock> strictDominator;
 
     private LinkedHashSet<BasicBlock> dominateFrontier;
@@ -62,6 +66,8 @@ public class BasicBlock extends Value {
         strictDominator = new LinkedHashSet<>();
         dominateFrontier = new LinkedHashSet<>();
         isReachAble = true;
+        paths = new HashMap<>();
+        keyPaths = new HashMap<>();
         ImmDominatee = new LinkedHashSet<>();
     }
 
@@ -161,7 +167,7 @@ public class BasicBlock extends Value {
     }
 
     public void addPreDominator(BasicBlock block) {
-        if (!block.equals(this)) dominators.add(block);
+        dominators.add(block);
     }
 
 
@@ -229,6 +235,19 @@ public class BasicBlock extends Value {
         }
     }
 
+    public void setStrictDominatee(LinkedHashSet<BasicBlock> strictDominatee) {
+        this.strictDominatee = strictDominatee;
+        this.strictDominatee.remove(this);
+        for (BasicBlock block : this.strictDominatee) {
+            block.addStrictDominator(this);
+        }
+    }
+
+    public void addStrictDominator(BasicBlock block) {
+        if (block != this)
+            strictDominator.add(block);
+    }
+
     public void addDominatee(BasicBlock block) {
         dominatee.add(block);
     }
@@ -245,21 +264,27 @@ public class BasicBlock extends Value {
         return strictDominatee.contains(block);
     }
 
-    public void DFSBuildStrictDominator(BasicBlock target, ArrayList<BasicBlock> road, ArrayList<ArrayList<BasicBlock>> roads) {
-        if (this.equals(target)) {
-            road.add(this);
+    public void DFSBuildStrictDominator(BasicBlock target, ArrayList<BasicBlock> road, ArrayList<ArrayList<BasicBlock>> roads, HashSet<BasicBlock> visited) {
+        if (visited.contains(this)) {
+        } else if (this == target) {
             roads.add(new ArrayList<>(road));
+            if (paths.get(target) == null) {
+                paths.put(target, new ArrayList<>());
+                paths.get(target).add(new ArrayList<>(road));
+            } else {
+                paths.get(target).add(new ArrayList<>(road));
+            }
             road.remove(this);
-        } else if (road.contains(this)) {
-            return;
         } else {
+            visited.add(this);
             road.add(this);
-            for (BasicBlock block : posBlocks) {
-                block.DFSBuildStrictDominator(target, road, roads);
+            for (BasicBlock block : dominatee) {
+                block.DFSBuildStrictDominator(target, road, roads, visited);
             }
             road.remove(this);
         }
     }
+
 
     public void setStrictDominator(LinkedHashSet<BasicBlock> strictDominator) {
         this.strictDominator = new LinkedHashSet<>(strictDominator);
@@ -483,20 +508,33 @@ public class BasicBlock extends Value {
         return false;
     }
 
+    public void flush() {
+        posBlocks.clear();
+        preBlocks.clear();
+        dominatee.clear();
+        dominators.clear();
+        strictDominatee.clear();
+        strictDominator.clear();
+        dominateFrontier.clear();
+        paths.clear();
+        ImmDominatee.clear();
+        ImmDominator = null;
+    }
 
-    public void proOrderForGVN(HashMap<String, Instr> GVNMap) {
-        for (Instr instr : instrs) {
-            if (instr instanceof IcmpInstr || instr instanceof BinaryInstr || instr instanceof GEPInstr) {
-                if (GVNMap.containsKey(instr.GVNHash())) {
-                    instr.replacedBy(GVNMap.get(instr.GVNHash()));
-                } else {
-                    GVNMap.put(instr.GVNHash(), instr);
-                }
+    public void buildPrePos() {
+        if (lastInstr() instanceof BranchInstr branchInstr) {
+            for (BasicBlock block : branchInstr.getSuccessors()) {
+                block.addPreBlock(this);
+                this.addPosBlock(block);
             }
         }
-        for (BasicBlock block : ImmDominatee) {
-            if (block == this) continue;
-            block.proOrderForGVN(GVNMap);
-        }
+    }
+
+    public ArrayList<BasicBlock> getImmDominatee() {
+        return new ArrayList<>(ImmDominatee);
+    }
+
+    public ArrayList<ArrayList<BasicBlock>> getPaths(BasicBlock block) {
+        return paths.get(block);
     }
 }

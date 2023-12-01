@@ -207,15 +207,19 @@ public class BinaryInstr extends Instr {
         StringBuilder sb = new StringBuilder();
         if (opcode == op.MUL || opcode == op.OR || opcode == op.ADD || opcode == op.AND) {
             if (opcode == op.MUL && operands.get(0) instanceof ConstInteger constInteger && constInteger.getVal() == 2) {
-                sb.append(operands.get(1).getName()).append(" ").append(op.ADD).append(" ").append(operands.get(1).getName());
-            } else if (operands.get(0).getName().compareTo(operands.get(1).getName()) < 0) {
-                sb.append(operands.get(0).getName()).append(" ").append(opcode).append(" ").append(operands.get(1).getName());
+                sb.append(operands.get(1).hash).append(" ").append(op.ADD).append(" ").append(operands.get(1).hash);
+            } else if (operands.get(0).hash.compareTo(operands.get(1).hash) < 0) {
+                sb.append(operands.get(0).hash).append(" ").append(opcode).append(" ").append(operands.get(1).hash);
             } else {
-                sb.append(operands.get(1).getName()).append(" ").append(opcode).append(" ").append(operands.get(0).getName());
+                sb.append(operands.get(1).hash).append(" ").append(opcode).append(" ").append(operands.get(0).hash);
             }
         } else {
-            sb.append(operands.get(0).getName()).append(" ").append(opcode).append(" ").append(operands.get(1).getName());
+            sb.append(operands.get(0).hash).append(" ").append(opcode).append(" ").append(operands.get(1).hash);
         }
         return sb.toString();
+    }
+
+    public op getOpcode() {
+        return opcode;
     }
 }

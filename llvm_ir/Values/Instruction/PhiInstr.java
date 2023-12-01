@@ -96,6 +96,10 @@ public class PhiInstr extends Instr {
                 block.addUsedBy(this);
             }
         }
+    }
 
+    @Override
+    public boolean isPinnedInst() {
+        return true;
     }
 }

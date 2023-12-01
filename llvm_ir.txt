@@ -17,93 +17,73 @@ define dso_local i32 @main() {
     %10 = add i32 1197, %9
     br label %11
 11:
-    %12 = phi i32 [ 0, %0 ], [ %65, %66 ]  ;0
+    %12 = phi i32 [ 0, %0 ], [ %45, %46 ]  ;0
     %13 = icmp sle i32 %12, 100
-    br i1 %13, label %14, label %67
+    br i1 %13, label %14, label %47
 14:
     %15 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 0
     %16 = load i32 , i32* %15
     %17 = mul i32 -6, -6
     %18 = add i32 %16, %17
-    %19 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 0
-    store i32 %5, i32* %15
-    %20 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 1
-    %21 = load i32 , i32* %3
-    %22 = mul i32 -6, -6
-    %23 = add i32 %21, %17
-    %24 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 1
-    store i32 %5, i32* %3
-    %25 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 2
-    %26 = load i32 , i32* %25
-    %27 = mul i32 -6, -6
-    %28 = add i32 %26, %17
-    %29 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 2
-    store i32 %5, i32* %25
-    %30 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 3
+    store i32 %18, i32* %15
+    %19 = load i32 , i32* %3
+    %20 = add i32 %19, %17
+    store i32 %20, i32* %3
+    %21 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 2
+    %22 = load i32 , i32* %21
+    %23 = add i32 %22, %17
+    store i32 %23, i32* %21
+    %24 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 3
+    %25 = load i32 , i32* %24
+    %26 = add i32 %25, %17
+    store i32 %26, i32* %24
+    %27 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 4
+    %28 = load i32 , i32* %27
+    %29 = add i32 %28, %17
+    store i32 %29, i32* %27
+    %30 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 5
     %31 = load i32 , i32* %30
-    %32 = mul i32 -6, -6
-    %33 = add i32 %31, %17
-    %34 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 3
-    store i32 %5, i32* %30
-    %35 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 4
-    %36 = load i32 , i32* %35
-    %37 = mul i32 -6, -6
-    %38 = add i32 %36, %17
-    %39 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 4
-    store i32 %5, i32* %35
-    %40 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 5
-    %41 = load i32 , i32* %40
-    %42 = mul i32 -6, -6
-    %43 = add i32 %41, %17
-    %44 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 5
-    store i32 %5, i32* %40
-    %45 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 6
-    %46 = load i32 , i32* %45
-    %47 = mul i32 -6, -6
-    %48 = add i32 %46, %17
-    %49 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 6
-    store i32 %5, i32* %45
-    %50 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 7
-    %51 = load i32 , i32* %50
-    %52 = mul i32 -6, -6
-    %53 = add i32 %51, %17
-    %54 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 7
-    store i32 %5, i32* %50
-    %55 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 8
-    %56 = load i32 , i32* %55
-    %57 = mul i32 -6, -6
-    %58 = add i32 %56, %17
-    %59 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 8
-    store i32 %5, i32* %55
-    %60 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 9
-    %61 = load i32 , i32* %60
-    %62 = mul i32 -6, -6
-    %63 = add i32 %61, %17
-    %64 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 9
-    store i32 %5, i32* %60
-    %65 = add i32 %12, 1
-    br label %66
-66:
+    %32 = add i32 %31, %17
+    store i32 %32, i32* %30
+    %33 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 6
+    %34 = load i32 , i32* %33
+    %35 = add i32 %34, %17
+    store i32 %35, i32* %33
+    %36 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 7
+    %37 = load i32 , i32* %36
+    %38 = add i32 %37, %17
+    store i32 %38, i32* %36
+    %39 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 8
+    %40 = load i32 , i32* %39
+    %41 = add i32 %40, %17
+    store i32 %41, i32* %39
+    %42 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 9
+    %43 = load i32 , i32* %42
+    %44 = add i32 %43, %17
+    store i32 %44, i32* %42
+    %45 = add i32 %12, 1
+    br label %46
+46:
     br label %11
-67:
-    br label %68
-68:
-    %69 = phi i32 [ 0, %67 ], [ %65, %75 ]  ;0
-    %70 = icmp slt i32 %69, 10
-    br i1 %70, label %71, label %76
-71:
-    %72 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 %69
-    %73 = load i32 , i32* %72
-    call void @putint(i32 %73)
+47:
+    br label %48
+48:
+    %49 = phi i32 [ 0, %47 ], [ %54, %55 ]  ;0
+    %50 = icmp slt i32 %49, 10
+    br i1 %50, label %51, label %56
+51:
+    %52 = getelementptr [10 x i32], [10 x i32]* @a, i32 0, i32 %49
+    %53 = load i32 , i32* %52
+    call void @putint(i32 %53)
     call void @putch(i32 44)
     call void @putch(i32 32)
-    %74 = add i32 %69, 1
-    br label %75
-75:
-    br label %68
-76:
+    %54 = add i32 %49, 1
+    br label %55
+55:
+    br label %48
+56:
     call void @putch(i32 10)
-    call void @putint(i32 %69)
+    call void @putint(i32 %49)
     call void @putch(i32 44)
     call void @putch(i32 32)
     call void @putint(i32 %10)

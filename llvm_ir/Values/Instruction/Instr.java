@@ -11,6 +11,7 @@ import llvm_ir.llvmType.LLVMType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 
 public class Instr extends User {
@@ -45,5 +46,22 @@ public class Instr extends User {
 
     public String GVNHash() {
         return null;
+    }
+
+    public boolean isPinnedInst() {
+        return false;
+    }
+
+    public boolean canBeDeleted(HashSet<Instr> deadInstrSet, HashSet<Instr> records) {
+        if (this instanceof BranchInstr || this instanceof ReturnInstr || this instanceof CallInstr || this instanceof StoreInstr)
+            return false;
+        if (deadInstrSet.contains(this)) return true;
+        if (records.contains(this)) return false;
+        records.add(this);
+        for (Value value : usedByList) {
+            if (value instanceof Instr instr && !instr.canBeDeleted(deadInstrSet, records)) return false;
+        }
+        deadInstrSet.add(this);
+        return true;
     }
 }

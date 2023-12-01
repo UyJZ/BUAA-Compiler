@@ -75,4 +75,9 @@ public class ReturnInstr extends Instr {
             return new ReturnInstr(type, operands.get(0).copy(map));
         }
     }
+
+    @Override
+    public boolean isPinnedInst() {
+        return true;
+    }
 }

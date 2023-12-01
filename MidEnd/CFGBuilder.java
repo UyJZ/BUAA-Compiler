@@ -4,29 +4,14 @@ import llvm_ir.Module;
 import llvm_ir.Values.BasicBlock;
 import llvm_ir.Values.Function;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
+import java.util.*;
 
 public class CFGBuilder {
 
     private final Module module;
 
-    private HashMap<BasicBlock, LinkedHashSet<BasicBlock>> posCFG;
-
-    private HashMap<BasicBlock, LinkedHashSet<BasicBlock>> preCFG;
-
-    private HashMap<BasicBlock, LinkedHashSet<BasicBlock>> DomMap;
-
-    private HashMap<BasicBlock, BasicBlock> immDomMap;
-
     public CFGBuilder(Module module) {
         this.module = module;
-        posCFG = new HashMap<>();
-        preCFG = new HashMap<>();
-        DomMap = new HashMap<>();
-        immDomMap = new HashMap<>();
     }
 
     public void run() {
@@ -37,8 +22,10 @@ public class CFGBuilder {
     private void buildCFG() {
         for (Function f : module.getFunctionList()) {
             for (BasicBlock block : f.getBlockArrayList()) {
-                posCFG.put(block, new LinkedHashSet<>(block.getPosBlocks()));
-                preCFG.put(block, new LinkedHashSet<>(block.getPreBlocks()));
+                block.flush();
+            }
+            for (BasicBlock block : f.getBlockArrayList()) {
+                block.buildPrePos();
             }
         }
     }
@@ -48,6 +35,7 @@ public class CFGBuilder {
         for (Function f : module.getFunctionList()) {
             if (f.getBlockArrayList().size() == 0) continue;
             BasicBlock entry = f.getBlockArrayList().get(0);
+            //删除不可达块
             while (true) {
                 boolean allReachAble = true;
                 ArrayList<BasicBlock> UnReachAbleBlock = new ArrayList<>();
@@ -55,29 +43,19 @@ public class CFGBuilder {
                 while (iterator.hasNext()) {
                     BasicBlock block = iterator.next();
                     if (block.isReachAble()) {
-                        if (block == entry) continue;
-                        ArrayList<ArrayList<BasicBlock>> roads = new ArrayList<>();
-                        ArrayList<BasicBlock> road = new ArrayList<>();
-                        entry.DFSBuildStrictDominator(block, road, roads);
-                        LinkedHashSet<BasicBlock> blocks = null;
-                        for (ArrayList<BasicBlock> road1 : roads) {
-                            if (blocks == null) {
-                                blocks = new LinkedHashSet<>(road1);
-                            } else {
-                                blocks.retainAll(road1);
-                            }
-                        }
-                        if (blocks == null) {
+                        LinkedHashSet<BasicBlock> reach = new LinkedHashSet<>();
+                        DFSForDom(entry, block, reach);
+                        LinkedHashSet<BasicBlock> blocks = new LinkedHashSet<>(f.getBlockArrayList());
+                        if (!reach.contains(block)) {
                             allReachAble = false;
                             UnReachAbleBlock.add(block);
-                            iterator.remove();
                             continue;
                         }
-                        block.setStrictDominator(blocks);
-                        block.setDominators(blocks);
-                        block.buildImmDominator();
-                        if (block.getImmDominator() != null)
-                            immDomMap.put(block, block.getImmDominator());
+                        for (BasicBlock b : reach) {
+                            blocks.remove(b);
+                        }
+                        block.setDominatee(blocks);
+                        block.setStrictDominatee(blocks);
                     }
                 }
                 if (allReachAble) break;
@@ -87,6 +65,9 @@ public class CFGBuilder {
                         f.removeBlock(block);
                     }
                 }
+            }
+            for (BasicBlock block : f.getBlockArrayList()) {
+                block.buildImmDominator();
             }
         }
         //build dominate frontier
@@ -105,5 +86,17 @@ public class CFGBuilder {
             }
         }
 
+    }
+
+    private void DFSForDom(BasicBlock cur, BasicBlock tar, LinkedHashSet<BasicBlock> reachedSet) {
+        reachedSet.add(cur);
+        if (cur.equals(tar)) {
+            return;
+        }
+        for (BasicBlock sucBB : cur.getPosBlocks()) {
+            if (! reachedSet.contains(sucBB)) {
+                DFSForDom(sucBB, tar, reachedSet);
+            }
+        }
     }
 }

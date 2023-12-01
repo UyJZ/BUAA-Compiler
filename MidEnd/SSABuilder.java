@@ -60,9 +60,6 @@ public class SSABuilder {
             for (AllocaInst v : values) {
                 BasicBlock entry = f.getBlockArrayList().get(0);
                 Stack<Value> reachingDef = new Stack<>();
-                if (v.getAllocaNum() == 2 || v.getAllocaNum() == 0) {
-                    System.out.println("debug");
-                }
                 entry.preOrderForRename(v, reachingDef);
             }
         }
