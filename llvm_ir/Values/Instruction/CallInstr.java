@@ -203,6 +203,10 @@ public class CallInstr extends Instr {
                         extraOff -= 4;
                         MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, v.getRegister(), Register.SP, extraOff);
                         MipsController.getInstance().addAsm(sw);
+                    } else if (v instanceof ConstInteger constInteger && constInteger.getVal() == 0) {
+                        extraOff -= 4;
+                        MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, Register.ZERO, Register.SP, extraOff);
+                        MipsController.getInstance().addAsm(sw);
                     } else if (v.isUseReg() && !registers.contains(v.getRegister())) {
                         extraOff -= 4;
                         MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.K0, Register.SP, offMap.get(v.getRegister()));
@@ -225,6 +229,9 @@ public class CallInstr extends Instr {
                 } else {
                     if (v.isUseReg() && registers.contains(v.getRegister())) {
                         MoveAsm move = new MoveAsm(registers.iterator().next(), v.getRegister());
+                        MipsController.getInstance().addAsm(move);
+                    } else if (v instanceof ConstInteger constInteger && constInteger.getVal() == 0) {
+                        MoveAsm move = new MoveAsm(registers.iterator().next(), Register.ZERO);
                         MipsController.getInstance().addAsm(move);
                     } else if (v.isUseReg() && !registers.contains(v.getRegister())) {
                         MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, registers.iterator().next(), Register.SP, offMap.get(v.getRegister()));

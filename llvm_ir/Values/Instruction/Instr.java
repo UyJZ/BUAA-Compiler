@@ -27,10 +27,6 @@ public class Instr extends User {
         else this.name = IRController.getInstance().genVirtualRegNum();
     }
 
-    public boolean hasOutput() {
-        return !(this instanceof StoreInstr || this instanceof BranchInstr || this instanceof ReturnInstr);
-    }
-
     public Instr copy(HashMap<Value, Value> map) {
         if (map.containsKey(this)) return (Instr) map.get(this);
         return null;

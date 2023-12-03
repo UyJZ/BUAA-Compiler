@@ -102,7 +102,15 @@ public class RegDispatcher {
 
     public void distributeRegFor(Value v) {
         //这个条件目前是不确定的，也可以说是待定的，因为之后还有图着色算法，目前还没有确定无法被着色的val是否是isdistributed()
-        if (v.isDistributed() && v.isUseReg()) return;
+        if (v.isDistributedToReg()) {
+            freeRegs.remove(v.getRegister());
+            usedRegs.add(v.getRegister());
+        } else if (v.isDistributedToMem()) {
+            if (v.getOffset() > 0) {
+                v.setOffset(currentOffset - v.getLen());
+                currentOffset = currentOffset - v.getLen();
+            }
+        }
         if (!v.isDistributed()) {
             if (freeRegs.isEmpty()) {
                 v.setOffset(currentOffset - v.getLen());

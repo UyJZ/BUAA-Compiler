@@ -10,8 +10,6 @@ import MidEnd.RegDispatcher;
 import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.ConstInteger;
-import llvm_ir.Values.TempValue;
-import llvm_ir.llvmType.LLVMType;
 import llvm_ir.llvmType.VoidType;
 
 public class MoveInstr extends Instr {
@@ -50,6 +48,9 @@ public class MoveInstr extends Instr {
         MipsController.getInstance().addAsm(commentAsm);
         Register r1;
         Register r2;
+        if (operands.get(0).getName().equals("%67")) {
+            System.out.println("debug");
+        }
         if (!operands.get(0).isDistributed() && !(operands.get(0) instanceof ConstInteger)) {
             RegDispatcher.getInstance().distributeRegFor(operands.get(0));
         }
@@ -60,6 +61,7 @@ public class MoveInstr extends Instr {
             r1 = operands.get(0).getRegister();
             if (operands.get(1).isUseReg()) {
                 r2 = operands.get(1).getRegister();
+                if (r1 == r2) return;
                 MoveAsm move = new MoveAsm(r1, r2);
                 MipsController.getInstance().addAsm(move);
             } else if (operands.get(1) instanceof ConstInteger) {
@@ -91,5 +93,13 @@ public class MoveInstr extends Instr {
     @Override
     public boolean isDefinition() {
         return true;
+    }
+
+    public Value getDst() {
+        return operands.get(0);
+    }
+
+    public Value getSrc() {
+        return operands.get(1);
     }
 }

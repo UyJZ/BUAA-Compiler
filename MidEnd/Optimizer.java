@@ -17,6 +17,12 @@ public class Optimizer {
 
     private final MergeBlock mergeBlock;
 
+    private final ActAnalysis actAnalysis;
+
+    private final RegAllocator regAllocator;
+
+    private final RegAllocatorForSSA regAllocatorForSSA;
+
     private final De_SSA deSsa;
 
     public Optimizer(Module module) {
@@ -28,6 +34,9 @@ public class Optimizer {
         this.gvnGcm = new GVN_GCM(module);
         this.mergeBlock = new MergeBlock(module);
         this.deSsa = new De_SSA(module);
+        this.actAnalysis = new ActAnalysis(module);
+        this.regAllocator = new RegAllocator(module);
+        this.regAllocatorForSSA = new RegAllocatorForSSA(module);
     }
 
     public void run() {
@@ -35,15 +44,18 @@ public class Optimizer {
         ssaBuilder.run();
         GlobalForInline globalForInline = new GlobalForInline();
         globalForInline.setModule(module);
-        //funcInline.run();
+        funcInline.run();
         deadCodeDeletion.run();
         cfgBuilder.run();
         gvnGcm.run();
         cfgBuilder.run();
+        actAnalysis.run();
+        regAllocatorForSSA.run();
         deSsa.run();
         cfgBuilder.run();
         mergeBlock.run();
         cfgBuilder.run();
         module.setName();
+        //regAllocator.run();
     }
 }

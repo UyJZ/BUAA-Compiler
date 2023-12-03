@@ -11,7 +11,6 @@ import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
 import llvm_ir.llvmType.BasicBlockType;
 import llvm_ir.llvmType.Integer32Type;
 
-import javax.swing.text.Position;
 import java.util.*;
 
 public class BasicBlock extends Value {
@@ -45,9 +44,11 @@ public class BasicBlock extends Value {
 
     private HashSet<Value> inSet;
 
-    private HashSet<Value> outSet;
+    private HashSet<Value> useSet;
 
     private HashSet<Value> defSet;
+
+    private HashSet<Value> outSet;
 
     private ArrayList<BasicBlock> posBlocks = new ArrayList<>();
 
@@ -135,6 +136,10 @@ public class BasicBlock extends Value {
         inSet = set;
     }
 
+    public void setUseSet(HashSet<Value> set) {
+        useSet = set;
+    }
+
     public void setOutSet(HashSet<Value> set) {
         outSet = set;
     }
@@ -155,16 +160,49 @@ public class BasicBlock extends Value {
         return outSet;
     }
 
+    public HashSet<Value> getUseSet() {
+        return useSet;
+    }
+
     public void BuildDefUse() {
         defSet = new HashSet<>();
-        outSet = new HashSet<>();
+        useSet = new HashSet<>();
         for (Instr instr : instrs) {
-            for (Value operand : instr.getOperands()) {
-                if (operand instanceof Instr || operand instanceof Param || operand instanceof GlobalVar) {
-                    outSet.add(operand);
+            if (instr instanceof PhiInstr) {
+                for (Value operand : instr.getOperands()) {
+                    if (!(operand instanceof BasicBlock || operand instanceof ConstInteger)) {
+                        useSet.add(operand);
+                    }
                 }
             }
-            if (instr.hasOutput()) {
+        }
+        for (Instr instr : instrs) {
+            /*
+            if (instr instanceof MoveInstr moveInstr) {
+                if (!(moveInstr.getSrc() instanceof BasicBlock || moveInstr.getSrc() instanceof ConstInteger) && !defSet.contains(moveInstr.getSrc())) {
+                    useSet.add(moveInstr.getSrc());
+                }
+                if (!useSet.contains(moveInstr.getDst())) {
+                    defSet.add(moveInstr.getDst());
+                }
+            } else {
+                for (Value operand : instr.getOperands()) {
+                    if (!(operand instanceof BasicBlock || operand instanceof ConstInteger) && !defSet.contains(operand)) {
+                        useSet.add(operand);
+                    }
+                }
+                if (instr.isDefinition() && !useSet.contains(instr)) {
+                    defSet.add(instr);
+                }
+            }
+
+             */
+            for (Value operand : instr.getOperands()) {
+                if (!(operand instanceof BasicBlock || operand instanceof ConstInteger) && !defSet.contains(operand)) {
+                    useSet.add(operand);
+                }
+            }
+            if (instr.isDefinition() && !useSet.contains(instr)) {
                 defSet.add(instr);
             }
         }
@@ -529,5 +567,10 @@ public class BasicBlock extends Value {
 
     public ArrayList<ArrayList<BasicBlock>> getPaths(BasicBlock block) {
         return paths.get(block);
+    }
+
+    @Override
+    public boolean isDistributable() {
+        return false;
     }
 }

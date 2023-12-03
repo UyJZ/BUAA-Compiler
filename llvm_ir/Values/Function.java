@@ -422,4 +422,9 @@ public class Function extends Value {
     public HashMap<String, Instr> getInstrGVNMap() {
         return instrGVNMap;
     }
+
+    @Override
+    public boolean isDistributable() {
+        return false;
+    }
 }

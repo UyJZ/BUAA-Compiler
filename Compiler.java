@@ -20,5 +20,6 @@ public class Compiler {
          */
         tasks.isMIPSoutput = true;
         CompilerHandler.work();
+        //throw new RuntimeException("Compiler finished");
     }
 }

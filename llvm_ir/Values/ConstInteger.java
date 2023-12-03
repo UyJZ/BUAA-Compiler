@@ -27,4 +27,9 @@ public class ConstInteger extends Value {
     public Value copy(HashMap<Value, Value> map) {
         return new ConstInteger(val);
     }
+
+    @Override
+    public boolean isDistributable() {
+        return false;
+    }
 }

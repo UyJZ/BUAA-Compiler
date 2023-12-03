@@ -32,6 +32,8 @@ public class Value {
 
     protected boolean isExist;
 
+    protected boolean isMem;
+
     public String hash;
 
     protected int offset;
@@ -46,6 +48,7 @@ public class Value {
         this.userList = new ArrayList<>();
         isDistributed = false;
         isExist = true;
+        isMem = false;
         usedByList = new ArrayList<>();
         if (this instanceof ConstInteger constInteger) {
             hash = "_" + name;
@@ -79,6 +82,7 @@ public class Value {
         this.offset = offset;
         this.useReg = false;
         this.isDistributed = true;
+        this.isMem = true;
     }
 
     public Register getRegister() {
@@ -146,6 +150,29 @@ public class Value {
     public Value copy(HashMap<Value, Value> map) {
         if (map.containsKey(this)) return map.get(this);
         return null;
+    }
+
+    public void removeDistribute() {
+        this.isDistributed = true;
+        this.useReg = false;
+        this.isMem = true;
+    }
+
+    public boolean isDistributable() {
+        return true;
+    }
+
+    public boolean isMem() {
+        return isMem;
+    }
+
+    public boolean isDistributedToReg() {
+        return isDistributed && useReg;
+    }
+
+    public boolean isDistributedToMem() {
+        offset = 4;
+        return isDistributed && isMem;
     }
 
 }

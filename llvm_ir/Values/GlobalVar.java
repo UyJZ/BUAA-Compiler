@@ -69,4 +69,9 @@ public class GlobalVar extends Value {
     public LabelAsm getLabel() {
         return label;
     }
+
+    @Override
+    public boolean isDistributable() {
+        return false;
+    }
 }

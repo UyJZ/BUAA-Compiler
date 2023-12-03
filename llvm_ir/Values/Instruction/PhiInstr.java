@@ -102,4 +102,9 @@ public class PhiInstr extends Instr {
     public boolean isPinnedInst() {
         return true;
     }
+
+    @Override
+    public boolean isDefinition() {
+        return true;
+    }
 }
