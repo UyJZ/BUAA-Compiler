@@ -109,4 +109,9 @@ public class IcmpInstr extends Instr {
         }
         return sb.toString();
     }
+
+    @Override
+    public boolean isDefinition() {
+        return true;
+    }
 }

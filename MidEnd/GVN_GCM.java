@@ -25,6 +25,7 @@ public class GVN_GCM {
     }
 
     public void run() {
+        OptimizedCalc();
         GVN();
     }
 
@@ -62,6 +63,7 @@ public class GVN_GCM {
     public void OptimizedCalc() {
         for (Function function : module.getFunctionList()) {
             for (BasicBlock block : function.getBlockArrayList()) {
+                LinkedHashSet<Instr> deadInstrSet = new LinkedHashSet<>();
                 for (Instr instr : block.getInstrs()) {
                     if (instr instanceof BinaryInstr binaryInstr) {
                         switch (binaryInstr.getOpcode()) {
@@ -69,52 +71,72 @@ public class GVN_GCM {
                                 if (binaryInstr.getOperands().get(0) instanceof ConstInteger constInteger1 && binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger2) {
                                     int res = constInteger1.getVal() + constInteger2.getVal();
                                     binaryInstr.replacedBy(new ConstInteger(res));
+                                    deadInstrSet.add(binaryInstr);
                                 } else if (binaryInstr.getOperands().get(0) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 0) {
                                     binaryInstr.replacedBy(binaryInstr.getOperands().get(1));
+                                    deadInstrSet.add(binaryInstr);
                                 } else if (binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 0) {
                                     binaryInstr.replacedBy(binaryInstr.getOperands().get(0));
+                                    deadInstrSet.add(binaryInstr);
                                 }
                             }
                             case SUB -> {
                                 if (binaryInstr.getOperands().get(0) instanceof ConstInteger constInteger1 && binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger2) {
                                     int res = constInteger1.getVal() - constInteger2.getVal();
                                     binaryInstr.replacedBy(new ConstInteger(res));
+                                    deadInstrSet.add(binaryInstr);
                                 } else if (binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 0) {
                                     binaryInstr.replacedBy(binaryInstr.getOperands().get(0));
+                                    deadInstrSet.add(binaryInstr);
                                 }
                             }
                             case MUL -> {
                                 if (binaryInstr.getOperands().get(0) instanceof ConstInteger constInteger1 && binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger2) {
                                     int res = constInteger1.getVal() * constInteger2.getVal();
                                     binaryInstr.replacedBy(new ConstInteger(res));
+                                    deadInstrSet.add(binaryInstr);
                                 } else if (binaryInstr.getOperands().get(0) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 0) {
                                     binaryInstr.replacedBy(new ConstInteger(0));
+                                    deadInstrSet.add(binaryInstr);
                                 } else if (binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 0) {
                                     binaryInstr.replacedBy(new ConstInteger(0));
+                                    deadInstrSet.add(binaryInstr);
                                 } else if (binaryInstr.getOperands().get(0) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 1) {
                                     binaryInstr.replacedBy(binaryInstr.getOperands().get(1));
+                                    deadInstrSet.add(binaryInstr);
                                 } else if (binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 1) {
                                     binaryInstr.replacedBy(binaryInstr.getOperands().get(0));
+                                    deadInstrSet.add(binaryInstr);
                                 }
                             }
                             case SDIV -> {
                                 if (binaryInstr.getOperands().get(0) instanceof ConstInteger constInteger1 && binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger2) {
                                     int res = constInteger1.getVal() / constInteger2.getVal();
                                     binaryInstr.replacedBy(new ConstInteger(res));
+                                    deadInstrSet.add(binaryInstr);
+                                } else if (binaryInstr.getOperands().get(0) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 0) {
+                                    binaryInstr.replacedBy(new ConstInteger(0));
+                                    deadInstrSet.add(binaryInstr);
                                 } else if (binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 1) {
                                     binaryInstr.replacedBy(binaryInstr.getOperands().get(0));
+                                    deadInstrSet.add(binaryInstr);
                                 }
                             }
                             case SREM -> {
                                 if (binaryInstr.getOperands().get(0) instanceof ConstInteger constInteger1 && binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger2) {
                                     int res = constInteger1.getVal() % constInteger2.getVal();
                                     binaryInstr.replacedBy(new ConstInteger(res));
+                                    deadInstrSet.add(binaryInstr);
                                 } else if (binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 1) {
                                     binaryInstr.replacedBy(new ConstInteger(0));
+                                    deadInstrSet.add(binaryInstr);
                                 }
                             }
                         }
                     }
+                }
+                for (Instr instr : deadInstrSet) {
+                    block.getInstrs().remove(instr);
                 }
             }
         }

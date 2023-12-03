@@ -4,7 +4,7 @@ import Config.tasks;
 import java.io.*;
 
 public class Compiler {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, RuntimeException {
         /*
         -l : Lexer analysis
         -p : Parser analysis
@@ -18,7 +18,7 @@ public class Compiler {
         -ioe : llvm ir and optimize and error handle
         -moe : mips and optimize and error handle
          */
-        tasks.isLLVMoutput = true;
+        tasks.isMIPSoutput = true;
         CompilerHandler.work();
     }
 }

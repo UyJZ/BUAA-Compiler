@@ -71,6 +71,10 @@ public class BasicBlock extends Value {
         ImmDominatee = new LinkedHashSet<>();
     }
 
+    public void setFather(Function father) {
+        this.father = father;
+    }
+
 
     public void addPreBlock(BasicBlock preBlock) {
         preBlocks.add(preBlock);
@@ -483,15 +487,6 @@ public class BasicBlock extends Value {
         return null;
     }
 
-    public void merge(BasicBlock block) {
-        if (canMerged(block)) {
-            instrs.remove(lastInstr());
-            instrs.addAll(block.getInstrs());
-            block.replacedBy(this);
-            posBlocks = new ArrayList<>(block.getPosBlocks());
-        }
-    }
-
     public void replacedByInPhi(BasicBlock block) {
         for (Value v : usedByList) {
             if (v instanceof PhiInstr phiInstr) {
@@ -501,11 +496,9 @@ public class BasicBlock extends Value {
     }
 
     public boolean canMerged(BasicBlock block) {
-        if ((posBlocks.size() == 1 && posBlocks.get(0) == block && block.getPosBlocks().size() == 1 && block.getPreBlocks().get(0) == this) ||
-                (posBlocks.size() == 1 && instrs.size() == 1 && instrs.get(0) instanceof BranchInstr && instrs.get(0).getOperands().get(0) == block)) {
-            return true;
-        }
-        return false;
+        return ((posBlocks.size() == 1 && posBlocks.get(0) == block && block.getPreBlocks().size() == 1 && block.getPreBlocks().get(0) == this) ||
+                (posBlocks.size() == 1 && instrs.size() == 1 && instrs.get(0) instanceof BranchInstr && instrs.get(0).getOperands().get(0) == block)) &&
+                !(block.getInstrs().get(0) instanceof PhiInstr);
     }
 
     public void flush() {

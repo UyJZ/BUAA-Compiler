@@ -52,6 +52,10 @@ public class Instr extends User {
         return false;
     }
 
+    public boolean isDefinition() {
+        return false;
+    }
+
     public boolean canBeDeleted(HashSet<Instr> deadInstrSet, HashSet<Instr> records) {
         if (this instanceof BranchInstr || this instanceof ReturnInstr || this instanceof CallInstr || this instanceof StoreInstr)
             return false;

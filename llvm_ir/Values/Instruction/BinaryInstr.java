@@ -222,4 +222,9 @@ public class BinaryInstr extends Instr {
     public op getOpcode() {
         return opcode;
     }
+
+    @Override
+    public boolean isDefinition() {
+        return true;
+    }
 }

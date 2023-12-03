@@ -18,12 +18,8 @@ import java.util.HashMap;
 
 public class BranchInstr extends Instr {
 
-    private final BasicBlock label1, label2;
-
     public BranchInstr(BasicBlock label1, BasicBlock label2, Value judge) {
         super(new LLVMType(), "");
-        this.label1 = label1;
-        this.label2 = label2;
         this.addValue(judge);
         this.addValue(label1);
         this.addValue(label2);
@@ -31,16 +27,14 @@ public class BranchInstr extends Instr {
 
     public BranchInstr(BasicBlock label1) {
         super(new LLVMType(), "");
-        this.label1 = label1;
-        this.label2 = null;
         this.addValue(label1);
     }
 
     @Override
     public String toString() {
         if (operands.size() == 1)
-            return "br label " + label1.getName();
-        return "br " + new BoolType().toString() + " " + operands.get(0).getName() + ", label " + label1.getName() + ", label " + label2.getName();
+            return "br label " + operands.get(0).getName();
+        return "br " + new BoolType().toString() + " " + operands.get(0).getName() + ", label " + operands.get(1).getName() + ", label " + operands.get(2).getName();
     }
 
     @Override
@@ -48,23 +42,27 @@ public class BranchInstr extends Instr {
         CommentAsm asm = new CommentAsm(this.toString());
         MipsController.getInstance().addAsm(asm);
         if (operands.size() == 1) {
+            BasicBlock label1 = (BasicBlock) operands.get(0);
             JAsm j = new JAsm(label1.getMIPSLabel());
             MipsController.getInstance().addAsm(j);
         } else {
+            BasicBlock label1 = (BasicBlock) operands.get(1);
+            BasicBlock label2 = (BasicBlock) operands.get(2);
             Value judge = operands.get(0);
-            if (judge.isUseReg()) {
+            if (judge.isUseReg() && judge.getRegister() != Register.ZERO) {
                 BranchITAsm bne = new BranchITAsm(BranchITAsm.Op.bne, judge.getRegister(), Register.ZERO, label1.getMIPSLabel());
                 MipsController.getInstance().addAsm(bne);
                 BranchITAsm beq = new BranchITAsm(BranchITAsm.Op.beq, judge.getRegister(), Register.ZERO, label2.getMIPSLabel());
                 MipsController.getInstance().addAsm(beq);
             } else if (judge instanceof ConstInteger constInteger) {
                 int v = constInteger.getVal();
-                LiAsm li = new LiAsm(Register.K0, v);
-                MipsController.getInstance().addAsm(li);
-                BranchITAsm bne = new BranchITAsm(BranchITAsm.Op.bne, Register.K0, Register.ZERO, label1.getMIPSLabel());
-                MipsController.getInstance().addAsm(bne);
-                BranchITAsm beq = new BranchITAsm(BranchITAsm.Op.beq, Register.K0, Register.ZERO, label2.getMIPSLabel());
-                MipsController.getInstance().addAsm(beq);
+                JAsm j;
+                if (v == 0) {
+                    j = new JAsm(label2.getMIPSLabel());
+                } else {
+                    j = new JAsm(label1.getMIPSLabel());
+                }
+                MipsController.getInstance().addAsm(j);
             } else {
                 MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.K0, Register.SP, judge.getOffset());
                 MipsController.getInstance().addAsm(lw);
@@ -78,8 +76,15 @@ public class BranchInstr extends Instr {
 
     public ArrayList<BasicBlock> getSuccessors() {
         ArrayList<BasicBlock> successors = new ArrayList<>();
-        successors.add(label1);
-        if (label2 != null) successors.add(label2);
+        if (operands.size() == 1) {
+            BasicBlock label1 = (BasicBlock) operands.get(0);
+            successors.add(label1);
+        } else {
+            BasicBlock label1 = (BasicBlock) operands.get(1);
+            BasicBlock label2 = (BasicBlock) operands.get(2);
+            successors.add(label1);
+            successors.add(label2);
+        }
         return successors;
     }
 
@@ -87,8 +92,11 @@ public class BranchInstr extends Instr {
     public Instr copy(HashMap<Value, Value> map) {
         if (map.containsKey(this)) return (Instr) map.get(this);
         if (operands.size() == 1) {
+            BasicBlock label1 = (BasicBlock) operands.get(0);
             return new BranchInstr((BasicBlock) label1.copy(map));
         } else {
+            BasicBlock label1 = (BasicBlock) operands.get(1);
+            BasicBlock label2 = (BasicBlock) operands.get(2);
             return new BranchInstr((BasicBlock) label1.copy(map), (BasicBlock) label2.copy(map), operands.get(0).copy(map));
         }
     }
@@ -96,5 +104,9 @@ public class BranchInstr extends Instr {
     @Override
     public boolean isPinnedInst() {
         return true;
+    }
+
+    public Value getJudge() {
+        return operands.get(0);
     }
 }

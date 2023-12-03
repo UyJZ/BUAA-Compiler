@@ -3,7 +3,6 @@ package BackEnd.MIPS;
 import BackEnd.MIPS.Assembly.AluITAsm;
 import BackEnd.MIPS.Assembly.MemITAsm;
 import MidEnd.RegDispatcher;
-import llvm_ir.Value;
 
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -16,7 +15,7 @@ public class PushMarco {
         this.operands.addAll(operands);
     }
 
-    public void addToMipsController() {
+    public void addToMipsControllerForSysReg() {
         for (Register register : operands) {
             RegDispatcher.getInstance().allocSpaceForReg();
             MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, register, Register.SP, RegDispatcher.getInstance().getCurrentOffset());
@@ -24,5 +23,13 @@ public class PushMarco {
         }
         AluITAsm addi = new AluITAsm(AluITAsm.Op.addi, Register.SP, Register.SP, RegDispatcher.getInstance().getCurrentOffset());
         MipsController.getInstance().addAsm(addi);
+    }
+
+    public void addToMipsControllerOnlyForNormalReg() {
+        for (Register register : operands) {
+            RegDispatcher.getInstance().allocSpaceForReg();
+            MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, register, Register.SP, RegDispatcher.getInstance().getCurrentOffset());
+            MipsController.getInstance().addAsm(sw);
+        }
     }
 }

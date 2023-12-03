@@ -58,8 +58,11 @@ public class CompilerHandler {
             if (ErrorChecker.getErrors().size() == 0) {
                 SymbolManager.getInstance().flush();
                 c.genLLVMir();
-                if (tasks.isSetNameAfterGen) {
-                    IRController.getInstance().setName();
+                if (tasks.isOptimize) {
+                    Optimizer optimizer = new Optimizer(IRController.getInstance().getModule());
+                    optimizer.run();
+                }else {
+                    IRController.getInstance().getModule().setName();
                 }
                 PrintStream ps1 = new PrintStream(new FileOutputStream("llvm_ir.txt"));
                 PrintStream ps2 = new PrintStream(new FileOutputStream("mips.txt"));

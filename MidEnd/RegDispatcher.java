@@ -23,6 +23,8 @@ public class RegDispatcher {
 
     private LinkedHashSet<Register> freeArgRegs;
 
+    private LinkedHashSet<Register> usedArgRegs;
+
     private LinkedHashSet<Register> usedRegs;
 
     private HashMap<Function, HashMap<Value, Register>> Val2Reg;
@@ -55,7 +57,7 @@ public class RegDispatcher {
         this.module = null;
         this.freeRegs = Register.tempRegs();
         this.usedRegs = new LinkedHashSet<>();
-        this.freeRegs = Register.argsRegs();
+        this.freeArgRegs = Register.argsRegs();
         this.Val2Reg = new HashMap<>();
         this.Val2Offset = new HashMap<>();
         this.Reg2Val = new HashMap<>();
@@ -84,6 +86,8 @@ public class RegDispatcher {
         currentOffset = function.getOffset();
         this.freeRegs = function.getFreeRegs();
         this.usedRegs = function.getUsedRegs();
+        this.freeArgRegs = function.getFreeArgRegs();
+        this.usedArgRegs = function.getUsedArgRegs();
     }
 
     public void distributeMemForAlloc(AllocaInst v) {
@@ -120,7 +124,24 @@ public class RegDispatcher {
         LinkedHashSet<Register> res = new LinkedHashSet<>();
         res.add(Register.SP);
         res.add(Register.RA);
+        return res;
+    }
+
+    public LinkedHashSet<Register> RegToPushInStackForParam() {
+        return usedArgRegs;
+    }
+
+    public LinkedHashSet<Register> usedRegister() {
+        LinkedHashSet<Register> res = new LinkedHashSet<>();
         res.addAll(usedRegs);
+        res.addAll(usedArgRegs);
+        return res;
+    }
+
+    public LinkedHashSet<Register> systemReg() {
+        LinkedHashSet<Register> res = new LinkedHashSet<>();
+        res.add(Register.RA);
+        res.add(Register.SP);
         return res;
     }
 

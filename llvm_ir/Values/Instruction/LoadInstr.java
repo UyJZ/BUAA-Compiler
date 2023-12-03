@@ -85,4 +85,8 @@ public class LoadInstr extends Instr {
         return new LoadInstr(operands.get(0).copy(map));
     }
 
+    @Override
+    public boolean isDefinition() {
+        return true;
+    }
 }

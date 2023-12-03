@@ -83,6 +83,7 @@ public class Function extends Value {
     public void addBasicBlock(BasicBlock basicBlock) {
         if (blockArrayList.size() == 0) basicBlock.setFirstBlock();
         blockArrayList.add(basicBlock);
+        basicBlock.setFather(this);
     }
 
     public boolean isMainFunc() {
@@ -211,6 +212,14 @@ public class Function extends Value {
                 }
             }
         }
+    }
+
+    public LinkedHashSet<Register> getFreeArgRegs() {
+        return freeArgRegs;
+    }
+
+    public LinkedHashSet<Register> getUsedArgRegs() {
+        return usedArgRegs;
     }
 
     @Override
@@ -407,6 +416,7 @@ public class Function extends Value {
 
     public void addBasicBlock(int pos, BasicBlock block) {
         blockArrayList.add(pos, block);
+        block.setFather(this);
     }
 
     public HashMap<String, Instr> getInstrGVNMap() {

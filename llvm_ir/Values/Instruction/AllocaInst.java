@@ -75,4 +75,9 @@ public class AllocaInst extends Instr {
         if (map.containsKey(this)) return (Instr) map.get(this);
         return new AllocaInst(((PointerType) type).getElementType());
     }
+
+    @Override
+    public boolean isDefinition() {
+        return true;
+    }
 }

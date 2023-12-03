@@ -44,9 +44,6 @@ public class GEPInstr extends Instr {
     @Override
     public String toString() {
         ArrayList<Value> indexs = new ArrayList<>(this.operands.subList(1, this.operands.size()));
-        if (operands.get(1).getName().length() == 0) {
-            System.out.println("DEBUG");
-        }
         Value ptr = operands.get(0);
         if (indexs.size() == 1)
             return name + " = getelementptr " + ((PointerType) ptr.getType()).getElementType() + ", " + ptr.getType() + " " + ptr.getName() + ", i32 " + operands.get(1).getName();
@@ -173,5 +170,10 @@ public class GEPInstr extends Instr {
             sb.append("GEP").append(operands.get(0).hash).append(operands.get(1).hash);
         else sb.append("GEP").append(operands.get(0).hash).append(operands.get(1).hash).append(operands.get(2).hash);
         return sb.toString();
+    }
+
+    @Override
+    public boolean isDefinition() {
+        return true;
     }
 }

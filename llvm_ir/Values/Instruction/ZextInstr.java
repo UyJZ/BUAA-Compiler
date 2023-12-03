@@ -40,4 +40,9 @@ public class ZextInstr extends Instr {
         if (map.containsKey(this)) return (Instr) map.get(this);
         return new ZextInstr(type1, type, operands.get(0).copy(map));
     }
+
+    @Override
+    public boolean isDefinition() {
+        return true;
+    }
 }

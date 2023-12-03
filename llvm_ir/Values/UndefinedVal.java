@@ -5,9 +5,9 @@ import llvm_ir.llvmType.Integer32Type;
 
 import java.util.HashMap;
 
-public class UndefinedVal extends Value {
+public class UndefinedVal extends ConstInteger {
     public UndefinedVal() {
-        super(new Integer32Type(), "0");
+        super(0);
     }
 
     @Override

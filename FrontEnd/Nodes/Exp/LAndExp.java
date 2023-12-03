@@ -38,7 +38,7 @@ public class LAndExp extends Node {
         if (newBasicBlock != null)
             IRController.getInstance().addNewBasicBlock(newBasicBlock);
         if (children.size() == 1) {
-            ((EqExp)children.get(0)).setBlock(null, trueBlock, falseBlock);
+            ((EqExp) children.get(0)).setBlock(null, trueBlock, falseBlock);
             Value v = children.get(0).genLLVMir();
             return ToBool(v);
         } else {
@@ -52,6 +52,16 @@ public class LAndExp extends Node {
     }
 
     private Value ToBool(Value v) {
+        if (v instanceof ConstInteger constInteger) {
+            BranchInstr branchInstr;
+            if (constInteger.getVal() == 0) {
+                branchInstr = new BranchInstr(falseBlock);
+            } else {
+                branchInstr = new BranchInstr(trueBlock);
+            }
+            IRController.getInstance().addInstr(branchInstr);
+            return null;
+        }
         if (!(v.getType() instanceof BoolType)) {
             IcmpInstr icmpInstr = new IcmpInstr(v, new ConstInteger(0), IcmpInstr.CmpOp.ne);
             IRController.getInstance().addInstr(icmpInstr);

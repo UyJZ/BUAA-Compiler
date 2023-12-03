@@ -15,6 +15,7 @@ import llvm_ir.llvmType.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 
 public class CallInstr extends Instr {
@@ -183,15 +184,30 @@ public class CallInstr extends Instr {
             }
         } else {
             if (!(type instanceof VoidType)) RegDispatcher.getInstance().distributeRegFor(this);
-            PushMarco pushMarco = new PushMarco(RegDispatcher.getInstance().RegToPushInStack());
+            PushMarco pushMarco_0 = new PushMarco(RegDispatcher.getInstance().usedRegister());
+            PushMarco pushMarco = new PushMarco(RegDispatcher.getInstance().systemReg());
+            LinkedHashSet<Register> regToPush = new LinkedHashSet<>(RegDispatcher.getInstance().usedRegister());
+            HashMap<Register, Integer> offMap = new HashMap<>();
+            int len = 1;
+            for (Register register : regToPush) {
+                offMap.put(register, RegDispatcher.getInstance().getCurrentOffset() - 4 * len);
+                len++;
+            }
             int off = RegDispatcher.getInstance().getCurrentOffset();
+            pushMarco_0.addToMipsControllerOnlyForNormalReg();
             LinkedHashSet<Register> registers = Register.argsRegs();
-            int extraOff = RegDispatcher.getInstance().getCurrentOffset() - RegDispatcher.getInstance().getUsedRegsSize();
+            int extraOff = RegDispatcher.getInstance().getCurrentOffset() - RegDispatcher.getInstance().systemReg().size() * 4;
             for (Value v : params) {
                 if (registers.isEmpty()) {
-                    if (v.isUseReg()) {
+                    if (v.isUseReg() && registers.contains(v.getRegister())) {
                         extraOff -= 4;
                         MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, v.getRegister(), Register.SP, extraOff);
+                        MipsController.getInstance().addAsm(sw);
+                    } else if (v.isUseReg() && !registers.contains(v.getRegister())) {
+                        extraOff -= 4;
+                        MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.K0, Register.SP, offMap.get(v.getRegister()));
+                        MipsController.getInstance().addAsm(lw);
+                        MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, Register.K0, Register.SP, extraOff);
                         MipsController.getInstance().addAsm(sw);
                     } else if (v instanceof ConstInteger constInteger) {
                         extraOff -= 4;
@@ -207,9 +223,12 @@ public class CallInstr extends Instr {
                         MipsController.getInstance().addAsm(sw);
                     }
                 } else {
-                    if (v.isUseReg()) {
+                    if (v.isUseReg() && registers.contains(v.getRegister())) {
                         MoveAsm move = new MoveAsm(registers.iterator().next(), v.getRegister());
                         MipsController.getInstance().addAsm(move);
+                    } else if (v.isUseReg() && !registers.contains(v.getRegister())) {
+                        MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, registers.iterator().next(), Register.SP, offMap.get(v.getRegister()));
+                        MipsController.getInstance().addAsm(lw);
                     } else if (v instanceof ConstInteger constInteger) {
                         LiAsm li = new LiAsm(registers.iterator().next(), constInteger.getVal());
                         MipsController.getInstance().addAsm(li);
@@ -220,11 +239,13 @@ public class CallInstr extends Instr {
                     registers.remove(registers.iterator().next());
                 }
             }
-            pushMarco.addToMipsController();
+            pushMarco.addToMipsControllerForSysReg();
             //TODO
             JalAsm jal = new JalAsm(new LabelAsm("func_" + functionName.substring(1)));
             MipsController.getInstance().addAsm(jal);
-            PopMarco popMarco = new PopMarco(RegDispatcher.getInstance().RegToPushInStack(), off);
+            LinkedHashSet<Register> regToPop = new LinkedHashSet<>(RegDispatcher.getInstance().usedRegister());
+            regToPop.addAll(RegDispatcher.getInstance().systemReg());
+            PopMarco popMarco = new PopMarco(regToPop);
             popMarco.addToMipsController();
             if (!(type instanceof VoidType)) {
                 if (useReg) {
@@ -256,5 +277,10 @@ public class CallInstr extends Instr {
             params.add(v.copy(map));
         }
         return new CallInstr(type, function, params);
+    }
+
+    @Override
+    public boolean isDefinition() {
+        return type instanceof Integer32Type;
     }
 }
