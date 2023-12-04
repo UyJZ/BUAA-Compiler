@@ -10,6 +10,7 @@ import llvm_ir.Values.ConstInteger;
 import llvm_ir.llvmType.LLVMType;
 import Config.tasks;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -158,6 +159,26 @@ public class BinaryInstr extends Instr {
             }
             Register r1;
             Register r2;
+            if (opcode == BinaryInstr.op.SDIV && tasks.isOptimize && operand2 instanceof ConstInteger constInteger && !(operand1 instanceof ConstInteger)) {
+                //TODO
+                 boolean flag = optimizeDiv(operand1, constInteger.getVal());
+                 if (flag) return;
+            }
+            if (operand1 instanceof ConstInteger constInteger && operand2 instanceof ConstInteger constInteger1) {
+                int val = 0;
+                switch (opcode) {
+                    case MUL -> val = constInteger.getVal() * constInteger1.getVal();
+                    case SDIV -> val = constInteger.getVal() / constInteger1.getVal();
+                    case SREM -> val = constInteger.getVal() % constInteger1.getVal();
+                }
+                LiAsm li = new LiAsm(tar, val);
+                MipsController.getInstance().addAsm(li);
+                if (!useReg) {
+                    MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, tar, Register.SP, this.offset);
+                    MipsController.getInstance().addAsm(sw);
+                }
+                return;
+            }
             if (operand1 instanceof ConstInteger) {
                 LiAsm li = new LiAsm(Register.K0, ((ConstInteger) operand1).getVal());
                 MipsController.getInstance().addAsm(li);
@@ -217,6 +238,45 @@ public class BinaryInstr extends Instr {
             sb.append(operands.get(0).hash).append(" ").append(opcode).append(" ").append(operands.get(1).hash);
         }
         return sb.toString();
+    }
+
+    private boolean optimizeDiv(Value v, int val) {
+        BigInteger d = new BigInteger(String.valueOf(val));
+        BigInteger N = new BigInteger(String.valueOf(32));
+        BigInteger m = new BigInteger(String.valueOf(0));
+        int l = 0;
+        for (l = 0; l < 32; l++) {
+            BigInteger up = BigInteger.ONE.shiftLeft(l).add(BigInteger.ONE.shiftLeft(l + 32));
+            BigInteger down = BigInteger.ONE.shiftLeft(l + 32);
+            BigInteger upRes = up.divide(d);
+            BigInteger downRes = down.divide(d);
+            if (!upRes.equals(downRes)) {
+                m = (upRes.add(downRes)).divide(BigInteger.valueOf(2));
+                break;
+            }
+        }
+        if (m.subtract(new BigInteger(String.valueOf(Integer.MAX_VALUE / 2))).compareTo(new BigInteger(String.valueOf(0))) > 0) {
+            return false;
+        }
+        LiAsm li = new LiAsm(Register.K0, m.intValue());
+        MipsController.getInstance().addAsm(li);
+        MulDivAsm mul = new MulDivAsm(MulDivAsm.Op.mult, v.getRegister(), Register.K0);
+        MipsController.getInstance().addAsm(mul);
+        HLAsm mfhi = new HLAsm(HLAsm.Op.mfhi, Register.K1);
+        MipsController.getInstance().addAsm(mfhi);
+        Register tar;
+        if (this.useReg) {
+            tar = this.register;
+        } else {
+            tar = Register.K0;
+        }
+        AluITAsm srl = new AluITAsm(AluITAsm.Op.srl, tar, Register.K1, l);
+        MipsController.getInstance().addAsm(srl);
+        if (!this.useReg) {
+            MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, tar, Register.SP, this.offset);
+            MipsController.getInstance().addAsm(sw);
+        }
+        return true;
     }
 
     public op getOpcode() {

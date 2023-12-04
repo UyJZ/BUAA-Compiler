@@ -1,815 +1,283 @@
 .data
-str_0:	.asciiz   "19"
-str_1:	.asciiz   "384\n"
-str_2:	.asciiz   "const and var // decl and def test\n"
-str_3:	.asciiz   "expected result: 579, output: "
+str_0:	.asciiz   "\n"
+str_1:	.asciiz   "\n"
+str_2:	.asciiz   "\n"
+str_3:	.asciiz   "\n"
 str_4:	.asciiz   "\n"
-str_5:	.asciiz   "function (def and )call test\n"
-str_6:	.asciiz   "expected result: {{589, 21}, {599, 31}}, output: {{"
-str_7:	.asciiz   ", "
-str_8:	.asciiz   "}, {"
-str_9:	.asciiz   ", "
-str_10:	.asciiz   "}}\n"
-str_11:	.asciiz   "LExp test, falling into infinite loop indicates an error -- "
-str_12:	.asciiz   "pass\nsimple echo test, get a integer and read back: "
-str_13:	.asciiz   "\n\n\n================================================================================\n                                     PASSED                                     \n================================================================================\n"
+str_5:	.asciiz   "\n"
+str_6:	.asciiz   "\n"
+str_7:	.asciiz   "\n"
+str_8:	.asciiz   "\n"
+str_9:	.asciiz   "\n"
+str_10:	.asciiz   "\n"
+str_11:	.asciiz   "\n"
+str_12:	.asciiz   "\n"
+str_13:	.asciiz   "\n"
+str_14:	.asciiz   "\n"
+str_15:	.asciiz   "\n"
 .text
 	jal	entry
 	j	end
 entry:
 func_main:
 main_0:
-	# call void @putch(i32 49)
+	# %1 = call i32 @getint()
+	li	$v0, 5
+	syscall
+	move	$t0, $v0
+	# call void @putint(i32 %1)
+	sw	$a0, -4($sp)
+	move	$a0, $t0
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
 	sw	$a0, -4($sp)
 	la	$a0, str_0
 	li	$v0, 4
 	syscall
 	lw	$a0, -4($sp)
-	# call void @putint(i32 373)
+	# %2 = sdiv i32 %1, 2
+	li	$k1, 2
+	div	$t0, $k1
+	mflo	$t1
+	# call void @putint(i32 %2)
 	sw	$a0, -4($sp)
-	li	$a0, 373
+	move	$a0, $t1
 	li	$v0, 1
 	syscall
 	lw	$a0, -4($sp)
-	# call void @putch(i32 51)
+	# call void @putch(i32 10)
 	sw	$a0, -4($sp)
 	la	$a0, str_1
 	li	$v0, 4
 	syscall
 	lw	$a0, -4($sp)
-	# br label %1
-	j	main_1
-
-main_1:
-	# call void @putch(i32 99)
+	# %3 = sdiv i32 %1, 3
+	li	$k1, 3
+	div	$t0, $k1
+	mflo	$t2
+	# call void @putint(i32 %3)
+	sw	$a0, -4($sp)
+	move	$a0, $t2
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
 	sw	$a0, -4($sp)
 	la	$a0, str_2
 	li	$v0, 4
 	syscall
 	lw	$a0, -4($sp)
-	# %2 = alloca [2 x i32]
-	addi	$t0, $sp, -8
-	# %3 = alloca [2 x [2 x i32]]
-	addi	$t1, $sp, -24
-	# %4 = alloca [2 x i32]
-	addi	$t2, $sp, -32
-	# %5 = getelementptr [2 x i32], [2 x i32]* %4, i32 0, i32 0
-	addu	$t3, $t2, $zero
-	# store i32 5, i32* %5
-	li	$k0, 5
-	sw	$k0, 0($t3)
-	# %6 = getelementptr [2 x i32], [2 x i32]* %4, i32 0, i32 1
-	li	$k0, 1
+	# %4 = sdiv i32 %1, 4
 	li	$k1, 4
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$t4, $t2, $k1
-	# store i32 6, i32* %6
-	li	$k0, 6
-	sw	$k0, 0($t4)
-	# %7 = alloca [2 x [2 x i32]]
-	addi	$t5, $sp, -48
-	# %8 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %7, i32 0, i32 0
-	addu	$t6, $t5, $zero
-	# %9 = getelementptr [2 x i32], [2 x i32]* %8, i32 0, i32 0
-	addu	$t7, $t6, $zero
-	# store i32 7, i32* %9
-	li	$k0, 7
-	sw	$k0, 0($t7)
-	# %10 = getelementptr [2 x i32], [2 x i32]* %8, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 4
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$s0, $t6, $k1
-	# store i32 10, i32* %10
-	li	$k0, 10
-	sw	$k0, 0($s0)
-	# %11 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %7, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 8
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$s1, $t5, $k1
-	# %12 = getelementptr [2 x i32], [2 x i32]* %11, i32 0, i32 0
-	addu	$s2, $s1, $zero
-	# store i32 27, i32* %12
-	li	$k0, 27
-	sw	$k0, 0($s2)
-	# %13 = getelementptr [2 x i32], [2 x i32]* %11, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 4
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$s3, $s1, $k1
-	# store i32 96, i32* %13
-	li	$k0, 96
-	sw	$k0, 0($s3)
-	# %14 = alloca [2 x i32]
-	addi	$s4, $sp, -56
-	# %15 = getelementptr [2 x i32], [2 x i32]* %14, i32 0, i32 0
-	addu	$s5, $s4, $zero
-	# store i32 1, i32* %15
-	li	$k0, 1
-	sw	$k0, 0($s5)
-	# %16 = getelementptr [2 x i32], [2 x i32]* %14, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 4
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$s6, $s4, $k1
-	# store i32 3, i32* %16
-	li	$k0, 3
-	sw	$k0, 0($s6)
-	# %17 = alloca [2 x i32]
-	addi	$s7, $sp, -64
-	# %18 = getelementptr [2 x i32], [2 x i32]* %17, i32 0, i32 0
-	addu	$t8, $s7, $zero
-	# store i32 2, i32* %18
-	li	$k0, 2
-	sw	$k0, 0($t8)
-	# %19 = getelementptr [2 x i32], [2 x i32]* %17, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 4
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$t9, $s7, $k1
-	# store i32 4, i32* %19
-	li	$k0, 4
-	sw	$k0, 0($t9)
-	# %20 = alloca [2 x [2 x i32]]
-	addi	$t3, $sp, -80
-	# %21 = load i32 , i32* %18
-	lw	$t2, 0($t8)
-	# %22 = load i32 , i32* %16
-	lw	$t7, 0($s6)
-	# %23 = load i32 , i32* %15
-	lw	$t6, 0($s5)
-	# %24 = load i32 , i32* %19
-	lw	$s0, 0($t9)
-	# %25 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %20, i32 0, i32 0
-	addu	$t5, $t3, $zero
-	# %26 = getelementptr [2 x i32], [2 x i32]* %25, i32 0, i32 0
-	addu	$s2, $t5, $zero
-	# store i32 %21, i32* %26
-	sw	$t2, 0($s2)
-	# %27 = getelementptr [2 x i32], [2 x i32]* %25, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 4
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$s1, $t5, $k1
-	# store i32 %22, i32* %27
-	sw	$t7, 0($s1)
-	# %28 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %20, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 8
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$s4, $t3, $k1
-	# %29 = getelementptr [2 x i32], [2 x i32]* %28, i32 0, i32 0
-	addu	$s7, $s4, $zero
-	# store i32 %23, i32* %29
-	sw	$t6, 0($s7)
-	# %30 = getelementptr [2 x i32], [2 x i32]* %28, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 4
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$t8, $s4, $k1
-	# store i32 %24, i32* %30
-	sw	$s0, 0($t8)
-	# %31 = load i32 , i32* %6
-	lw	$s5, 0($t4)
-	# %32 = getelementptr [2 x i32], [2 x i32]* %2, i32 0, i32 0
-	addu	$t9, $t0, $zero
-	# store i32 %31, i32* %32
-	sw	$s5, 0($t9)
-	# %33 = load i32 , i32* %27
-	lw	$t2, 0($s1)
-	# %34 = load i32 , i32* %32
-	lw	$s2, 0($t9)
-	# %35 = load i32 , i32* %13
-	lw	$t5, 0($s3)
-	# %36 = mul i32 %34, %35
-	mult	$s2, $t5
-	mflo	$t7
-	# %37 = add i32 %33, %36
-	addu	$t3, $t2, $t7
-	# call void @putch(i32 101)
-	sw	$a0, -84($sp)
-	la	$a0, str_3
-	li	$v0, 4
-	syscall
-	lw	$a0, -84($sp)
-	# call void @putint(i32 %37)
-	sw	$a0, -84($sp)
+	div	$t0, $k1
+	mflo	$t3
+	# call void @putint(i32 %4)
+	sw	$a0, -4($sp)
 	move	$a0, $t3
 	li	$v0, 1
 	syscall
-	lw	$a0, -84($sp)
+	lw	$a0, -4($sp)
 	# call void @putch(i32 10)
-	sw	$a0, -84($sp)
-	la	$a0, str_4
+	sw	$a0, -4($sp)
+	la	$a0, str_3
 	li	$v0, 4
 	syscall
-	lw	$a0, -84($sp)
-	# %38 = icmp ne i32 579, %37
-	li	$k0, 579
-	sne	$t6, $k0, $t3
-	# br i1 %38, label %39, label %40
-	bne	$zero, $t6, main_2
-	beq	$zero, $t6, main_3
-
-main_2:
-	# ret i32 1
-	li	$v0, 1
-	jr	$ra
-
-main_3:
-	# call void @putch(i32 102)
-	sw	$a0, -84($sp)
-	la	$a0, str_5
-	li	$v0, 4
-	syscall
-	lw	$a0, -84($sp)
-	# br label %41
-	j	main_4
-
-main_4:
-	# move  %42, 0
-	move	$t2, $zero
-	# move  %43, %37
-	move	$t4, $t3
-	# br label %44
-	j	main_5
-
-main_5:
-	# %45 = icmp eq i32 %42, 0
-	seq	$t5, $t2, $zero
-	# br i1 %45, label %46, label %50
-	bne	$zero, $t5, main_6
-	beq	$zero, $t5, main_7
-
-main_6:
-	# %47 = add i32 %42, 1
-	addi	$t5, $t2, 1
-	# move  %48, %47
-	move	$t8, $t5
-	# move  %49, %43
-	sw	$t4, -84($sp)
-	# br label %57
-	j	main_10
-
-main_7:
-	# %51 = add i32 %43, 1
-	addi	$t6, $t4, 1
-	# %52 = icmp eq i32 %42, 2
-	li	$k1, 2
-	seq	$t7, $t2, $k1
-	# br i1 %52, label %53, label %55
-	bne	$zero, $t7, main_8
-	beq	$zero, $t7, main_9
-
-main_8:
-	# move  %54, %51
-	move	$t2, $t6
-	# br label %58
-	j	main_11
-
-main_9:
-	# %56 = add i32 %42, 1
-	addi	$s7, $t2, 1
-	# move  %48, %56
-	move	$t8, $s7
-	# move  %49, %51
-	sw	$t6, -84($sp)
-	# br label %57
-	j	main_10
-
-main_10:
-	# move  %42, %48
-	move	$t2, $t8
-	# move  %43, %49
-	lw	$t4, -84($sp)
-	# br label %44
-	j	main_5
-
-main_11:
-	# move  %59, %54
-	move	$t3, $t2
-	# store i32 %59, i32* %32
-	sw	$t3, 0($t9)
-	# %60 = load i32 , i32* %16
-	lw	$t4, 0($s6)
-	# br label %61
-	j	main_12
-
-main_12:
-	# move  %62, 0
-	move	$t2, $zero
-	# move  %63, %60
-	move	$t3, $t4
-	# br label %64
-	j	main_13
-
-main_13:
-	# %65 = icmp eq i32 %62, 0
-	seq	$t5, $t2, $zero
-	# br i1 %65, label %66, label %70
-	bne	$zero, $t5, main_14
-	beq	$zero, $t5, main_15
-
-main_14:
-	# %67 = add i32 %62, 1
-	addi	$t5, $t2, 1
-	# move  %68, %67
-	move	$s4, $t5
-	# move  %69, %63
-	move	$s5, $t3
-	# br label %77
-	j	main_18
-
-main_15:
-	# %71 = add i32 %63, 1
-	addi	$t6, $t3, 1
-	# %72 = icmp eq i32 %62, 5
+	lw	$a0, -4($sp)
+	# %5 = sdiv i32 %1, 5
 	li	$k1, 5
-	seq	$t7, $t2, $k1
-	# br i1 %72, label %73, label %75
-	bne	$zero, $t7, main_16
-	beq	$zero, $t7, main_17
-
-main_16:
-	# move  %74, %71
-	move	$t2, $t6
-	# br label %78
-	j	main_19
-
-main_17:
-	# %76 = add i32 %62, 1
-	addi	$s3, $t2, 1
-	# move  %68, %76
-	move	$s4, $s3
-	# move  %69, %71
-	move	$s5, $t6
-	# br label %77
-	j	main_18
-
-main_18:
-	# move  %62, %68
-	move	$t2, $s4
-	# move  %63, %69
-	move	$t3, $s5
-	# br label %64
-	j	main_13
-
-main_19:
-	# %79 = getelementptr [2 x i32], [2 x i32]* %2, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 4
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$t3, $t0, $k1
-	# store i32 %74, i32* %79
-	sw	$t2, 0($t3)
-	# %80 = alloca i32*
-	addi	$t0, $sp, -88
-	# store i32* %32, i32** %80
-	sw	$t9, 0($t0)
-	# move  %81, 0
-	move	$t2, $zero
-	# br label %82
-	j	main_20
-
-main_20:
-	# %83 = icmp slt i32 %81, 2
-	li	$k1, 2
-	slt	$t3, $t2, $k1
-	# br i1 %83, label %84, label %108
-	bne	$zero, $t3, main_21
-	beq	$zero, $t3, main_29
-
-main_21:
-	# %85 = load i32* , i32** %80
-	lw	$t3, 0($t0)
-	# %86 = getelementptr i32, i32* %85, i32 %81
-	li	$k0, 4
-	mult	$t2, $k0
-	mflo	$k1
-	addu	$t4, $t3, $k1
-	# %87 = load i32 , i32* %86
-	lw	$t5, 0($t4)
-	# move  %88, 0
-	move	$t3, $zero
-	# move  %89, %87
-	move	$t4, $t5
-	# br label %90
-	j	main_22
-
-main_22:
-	# %91 = icmp eq i32 %88, 0
-	seq	$t6, $t3, $zero
-	# br i1 %91, label %92, label %96
-	bne	$zero, $t6, main_23
-	beq	$zero, $t6, main_24
-
-main_23:
-	# %93 = add i32 %88, 1
-	addi	$t6, $t3, 1
-	# move  %94, %93
-	move	$s1, $t6
-	# move  %95, %89
-	move	$s2, $t4
-	# br label %103
-	j	main_27
-
-main_24:
-	# %97 = add i32 %89, 1
-	addi	$t7, $t4, 1
-	# %98 = icmp eq i32 %88, 3
-	li	$k1, 3
-	seq	$s0, $t3, $k1
-	# br i1 %98, label %99, label %101
-	bne	$zero, $s0, main_25
-	beq	$zero, $s0, main_26
-
-main_25:
-	# move  %100, %97
-	move	$t3, $t7
-	# br label %104
-	j	main_28
-
-main_26:
-	# %102 = add i32 %88, 1
-	addi	$s0, $t3, 1
-	# move  %94, %102
-	move	$s1, $s0
-	# move  %95, %97
-	move	$s2, $t7
-	# br label %103
-	j	main_27
-
-main_27:
-	# move  %88, %94
-	move	$t3, $s1
-	# move  %89, %95
-	move	$t4, $s2
-	# br label %90
-	j	main_22
-
-main_28:
-	# %105 = load i32* , i32** %80
-	lw	$t4, 0($t0)
-	# %106 = getelementptr i32, i32* %105, i32 %81
-	li	$k0, 4
-	mult	$t2, $k0
-	mflo	$k1
-	addu	$t5, $t4, $k1
-	# store i32 %100, i32* %106
-	sw	$t3, 0($t5)
-	# %107 = add i32 %81, 1
-	addi	$s0, $t2, 1
-	# move  %81, %107
-	move	$t2, $s0
-	# br label %82
-	j	main_20
-
-main_29:
-	# %109 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %3, i32 0, i32 0
-	addu	$t0, $t1, $zero
-	# %110 = getelementptr [2 x i32], [2 x i32]* %109, i32 0, i32 0
-	addu	$t2, $t0, $zero
-	# store i32 5, i32* %110
-	li	$k0, 5
-	sw	$k0, 0($t2)
-	# %111 = getelementptr [2 x i32], [2 x i32]* %109, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 4
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$t3, $t0, $k1
-	# store i32 10, i32* %111
-	li	$k0, 10
-	sw	$k0, 0($t3)
-	# %112 = getelementptr [2 x [2 x i32]], [2 x [2 x i32]]* %3, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 8
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$t4, $t1, $k1
-	# %113 = getelementptr [2 x i32], [2 x i32]* %112, i32 0, i32 0
-	addu	$t5, $t4, $zero
-	# store i32 15, i32* %113
-	li	$k0, 15
-	sw	$k0, 0($t5)
-	# %114 = getelementptr [2 x i32], [2 x i32]* %112, i32 0, i32 1
-	li	$k0, 1
-	li	$k1, 4
-	mult	$k0, $k1
-	mflo	$k1
-	addu	$t6, $t4, $k1
-	# store i32 20, i32* %114
-	li	$k0, 20
-	sw	$k0, 0($t6)
-	# br label %115
-	j	main_30
-
-main_30:
-	# %116 = alloca [2 x i32]*
-	addi	$t1, $sp, -92
-	# store [2 x i32]* %109, [2 x i32]** %116
-	sw	$t0, 0($t1)
-	# %117 = alloca i32*
-	addi	$t4, $sp, -96
-	# store i32* %32, i32** %117
-	sw	$t9, 0($t4)
-	# move  %118, 0
-	move	$t0, $zero
-	# br label %119
-	j	main_31
-
-main_31:
-	# %120 = icmp slt i32 %118, 2
-	li	$k1, 2
-	slt	$t7, $t0, $k1
-	# br i1 %120, label %121, label %140
-	bne	$zero, $t7, main_32
-	beq	$zero, $t7, main_36
-
-main_32:
-	# move  %122, 0
-	move	$t7, $zero
-	# br label %123
-	j	main_33
-
-main_33:
-	# %124 = icmp slt i32 %122, 2
-	li	$k1, 2
-	slt	$s0, $t7, $k1
-	# br i1 %124, label %125, label %138
-	bne	$zero, $s0, main_34
-	beq	$zero, $s0, main_35
-
-main_34:
-	# %126 = load [2 x i32]* , [2 x i32]** %116
-	lw	$s0, 0($t1)
-	# %127 = getelementptr [2 x i32], [2 x i32]* %126, i32 %118
-	li	$k0, 8
-	mult	$t0, $k0
-	mflo	$k1
-	addu	$s1, $s0, $k1
-	# %128 = getelementptr [2 x i32], [2 x i32]* %127, i32 0, i32 %122
-	li	$k1, 4
-	mult	$t7, $k1
-	mflo	$k1
-	addu	$s2, $s1, $k1
-	# %129 = load i32 , i32* %128
-	lw	$s3, 0($s2)
-	# %130 = load i32* , i32** %117
-	lw	$s4, 0($t4)
-	# %131 = getelementptr i32, i32* %130, i32 %122
-	li	$k0, 4
-	mult	$t7, $k0
-	mflo	$k1
-	addu	$s5, $s4, $k1
-	# %132 = load i32 , i32* %131
-	lw	$s6, 0($s5)
-	# %133 = add i32 %129, %132
-	addu	$s7, $s3, $s6
-	# %134 = load [2 x i32]* , [2 x i32]** %116
-	lw	$t8, 0($t1)
-	# %135 = getelementptr [2 x i32], [2 x i32]* %134, i32 %118
-	li	$k0, 8
-	mult	$t0, $k0
-	mflo	$k1
-	addu	$t9, $t8, $k1
-	# %136 = getelementptr [2 x i32], [2 x i32]* %135, i32 0, i32 %122
-	li	$k1, 4
-	mult	$t7, $k1
-	mflo	$k1
-	addu	$s0, $t9, $k1
-	# store i32 %133, i32* %136
-	sw	$s7, 0($s0)
-	# %137 = add i32 %122, 1
-	addi	$s1, $t7, 1
-	# move  %122, %137
-	move	$t7, $s1
-	# br label %123
-	j	main_33
-
-main_35:
-	# %139 = add i32 %118, 1
-	addi	$s0, $t0, 1
-	# move  %118, %139
-	move	$t0, $s0
-	# br label %119
-	j	main_31
-
-main_36:
-	# %141 = load i32 , i32* %110
-	lw	$t0, 0($t2)
-	# %142 = load i32 , i32* %111
-	lw	$t1, 0($t3)
-	# %143 = load i32 , i32* %113
-	lw	$t4, 0($t5)
-	# %144 = load i32 , i32* %114
-	lw	$t7, 0($t6)
-	# call void @putch(i32 101)
-	sw	$a0, -100($sp)
-	la	$a0, str_6
-	li	$v0, 4
-	syscall
-	lw	$a0, -100($sp)
-	# call void @putint(i32 %141)
-	sw	$a0, -100($sp)
-	move	$a0, $t0
-	li	$v0, 1
-	syscall
-	lw	$a0, -100($sp)
-	# call void @putch(i32 44)
-	sw	$a0, -100($sp)
-	la	$a0, str_7
-	li	$v0, 4
-	syscall
-	lw	$a0, -100($sp)
-	# call void @putint(i32 %142)
-	sw	$a0, -100($sp)
-	move	$a0, $t1
-	li	$v0, 1
-	syscall
-	lw	$a0, -100($sp)
-	# call void @putch(i32 125)
-	sw	$a0, -100($sp)
-	la	$a0, str_8
-	li	$v0, 4
-	syscall
-	lw	$a0, -100($sp)
-	# call void @putint(i32 %143)
-	sw	$a0, -100($sp)
+	div	$t0, $k1
+	mflo	$t4
+	# call void @putint(i32 %5)
+	sw	$a0, -4($sp)
 	move	$a0, $t4
 	li	$v0, 1
 	syscall
-	lw	$a0, -100($sp)
-	# call void @putch(i32 44)
-	sw	$a0, -100($sp)
-	la	$a0, str_9
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
+	la	$a0, str_4
 	li	$v0, 4
 	syscall
-	lw	$a0, -100($sp)
-	# call void @putint(i32 %144)
-	sw	$a0, -100($sp)
+	lw	$a0, -4($sp)
+	# %6 = sdiv i32 %1, 6
+	li	$k1, 6
+	div	$t0, $k1
+	mflo	$t5
+	# call void @putint(i32 %6)
+	sw	$a0, -4($sp)
+	move	$a0, $t5
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
+	la	$a0, str_5
+	li	$v0, 4
+	syscall
+	lw	$a0, -4($sp)
+	# %7 = sdiv i32 %1, 7
+	li	$k1, 7
+	div	$t0, $k1
+	mflo	$t6
+	# call void @putint(i32 %7)
+	sw	$a0, -4($sp)
+	move	$a0, $t6
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
+	la	$a0, str_6
+	li	$v0, 4
+	syscall
+	lw	$a0, -4($sp)
+	# %8 = sdiv i32 %1, 8
+	li	$k1, 8
+	div	$t0, $k1
+	mflo	$t7
+	# call void @putint(i32 %8)
+	sw	$a0, -4($sp)
 	move	$a0, $t7
 	li	$v0, 1
 	syscall
-	lw	$a0, -100($sp)
-	# call void @putch(i32 125)
-	sw	$a0, -100($sp)
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
+	la	$a0, str_7
+	li	$v0, 4
+	syscall
+	lw	$a0, -4($sp)
+	# %9 = sdiv i32 %1, 9
+	li	$k0, 954437176
+	mult	$t0, $k0
+	mfhi	$k1
+	srl	$s0, $k1, 1
+	# call void @putint(i32 %9)
+	sw	$a0, -4($sp)
+	move	$a0, $s0
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
+	la	$a0, str_8
+	li	$v0, 4
+	syscall
+	lw	$a0, -4($sp)
+	# %10 = sdiv i32 %1, 10
+	li	$k1, 10
+	div	$t0, $k1
+	mflo	$s1
+	# call void @putint(i32 %10)
+	sw	$a0, -4($sp)
+	move	$a0, $s1
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
+	la	$a0, str_9
+	li	$v0, 4
+	syscall
+	lw	$a0, -4($sp)
+	# %11 = sdiv i32 %1, 11
+	li	$k1, 11
+	div	$t0, $k1
+	mflo	$s2
+	# call void @putint(i32 %11)
+	sw	$a0, -4($sp)
+	move	$a0, $s2
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
 	la	$a0, str_10
 	li	$v0, 4
 	syscall
-	lw	$a0, -100($sp)
-	# %145 = load i32 , i32* %110
-	lw	$s0, 0($t2)
-	# %146 = icmp ne i32 %145, 589
-	li	$k1, 589
-	sne	$s1, $s0, $k1
-	# br i1 %146, label %147, label %148
-	bne	$zero, $s1, main_37
-	beq	$zero, $s1, main_38
-
-main_37:
-	# ret i32 2
-	li	$v0, 2
-	jr	$ra
-
-main_38:
-	# %149 = load i32 , i32* %111
-	lw	$t0, 0($t3)
-	# %150 = icmp ne i32 %149, 21
-	li	$k1, 21
-	sne	$t1, $t0, $k1
-	# br i1 %150, label %151, label %152
-	bne	$zero, $t1, main_39
-	beq	$zero, $t1, main_40
-
-main_39:
-	# ret i32 2
-	li	$v0, 2
-	jr	$ra
-
-main_40:
-	# %153 = load i32 , i32* %113
-	lw	$t0, 0($t5)
-	# %154 = icmp ne i32 %153, 599
-	li	$k1, 599
-	sne	$t1, $t0, $k1
-	# br i1 %154, label %155, label %156
-	bne	$zero, $t1, main_41
-	beq	$zero, $t1, main_42
-
-main_41:
-	# ret i32 2
-	li	$v0, 2
-	jr	$ra
-
-main_42:
-	# %157 = load i32 , i32* %114
-	lw	$t0, 0($t6)
-	# %158 = icmp ne i32 %157, 31
-	li	$k1, 31
-	sne	$t1, $t0, $k1
-	# br i1 %158, label %159, label %160
-	bne	$zero, $t1, main_43
-	beq	$zero, $t1, main_44
-
-main_43:
-	# ret i32 2
-	li	$v0, 2
-	jr	$ra
-
-main_44:
-	# call void @putch(i32 76)
-	sw	$a0, -100($sp)
+	lw	$a0, -4($sp)
+	# %12 = sdiv i32 %1, 12
+	li	$k1, 12
+	div	$t0, $k1
+	mflo	$s3
+	# call void @putint(i32 %12)
+	sw	$a0, -4($sp)
+	move	$a0, $s3
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
 	la	$a0, str_11
 	li	$v0, 4
 	syscall
-	lw	$a0, -100($sp)
-	# %161 = icmp slt i32 2, 1
-	li	$k0, 2
-	li	$k1, 1
-	slt	$t0, $k0, $k1
-	# br i1 %161, label %171, label %162
-	bne	$zero, $t0, main_50
-	beq	$zero, $t0, main_45
-
-main_45:
-	# %163 = icmp sgt i32 1, 1
-	li	$k0, 1
-	li	$k1, 1
-	sgt	$t0, $k0, $k1
-	# br i1 %163, label %171, label %164
-	bne	$zero, $t0, main_50
-	beq	$zero, $t0, main_46
-
-main_46:
-	# %165 = icmp sge i32 3, 5
-	li	$k0, 3
-	li	$k1, 5
-	sge	$t0, $k0, $k1
-	# br i1 %165, label %171, label %166
-	bne	$zero, $t0, main_50
-	beq	$zero, $t0, main_47
-
-main_47:
-	# %167 = icmp sle i32 7, 6
-	li	$k0, 7
-	li	$k1, 6
-	sle	$t0, $k0, $k1
-	# br i1 %167, label %171, label %168
-	bne	$zero, $t0, main_50
-	beq	$zero, $t0, main_48
-
-main_48:
-	# %169 = icmp eq i32 9, 10
-	li	$k0, 9
-	li	$k1, 10
-	seq	$t0, $k0, $k1
-	# br i1 %169, label %171, label %170
-	bne	$zero, $t0, main_50
-	beq	$zero, $t0, main_49
-
-main_49:
-	# br label %171
-	j	main_50
-
-main_50:
-	# br label %172
-	j	main_51
-
-main_51:
-	# call void @putch(i32 112)
-	sw	$a0, -100($sp)
+	lw	$a0, -4($sp)
+	# %13 = sdiv i32 %1, 13
+	li	$k1, 13
+	div	$t0, $k1
+	mflo	$s4
+	# call void @putint(i32 %13)
+	sw	$a0, -4($sp)
+	move	$a0, $s4
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
 	la	$a0, str_12
 	li	$v0, 4
 	syscall
-	lw	$a0, -100($sp)
-	# %173 = call i32 @getint()
-	li	$v0, 5
-	syscall
-	move	$t0, $v0
-	# call void @putint(i32 %173)
-	sw	$a0, -100($sp)
-	move	$a0, $t0
+	lw	$a0, -4($sp)
+	# %14 = sdiv i32 %1, 14
+	li	$k1, 14
+	div	$t0, $k1
+	mflo	$s5
+	# call void @putint(i32 %14)
+	sw	$a0, -4($sp)
+	move	$a0, $s5
 	li	$v0, 1
 	syscall
-	lw	$a0, -100($sp)
+	lw	$a0, -4($sp)
 	# call void @putch(i32 10)
-	sw	$a0, -100($sp)
+	sw	$a0, -4($sp)
 	la	$a0, str_13
 	li	$v0, 4
 	syscall
-	lw	$a0, -100($sp)
+	lw	$a0, -4($sp)
+	# %15 = sdiv i32 %1, 15
+	li	$k1, 15
+	div	$t0, $k1
+	mflo	$s6
+	# call void @putint(i32 %15)
+	sw	$a0, -4($sp)
+	move	$a0, $s6
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
+	la	$a0, str_14
+	li	$v0, 4
+	syscall
+	lw	$a0, -4($sp)
+	# %16 = sdiv i32 %1, 200
+	li	$k1, 200
+	div	$t0, $k1
+	mflo	$s7
+	# call void @putint(i32 %16)
+	sw	$a0, -4($sp)
+	move	$a0, $s7
+	li	$v0, 1
+	syscall
+	lw	$a0, -4($sp)
+	# call void @putch(i32 10)
+	sw	$a0, -4($sp)
+	la	$a0, str_15
+	li	$v0, 4
+	syscall
+	lw	$a0, -4($sp)
 	# ret i32 0
 	move	$v0, $zero
 	jr	$ra
