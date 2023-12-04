@@ -7,12 +7,16 @@ import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Nodes.Exp.Exp;
 import FrontEnd.Nodes.Node;
 import FrontEnd.Nodes.TokenNode;
+import FrontEnd.Symbol.FuncSymbol;
+import FrontEnd.Symbol.SymbolManager;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstInteger;
+import llvm_ir.Values.Instruction.BinaryInstr;
 import llvm_ir.Values.Instruction.CallInstr;
 import llvm_ir.Values.Instruction.Instr;
+import llvm_ir.Values.Param;
 import llvm_ir.llvmType.Integer32Type;
-import llvm_ir.llvmType.Integer8Type;
 import llvm_ir.llvmType.VoidType;
 
 import java.util.ArrayList;
@@ -50,20 +54,24 @@ public class PrintfStmt extends Stmt {
         for (int i = 0; i < s.length(); i++) {
             if (i + 1 < s.length() && s.charAt(i) == '%' && s.charAt(i + 1) == 'd') {
                 ArrayList<Value> p = new ArrayList<>();
-                p.add(instrs.get(start++));
-                CallInstr callInstr = new CallInstr(new VoidType(), "@putint", p, "");
+                Value v = instrs.get(start++);
+                p.add(v);
+                FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("putint");
+                CallInstr callInstr = new CallInstr(new VoidType(), funcSymbol.getLLVMirValue(), p);
                 i++;
                 IRController.getInstance().addInstr(callInstr);
             } else if (i + 1 < s.length() && s.charAt(i) == '\\' && s.charAt(i + 1) == 'n') {
                 ArrayList<Value> p = new ArrayList<>();
-                p.add(new Value(new Integer32Type(), String.valueOf((int) '\n')));
-                CallInstr callInstr = new CallInstr(new VoidType(), "@putch", p, "");
+                p.add(new ConstInteger(10));
+                FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("putch");
+                CallInstr callInstr = new CallInstr(new VoidType(), funcSymbol.getLLVMirValue(), p);
                 IRController.getInstance().addInstr(callInstr);
                 i++;
             } else {
                 ArrayList<Value> p = new ArrayList<>();
-                p.add(new Value(new Integer32Type(), String.valueOf((int) s.charAt(i))));
-                CallInstr callInstr = new CallInstr(new VoidType(), "@putch", p, "");
+                p.add(new ConstInteger((int) s.charAt(i)));
+                FuncSymbol funcSymbol = SymbolManager.getInstance().getFuncSymbolByFuncName("putch");
+                CallInstr callInstr = new CallInstr(new VoidType(), funcSymbol.getLLVMirValue(), p);
                 IRController.getInstance().addInstr(callInstr);
             }
         }

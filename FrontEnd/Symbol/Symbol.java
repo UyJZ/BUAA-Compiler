@@ -28,6 +28,10 @@ public class Symbol {
         this.llvmValue = llvmValue;
     }
 
+    public Value getLLVMirValue() {
+        return llvmValue;
+    }
+
 
     public int getDim() {
         return -1;

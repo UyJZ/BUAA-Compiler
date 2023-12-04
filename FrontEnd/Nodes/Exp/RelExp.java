@@ -5,6 +5,8 @@ import FrontEnd.Nodes.Node;
 import FrontEnd.Nodes.TokenNode;
 import llvm_ir.IRController;
 import llvm_ir.Value;
+import llvm_ir.Values.ConstBool;
+import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Instruction.IcmpInstr;
 import llvm_ir.Values.Instruction.ZextInstr;
 import llvm_ir.llvmType.Integer32Type;
@@ -41,23 +43,37 @@ public class RelExp extends Node {
             }
             Value left = children.get(0).genLLVMir();
             Value right = children.get(2).genLLVMir();
+            if (left instanceof ConstBool constBool && right instanceof ConstBool constBool1) {
+                if (cmpOp == IcmpInstr.CmpOp.slt) return new ConstBool(constBool.getVal() < constBool1.getVal());
+                else if (cmpOp == IcmpInstr.CmpOp.sle) return new ConstBool(constBool.getVal() <= constBool1.getVal());
+                else if (cmpOp == IcmpInstr.CmpOp.sgt) return new ConstBool(constBool.getVal() > constBool1.getVal());
+                else if (cmpOp == IcmpInstr.CmpOp.sge) return new ConstBool(constBool.getVal() >= constBool1.getVal());
+            }
             if (!left.getType().equals(right.getType())) {
                 ZextInstr zextInstr;
-                if (right.getType() instanceof Integer32Type) {
-                    zextInstr = new ZextInstr(left.getType(), right.getType(), left.getName());
+                if (left instanceof ConstBool constBool) {
+                    IcmpInstr icmpInstr = new IcmpInstr(new ConstInteger(constBool.getVal()), right, cmpOp);
+                    IRController.getInstance().addInstr(icmpInstr);
+                    return icmpInstr;
+                } else if (right instanceof ConstBool constBool) {
+                    IcmpInstr icmpInstr = new IcmpInstr(left, new ConstInteger(constBool.getVal()), cmpOp);
+                    IRController.getInstance().addInstr(icmpInstr);
+                    return icmpInstr;
+                } else if (right.getType() instanceof Integer32Type) {
+                    zextInstr = new ZextInstr(left.getType(), right.getType(), left);
                     IRController.getInstance().addInstr(zextInstr);
-                    IcmpInstr icmpInstr = new IcmpInstr(right.getType(), zextInstr.getName(), right.getName(), cmpOp);
+                    IcmpInstr icmpInstr = new IcmpInstr(zextInstr, right, cmpOp);
                     IRController.getInstance().addInstr(icmpInstr);
                     return icmpInstr;
                 } else {
-                    zextInstr = new ZextInstr(right.getType(), left.getType(), right.getName());
+                    zextInstr = new ZextInstr(right.getType(), left.getType(), right);
                     IRController.getInstance().addInstr(zextInstr);
-                    IcmpInstr icmpInstr = new IcmpInstr(zextInstr.getType(), left.getName(), zextInstr.getName(), cmpOp);
+                    IcmpInstr icmpInstr = new IcmpInstr(left, zextInstr, cmpOp);
                     IRController.getInstance().addInstr(icmpInstr);
                     return icmpInstr;
                 }
             } else {
-                IcmpInstr icmpInstr = new IcmpInstr(left.getType(), left.getName(), right.getName(), cmpOp);
+                IcmpInstr icmpInstr = new IcmpInstr(left, right, cmpOp);
                 IRController.getInstance().addInstr(icmpInstr);
                 return icmpInstr;
             }

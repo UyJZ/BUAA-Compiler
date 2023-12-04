@@ -11,6 +11,8 @@ public class SymbolManager {
 
     private final HashMap<String, SymbolTable> funcMap;
 
+    private final HashMap<String, FuncSymbol> funcSymbolHashMap;
+
     private String currentFuncName;
 
     private boolean isGlobal;
@@ -23,6 +25,7 @@ public class SymbolManager {
         isGlobal = true;
         currentFuncName = null;
         loopDepth = 0;
+        funcSymbolHashMap = new HashMap<>();
     }
 
     public int getLoopDepth() {
@@ -30,11 +33,13 @@ public class SymbolManager {
     }
 
     public void enterFuncBlock(FuncSymbol funcSymbol) throws RenameException {
-        symbolTableStack.peek().addSymbol(funcSymbol);
+        if (getInstance().getSymbolByName(funcSymbol.getSymbolName()) != null || getInstance().getFuncSymbolByFuncName(funcSymbol.getSymbolName()) != null)
+            throw new RenameException("Rename Exception");
         SymbolTable symbolTable = new SymbolTable(funcSymbol);
         symbolTableStack.push(symbolTable);
         funcMap.put(funcSymbol.getSymbolName(), symbolTable);
         currentFuncName = funcSymbol.getSymbolName();
+        //symbolTableStack.peek().addSymbol(funcSymbol);
     }
 
     public void enterBlock() {
@@ -53,27 +58,34 @@ public class SymbolManager {
         loopDepth--;
     }
 
-    public void addSymbol (Symbol symbol) throws RenameException {
+    public void addSymbol(Symbol symbol) throws RenameException {
         SymbolTable topTable = symbolTableStack.peek();
         topTable.addSymbol(symbol);
+        if (symbol instanceof FuncSymbol funcSymbol) funcSymbolHashMap.put(funcSymbol.getSymbolName(), funcSymbol);
+    }
+
+    public void addSysSymbol(FuncSymbol symbol) throws RenameException {
+        funcSymbolHashMap.put(symbol.getSymbolName(), symbol);
     }
 
     public boolean isVarDefined(String name) {
         for (SymbolTable s : symbolTableStack) {
-            if (s.containsName(name) && !name.equals(currentFuncName)) return true;
+            if (s.containsName(name)) return true;
         }
         return false;
     }
 
     public boolean isVarFuncDefined(String name) {
         for (SymbolTable s : symbolTableStack) {
-            if (s.containsVarFuncName(name) && !name.equals(currentFuncName)) return true;
+            if (s.containsVarFuncName(name)) return true;
         }
         return funcMap.containsKey(name);
     }
 
     public int getDimByName(String name) {
-        for (SymbolTable s : symbolTableStack) {
+        List<SymbolTable> list = new ArrayList<>(symbolTableStack);
+        Collections.reverse(list);
+        for (SymbolTable s : list) {
             if (s.containsName(name)) return s.getSymbol(name).getDim();
         }
         if (funcMap.get(name) != null) return funcMap.get(name).getFuncSymbol(name).getDim();
@@ -92,7 +104,7 @@ public class SymbolManager {
     public FuncSymbol getFuncSymbolByFuncName(String name) {
         if (funcMap.containsKey(name)) {
             return (FuncSymbol) funcMap.get(name).getFuncSymbol(name);
-        }
+        } else if (funcSymbolHashMap.containsKey(name)) return funcSymbolHashMap.get(name);
         return null;
     }
 
@@ -110,5 +122,13 @@ public class SymbolManager {
 
     public void setGlobal(boolean global) {
         isGlobal = global;
+    }
+
+    public void flush() {
+        symbolTableStack.clear();
+        funcMap.clear();
+        isGlobal = true;
+        currentFuncName = null;
+        loopDepth = 0;
     }
 }

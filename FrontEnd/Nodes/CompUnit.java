@@ -31,38 +31,42 @@ public class CompUnit extends Node {
     @Override
     public Value genLLVMir() {
         SymbolManager.getInstance().enterBlock();
-        FuncSymbol getint = new FuncSymbol("@getint", SymbolType.SYMBOL_FUNC, FunctionType.FUNC_INT, new ArrayList<>());
+        FuncSymbol getint = new FuncSymbol("getint", SymbolType.SYMBOL_FUNC, FunctionType.FUNC_INT, new ArrayList<>());
         try {
-            SymbolManager.getInstance().addSymbol(getint);
+            SymbolManager.getInstance().addSysSymbol(getint);
         } catch (RenameException e) {
         }
+        getint.setLlvmValue(new Function(new Integer32Type(), "getint", false));
         ArrayList<Integer> dims = new ArrayList<>();
         ArrayList<LLVMType> types = new ArrayList<>();
         dims.add(1);
         types.add(new Integer32Type());
-        FuncSymbol putint = new FuncSymbol("@putint", SymbolType.SYMBOL_FUNC, FunctionType.FUNC_VOID, dims, types);
+        FuncSymbol putint = new FuncSymbol("putint", SymbolType.SYMBOL_FUNC, FunctionType.FUNC_VOID, dims, types);
         try {
-            SymbolManager.getInstance().addSymbol(putint);
+            SymbolManager.getInstance().addSysSymbol(putint);
         } catch (RenameException e) {
         }
+        putint.setLlvmValue(new Function(new VoidType(), "putint", true));
         ArrayList<Integer> dims1 = new ArrayList<>();
         ArrayList<LLVMType> types1 = new ArrayList<>();
         dims1.add(1);
         types1.add(new Integer32Type());
-        FuncSymbol putch = new FuncSymbol("@putch", SymbolType.SYMBOL_FUNC, FunctionType.FUNC_VOID, dims1, types1);
+        FuncSymbol putch = new FuncSymbol("putch", SymbolType.SYMBOL_FUNC, FunctionType.FUNC_VOID, dims1, types1);
         try {
-            SymbolManager.getInstance().addSymbol(putch);
+            SymbolManager.getInstance().addSysSymbol(putch);
         } catch (RenameException e) {
         }
+        putch.setLlvmValue(new Function(new VoidType(), "putch", true));
         ArrayList<Integer> dims2 = new ArrayList<>();
         ArrayList<LLVMType> types2 = new ArrayList<>();
         dims2.add(1);
         types2.add(new PointerType(new Integer8Type()));
-        FuncSymbol putstr = new FuncSymbol("@putstr", SymbolType.SYMBOL_FUNC, FunctionType.FUNC_VOID, dims2, types2);
+        FuncSymbol putstr = new FuncSymbol("putstr", SymbolType.SYMBOL_FUNC, FunctionType.FUNC_VOID, dims2, types2);
         try {
-            SymbolManager.getInstance().addSymbol(putstr);
+            SymbolManager.getInstance().addSysSymbol(putstr);
         } catch (RenameException e) {
         }
+        putstr.setLlvmValue(new Function(new VoidType(), "putstr", true));
         super.genLLVMir();
         SymbolManager.getInstance().leaveBlock();
         return null;

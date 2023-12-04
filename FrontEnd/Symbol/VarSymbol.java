@@ -1,7 +1,6 @@
 package FrontEnd.Symbol;
 
 import Enums.SymbolType;
-import llvm_ir.Value;
 import llvm_ir.llvmType.ArrayType;
 import llvm_ir.llvmType.Integer32Type;
 import llvm_ir.llvmType.LLVMType;
@@ -16,6 +15,8 @@ public class VarSymbol extends Symbol {
 
     private boolean isGlobal;
 
+    private boolean isCalcAble;
+
     private Initial initial = null;
 
     private int value;
@@ -26,6 +27,8 @@ public class VarSymbol extends Symbol {
 
     private boolean isParam = false;
 
+    private Integer val = null;
+
     private ArrayList<Integer> lens = new ArrayList<>();
 
     public VarSymbol(String symbolName, SymbolType symbolType, int dim, boolean isConst) {
@@ -34,6 +37,7 @@ public class VarSymbol extends Symbol {
         this.dim = dim;
         this.isGlobal = SymbolManager.getInstance().isGlobal();
         this.type = symbolType == SymbolType.SYMBOL_VAR ? new llvm_ir.llvmType.Integer32Type() : new llvm_ir.llvmType.VoidType();
+        isCalcAble = false;
     }
 
     public VarSymbol(String symbolName, SymbolType symbolType, int dim, boolean isConst, ArrayList<Integer> lens) {
@@ -44,6 +48,7 @@ public class VarSymbol extends Symbol {
         this.isGlobal = SymbolManager.getInstance().isGlobal();
         if (dim == 0) this.type = new Integer32Type();
         else this.type = new ArrayType(lens, new Integer32Type());
+        isCalcAble = false;
     }
 
     public VarSymbol(String symbolName, SymbolType symbolType, int dim, boolean isConst, int width) { // for funcfparam
@@ -58,6 +63,7 @@ public class VarSymbol extends Symbol {
             l.add(width);
             type = new PointerType(new ArrayType(l, new Integer32Type()));
         }
+        isCalcAble = false;
     }
 
     public void setAsParam() {
@@ -74,6 +80,10 @@ public class VarSymbol extends Symbol {
 
     public void setInitValue(Initial initial) {
         this.initial = initial;
+        if (dim == 0) {
+            this.val = initial.getVal(new ArrayList<>());
+            isCalcAble = false;
+        }
     }
 
     public ArrayList<Integer> getLens() {
@@ -92,9 +102,6 @@ public class VarSymbol extends Symbol {
         return initial.getVal(pos);
     }
 
-    public Value getLLVMirValue() {
-        return llvmValue;
-    }
 
     public LLVMType getType() {
         return type;
@@ -102,5 +109,21 @@ public class VarSymbol extends Symbol {
 
     public boolean isGlobal() {
         return isGlobal;
+    }
+
+    public boolean isCalcAble() {
+        return isCalcAble;
+    }
+
+    public void setChanged() {
+        isCalcAble = false;
+    }
+
+    public void setValFor0Dim(int val) {
+        this.val = val;
+    }
+
+    public Integer getValueFor0Dim() {
+        return val;
     }
 }

@@ -125,9 +125,45 @@ public class Initial {
                 sb.append(OneDimArrays.get(i).getValue());
                 if (i != allZeroPos - 1) sb.append(", ");
             }
-            for (int i = allZeroPos;i < lens.get(0); i++)
+            for (int i = allZeroPos; i < lens.get(0); i++)
                 sb.append(", ").append(" [").append(lens.get(1)).append(" x ").append(elementType).append("] ").append("zeroinitializer");
             sb.append("]");
+        }
+        return sb.toString();
+    }
+
+    public String genMIPSData(ArrayList<Integer> lens) {
+        StringBuilder sb = new StringBuilder();
+        if (dim == 0) {
+            sb.append(".word \t").append(values.get(0).get(0));
+        } else if (dim == 1) {
+            sb.append("\t.word \t");
+            for (int i : values.get(0)) sb.append(i).append(", ");
+            if (lens.get(0) > values.get(0).size()) {
+                sb.append("\n\t.space \t").append(4 * (lens.get(0) - values.get(0).size()));
+            }
+        } else {
+            assert dim == 2;
+            ArrayList<OneDimArray> OneDimArrays = new ArrayList<>();
+            for (int i = 0; i < lens.get(0); i++) {
+                if (i >= values.size()) {
+                    OneDimArrays.add(new OneDimArray(lens.get(1), new ArrayList<>(), elementType));
+                } else {
+                    OneDimArrays.add(new OneDimArray(lens.get(1), values.get(i), elementType));
+                }
+            }
+            int allZeroPos = lens.get(0);
+            for (int i = OneDimArrays.size() - 1; i >= 0; i--) {
+                if (OneDimArrays.get(i).allZero) {
+                    allZeroPos = i;
+                } else break;
+            }
+            for (int i = 0; i < allZeroPos; i++) {
+                sb.append(OneDimArrays.get(i).getMIPSVal()).append("\n");
+            }
+            if (allZeroPos < lens.get(0)) {
+                sb.append("\t.space ").append(4 * (lens.get(1) * (lens.get(0) - allZeroPos)));
+            }
         }
         return sb.toString();
     }
@@ -185,6 +221,22 @@ public class Initial {
                     sb.append(" ,").append(elementType).append(" 0");
                 }
                 sb.append("]");
+            }
+            return sb.toString();
+        }
+
+        public String getMIPSVal() {
+            StringBuilder sb = new StringBuilder();
+            if (allZero) {
+                sb.append("\t.space \t").append(len * 4);
+            } else {
+                sb.append("\t.word \t");
+                for (int i = 0; i < values.size(); i++) {
+                    sb.append(values.get(i));
+                    if (i != values.size() - 1) sb.append(", ");
+                }
+                if (len > values.size())
+                    sb.append("\n\t.space \t").append(4 * (len - values.size()));
             }
             return sb.toString();
         }

@@ -73,10 +73,10 @@ public class FuncFParam extends Node {
     public void setParamLLVMForFunc() {
         Symbol symbol = SymbolManager.getInstance().getSymbolByName(getName());
         LLVMType type1 = ((VarSymbol) symbol).getLLVMirValue().getType();
-        AllocaInst allocaInst = new AllocaInst(type1, IRController.getInstance().genVirtualRegNum());
+        AllocaInst allocaInst = new AllocaInst(type1);
         IRController.getInstance().addInstr(allocaInst);
-        StoreInstr storeInstr = new StoreInstr(type1, new PointerType(type1), ((VarSymbol) symbol).getLLVMirValue().getName(), allocaInst.getName());
+        StoreInstr storeInstr = new StoreInstr( symbol.getLLVMirValue(), allocaInst);
         IRController.getInstance().addInstr(storeInstr);
-        symbol.setLlvmValue(storeInstr);
+        symbol.setLlvmValue(allocaInst);
     }
 }

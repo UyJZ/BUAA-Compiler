@@ -1,17 +1,17 @@
 package Config;
 
+import BackEnd.MIPS.MipsController;
 import FrontEnd.ErrorManager.ErrorChecker;
 import FrontEnd.Lexer.Lexer;
 import FrontEnd.Lexer.Token;
-import FrontEnd.Nodes.CompUnit;
 import FrontEnd.Nodes.Node;
 import FrontEnd.Parser.ParserController;
+import FrontEnd.Symbol.SymbolManager;
+import MidEnd.Optimizer;
 import llvm_ir.IRController;
 
-import javax.swing.text.html.parser.Parser;
 import java.io.*;
 import java.util.ArrayList;
-import java.util.logging.Level;
 
 public class CompilerHandler {
 
@@ -29,17 +29,51 @@ public class CompilerHandler {
         } else if (tasks.isParserAnalysis) {
             ParserController parserController = new ParserController(lexer.getTokenStream());
             parserController.parse().print(ps);
-        } else if (tasks.isErrorHandle) {
+        } else if (tasks.isErrorHandle && !tasks.isLLVMoutput && !tasks.isMIPSoutput) {
             ParserController parserController = new ParserController(lexer.getTokenStream());
             parserController.parse().checkError();
             ErrorChecker.showErrorMsg(ps);
         } else if (tasks.isLLVMoutput) {
+            assert (tasks.getOutputPath().equals("llvm_ir.txt"));
             ParserController parserController = new ParserController(lexer.getTokenStream());
             Node c = parserController.parse();
-            c.genLLVMir();
-            IRController.getInstance().Output(ps);
+            c.checkError();
+            ErrorChecker.showErrorMsg(new PrintStream(new FileOutputStream("error.txt")));
+            if (ErrorChecker.getErrors().size() == 0) {
+                SymbolManager.getInstance().flush();
+                c.genLLVMir();
+                if (tasks.isOptimize) {
+                    Optimizer optimizer = new Optimizer(IRController.getInstance().getModule());
+                    optimizer.run();
+                }
+                IRController.getInstance().Output(ps);
+            }
+        } else if (tasks.isMIPSoutput) {
+            ParserController parserController = new ParserController(lexer.getTokenStream());
+            Node c = parserController.parse();
+            if (tasks.isErrorHandle) {
+                c.checkError();
+                ErrorChecker.showErrorMsg(new PrintStream(new FileOutputStream("error.txt")));
+            }
+            if (ErrorChecker.getErrors().size() == 0) {
+                SymbolManager.getInstance().flush();
+                c.genLLVMir();
+                if (tasks.isOptimize) {
+                    Optimizer optimizer = new Optimizer(IRController.getInstance().getModule());
+                    optimizer.run();
+                }else {
+                    IRController.getInstance().getModule().setName();
+                }
+                PrintStream ps1 = new PrintStream(new FileOutputStream("llvm_ir.txt"));
+                PrintStream ps2 = new PrintStream(new FileOutputStream("mips.txt"));
+                IRController.getInstance().Output(ps1);
+                MipsController.getInstance().setModule(IRController.getInstance().getModule());
+                MipsController.getInstance().run();
+                MipsController.getInstance().print(ps2);
+            }
         }
     }
+
 
     private static StringBuilder readFile(String filePath) throws FileNotFoundException {
         StringBuilder stringBuffer = new StringBuilder();

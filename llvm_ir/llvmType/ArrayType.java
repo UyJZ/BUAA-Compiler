@@ -15,9 +15,14 @@ public class ArrayType extends LLVMType {
         this.lens = lens;
         this.eleType = eleType;
         this.dim = lens.size();
+        int l = 1;
+        for (int i = 0; i < dim; i++) {
+            l *= lens.get(i);
+        }
+        this.len = l * 4;
     }
 
-    public LLVMType getEleType() {
+    public LLVMType getElementType() {
         if (dim == 2) return new ArrayType(lens.subList(1, 2), eleType);
         else return eleType;
     }
@@ -26,7 +31,7 @@ public class ArrayType extends LLVMType {
         return dim;
     }
 
-    public LLVMType getEleType(int i, int j) {
+    public LLVMType getElementType(int i, int j) {
         return eleType;
     }
 
@@ -36,7 +41,7 @@ public class ArrayType extends LLVMType {
         stringBuilder.append("[");
         stringBuilder.append(lens.get(0));
         stringBuilder.append(" x ");
-        stringBuilder.append(getEleType().toString());
+        stringBuilder.append(getElementType().toString());
         stringBuilder.append("]");
         return stringBuilder.toString();
     }

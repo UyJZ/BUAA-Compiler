@@ -88,7 +88,7 @@ public class Lexer {
                 next();
             }
         } else if (nextString(2).equals("/*")) {
-            pos++;
+            pos+=2;
             while (hasNext()) {
                 if (source.substring(pos, pos + 1).equals("\n")) curLine++;
                 if (nextString(2).equals("*/")) {

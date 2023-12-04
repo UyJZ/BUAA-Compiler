@@ -5,13 +5,21 @@ public class tasks {
     public static boolean isParserAnalysis = false;
     public static boolean isErrorHandle = false;
 
+    public static boolean isMIPSoutput = true;
+
+    public static boolean isSetNameAfterGen = true;
+
+    public static boolean isOptimize = true;
+
     public static boolean isLLVMoutput = false;
 
     private static String LexerOutputPath = "output.txt";
 
     private static String ParserOutputPath = "output.txt";
 
-    private static String ErrorHandleOutputPath = "error.txt";
+    public static String ErrorHandleOutputPath = "error.txt";
+
+    public static String MIPSOutputPath = "mips.txt";
 
     public static String getInputPath() {
         return "testfile.txt";
@@ -39,12 +47,16 @@ public class tasks {
 
     public static void setLLVMOutputForHw4() {
         tasks.isLexerAnalysis = false;
-        tasks.isErrorHandle = false;
+        tasks.isErrorHandle = true;
         tasks.isParserAnalysis = false;
         tasks.isLLVMoutput = true;
     }
 
     public static String getOutputPath() {
-        return isErrorHandle ? ErrorHandleOutputPath : isLLVMoutput ? LLVMOutputPath : LexerOutputPath;
+        return isLLVMoutput ? LLVMOutputPath : isErrorHandle ? ErrorHandleOutputPath : isLexerAnalysis ? LexerOutputPath : ParserOutputPath;
+    }
+
+    public static boolean isIsSetNameAfterGen() {
+        return isSetNameAfterGen;
     }
 }
