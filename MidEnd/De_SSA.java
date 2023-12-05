@@ -36,9 +36,9 @@ public class De_SSA {
 
     private void SSA_Phi2Pcopy(Function function) {
         int len = function.getBlockArrayList().size();
-        for (int i = 0; i < len; i++) {
+        ArrayList<BasicBlock> bList = new ArrayList<>(function.getBlockArrayList());
+        for (BasicBlock block : bList) {
             //主要是为了不处理消除关键边之后产生的基本块
-            BasicBlock block = function.getBlockArrayList().get(i);
             if (block.getInstrs().get(0) instanceof PhiInstr) {
                 LinkedHashMap<BasicBlock, PcopyInstr> map = new LinkedHashMap<>();
                 // TODO
@@ -75,7 +75,7 @@ public class De_SSA {
                             midBlock.addInstr(pc_i);
                             midBlock.addInstr(new BranchInstr(block));
                         }
-                        function.addBasicBlock(midBlock);
+                        function.getBlockArrayList().add(function.getBlockArrayList().indexOf(preBlock) + 1, midBlock);
                         it.remove();
                     }
                 }
