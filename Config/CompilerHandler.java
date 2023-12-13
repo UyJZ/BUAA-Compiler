@@ -9,6 +9,9 @@ import FrontEnd.Parser.ParserController;
 import FrontEnd.Symbol.SymbolManager;
 import MidEnd.Optimizer;
 import llvm_ir.IRController;
+import llvm_ir.Value;
+import llvm_ir.Values.BasicBlock;
+import llvm_ir.Values.Function;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -47,6 +50,14 @@ public class CompilerHandler {
                     optimizer.run();
                 }
                 IRController.getInstance().Output(ps);
+                for (Function function : IRController.getInstance().getModule().getFunctionList()) {
+                    for (BasicBlock block : function.getBlockArrayList()) {
+                        System.out.println(block.getName());
+                        for (Value block1 : block.getInSet()) {
+                            System.out.println(block.getName() + " in " + block1.getName());
+                        }
+                    }
+                }
             }
         } else if (tasks.isMIPSoutput) {
             ParserController parserController = new ParserController(lexer.getTokenStream());

@@ -1,8 +1,10 @@
 package MidEnd;
 
+import BackEnd.MIPS.Register;
 import llvm_ir.Module;
 import llvm_ir.Value;
 import llvm_ir.Values.BasicBlock;
+import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Function;
 import llvm_ir.Values.Instruction.Instr;
 import llvm_ir.Values.Instruction.MoveInstr;
@@ -11,9 +13,7 @@ import llvm_ir.Values.Instruction.PhiInstr;
 import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
 import llvm_ir.Values.TempValue;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
+import java.util.*;
 
 public class De_SSA {
 
@@ -76,6 +76,7 @@ public class De_SSA {
                             midBlock.addInstr(new BranchInstr(block));
                         }
                         function.getBlockArrayList().add(function.getBlockArrayList().indexOf(preBlock) + 1, midBlock);
+                        midBlock.setFather(function);
                         it.remove();
                     }
                 }
@@ -114,6 +115,8 @@ public class De_SSA {
                             }
                         }
                     }
+                    //解决寄存器冲突
+                    HashMap<Register, Value> conflictMap = new HashMap<>();
                     for (int i = seq.size() - 1; i >= 0; i--) {
                         block.getInstrs().add(k, seq.get(i));
                     }
@@ -121,6 +124,17 @@ public class De_SSA {
                 }
             }
         }
+    }
+
+    private boolean hasRegConflict(BasicBlock preBlock, BasicBlock posBlock) {
+        ArrayList<PhiInstr> phis = new ArrayList<>();
+        for (Instr instr : posBlock.getInstrs()) {
+            if (instr instanceof PhiInstr phiInstr) {
+                phis.add(phiInstr);
+            }
+        }
+        HashSet<Value> set = new HashSet<>();
+        return false;
     }
 
 }

@@ -51,7 +51,9 @@ public class Optimizer {
         cfgBuilder.run();
         gvnGcm.run();
         cfgBuilder.run();
+        mergeBlock.run();
         actAnalysis.run();
+        cfgBuilder.run();
         regAllocatorForSSA.run();
         deSsa.run();
         cfgBuilder.run();

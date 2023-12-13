@@ -456,6 +456,10 @@ public class Function extends Value {
                     hasSideEffect = true;
                     return;
                 }
+                if (instr instanceof LoadInstr loadInstr && loadInstr.getPtr() instanceof GlobalVar) {
+                    hasSideEffect = true;
+                    return;
+                }
             }
         }
         hasSideEffect = false;

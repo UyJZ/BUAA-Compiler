@@ -48,13 +48,13 @@ public class MoveInstr extends Instr {
         MipsController.getInstance().addAsm(commentAsm);
         Register r1;
         Register r2;
-        if (operands.get(0).getName().equals("%67")) {
+        if (operands.get(0).getName().equals("%680")) {
             System.out.println("debug");
         }
-        if (!operands.get(0).isDistributed() && !(operands.get(0) instanceof ConstInteger)) {
+        if (!(operands.get(0) instanceof ConstInteger)) {
             RegDispatcher.getInstance().distributeRegFor(operands.get(0));
         }
-        if (!operands.get(1).isDistributed() && !(operands.get(1) instanceof ConstInteger)) {
+        if (!(operands.get(1) instanceof ConstInteger)) {
             RegDispatcher.getInstance().distributeRegFor(operands.get(1));
         }
         if (operands.get(0).isUseReg()) {

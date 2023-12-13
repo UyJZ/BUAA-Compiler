@@ -19,6 +19,8 @@ public class Compiler {
         -moe : mips and optimize and error handle
          */
         tasks.isMIPSoutput = true;
+        tasks.isOptimize = true;
+        tasks.isErrorHandle = false;
         CompilerHandler.work();
         //throw new RuntimeException("Compiler finished");
     }

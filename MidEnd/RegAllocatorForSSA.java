@@ -10,13 +10,14 @@ import llvm_ir.Values.Instruction.MoveInstr;
 import llvm_ir.Values.Instruction.PhiInstr;
 import llvm_ir.Values.Instruction.ZextInstr;
 
-import java.security.Key;
 import java.util.*;
 
 public class RegAllocatorForSSA {
     private final Module module;
 
     private final HashMap<Value, Integer> useTimes;
+
+    private HashSet<Register> allPhiRegs;
 
     private HashMap<Function, HashSet<Register>> funcFreeRegs;
 
@@ -26,6 +27,7 @@ public class RegAllocatorForSSA {
         this.module = module;
         this.useTimes = new HashMap<>();
         this.funcFreeRegs = new HashMap<>();
+        this.allPhiRegs = new HashSet<>();
     }
 
     public void run() {
@@ -47,7 +49,7 @@ public class RegAllocatorForSSA {
     private void allocRegForBlock(BasicBlock block, LinkedHashSet<Register> freeRegs) {
         for (Value value : block.getInSet()) {
             if (value.isUseReg()) {
-                System.out.println(value.getName() + " ==> " + value.getRegister() + " (in)" + " " + value.getName());
+                System.out.println(value.hash + " ==> " + value.getRegister() + " (in)" + " " + value.hash);
             }
         }
         for (Register register : freeRegs) {
@@ -83,7 +85,7 @@ public class RegAllocatorForSSA {
                         //释放寄存器
                         freeRegs.add(value.getRegister());
                         reg2val.remove(value.getRegister());
-                        System.out.println("lastuse free " + value.getName() + " ==> " + value.getRegister());
+                        System.out.println("lastuse free " + value.hash + " ==> " + value.getRegister());
                     }
                 }
             }
@@ -129,8 +131,11 @@ public class RegAllocatorForSSA {
             minVal.removeDistribute();
             value.setUseReg(register);
             reg2val.put(register, value);
-            System.out.println("spill free " + minVal.getName() + " ==> " + register);
-            System.out.println(value.getName() + " ==> " + register);
+            if (value instanceof PhiInstr) {
+                allPhiRegs.add(register);
+            }
+            System.out.println("spill free " + minVal.hash + " ==> " + register);
+            System.out.println(value.hash + " ==> " + register);
         }
     }
 
@@ -166,7 +171,10 @@ public class RegAllocatorForSSA {
             freeRegs.remove(reg);
             reg2val.put(reg, v);
             funcFreeRegs.get(currentFunction).remove(reg);
-            System.out.println(v.getName() + " ==> " + reg);
+            System.out.println(v.hash + " ==> " + reg);
+            if (v instanceof PhiInstr) {
+                allPhiRegs.add(reg);
+            }
             return true;
         }
         return false;
