@@ -11,6 +11,7 @@ import llvm_ir.IRController;
 import llvm_ir.Value;
 import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Function;
+import llvm_ir.Values.Param;
 import llvm_ir.llvmType.*;
 
 import java.util.ArrayList;
@@ -123,6 +124,10 @@ public class CallInstr extends Instr {
 
     public void setName() {
         if (type instanceof Integer32Type) this.name = IRController.getInstance().genVirtualRegNum();
+    }
+
+    public void clearName() {
+        if (type instanceof Integer32Type) this.name = "";
     }
 
     public void setConStrName(String name) {
@@ -289,5 +294,18 @@ public class CallInstr extends Instr {
     @Override
     public boolean isDefinition() {
         return type instanceof Integer32Type;
+    }
+
+    @Override
+    public String GVNHash() {
+        assert !function.hasSideEffect();
+        StringBuilder sb = new StringBuilder();
+        sb.append("call_").append(function.getName()).append("(");
+        for (int i = 0;i < operands.size(); i++) {
+            sb.append(operands.get(i).hash);
+            if (i != operands.size() - 1) sb.append(", ");
+        }
+        sb.append(")");
+        return sb.toString();
     }
 }

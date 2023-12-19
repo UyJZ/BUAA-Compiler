@@ -51,6 +51,8 @@ public class Function extends Value {
 
     private boolean hasSyscall;
 
+    private boolean hasSideEffect;
+
     private int ValOffset;
 
     private LinkedHashSet<Function> callFunctions;
@@ -73,6 +75,7 @@ public class Function extends Value {
         Val2Offset = new HashMap<>();
         defMap = new HashMap<>();
         isSysCall = name.equals("getint") || name.equals("putint") || name.equals("putch") || name.equals("putstr");
+        hasSideEffect = isSysCall;
         hasPointer = false;
         recursive = false;
         instrGVNMap = new HashMap<>();
@@ -146,6 +149,15 @@ public class Function extends Value {
         }
         for (BasicBlock b : blockArrayList) {
             b.setName();
+        }
+    }
+
+    public void clearName() {
+        for (Param p : paramArrayList) {
+            p.clearName();
+        }
+        for (BasicBlock b : blockArrayList) {
+            b.clearName();
         }
     }
 
@@ -426,5 +438,39 @@ public class Function extends Value {
     @Override
     public boolean isDistributable() {
         return false;
+    }
+
+    public boolean hasSideEffect() {
+        return hasSideEffect;
+    }
+
+    public void buildSideEffect() {
+        if (isSysCall) {
+            hasSideEffect = true;
+            return;
+        }
+        for (Param param : paramArrayList) {
+            if (param.getType() instanceof ArrayType || param.getType() instanceof PointerType) {
+                hasSideEffect = true;
+                return;
+            }
+        }
+        for (BasicBlock block : blockArrayList) {
+            for (Instr instr : block.getInstrs()) {
+                if (instr instanceof CallInstr callInstr && callInstr.getFunction() != this && callInstr.getFunction().hasSideEffect()) {
+                    hasSideEffect = true;
+                    return;
+                }
+                if (instr instanceof StoreInstr storeInstr && storeInstr.getDst() instanceof GlobalVar) {
+                    hasSideEffect = true;
+                    return;
+                }
+                if (instr instanceof LoadInstr loadInstr && loadInstr.getPtr() instanceof GlobalVar) {
+                    hasSideEffect = true;
+                    return;
+                }
+            }
+        }
+        hasSideEffect = false;
     }
 }

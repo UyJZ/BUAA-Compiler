@@ -4,10 +4,7 @@ import llvm_ir.Module;
 import llvm_ir.Values.BasicBlock;
 import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.Function;
-import llvm_ir.Values.Instruction.BinaryInstr;
-import llvm_ir.Values.Instruction.GEPInstr;
-import llvm_ir.Values.Instruction.IcmpInstr;
-import llvm_ir.Values.Instruction.Instr;
+import llvm_ir.Values.Instruction.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,6 +24,7 @@ public class GVN_GCM {
     public void run() {
         OptimizedCalc();
         GVN();
+        GVNMap.clear();
     }
 
     private void GVN() {
@@ -41,7 +39,7 @@ public class GVN_GCM {
         LinkedHashSet<String> inserted = new LinkedHashSet<>();
         while (iterator.hasNext()) {
             Instr instr = iterator.next();
-            if (instr instanceof IcmpInstr || instr instanceof BinaryInstr || instr instanceof GEPInstr) {
+            if (instr instanceof IcmpInstr || instr instanceof BinaryInstr || instr instanceof GEPInstr || instr instanceof CallInstr callInstr && !callInstr.getFunction().hasSideEffect()) {
                 if (GVNMap.containsKey(instr.GVNHash())) {
                     instr.replacedBy(GVNMap.get(instr.GVNHash()));
                     iterator.remove();
@@ -128,6 +126,15 @@ public class GVN_GCM {
                                     binaryInstr.replacedBy(new ConstInteger(res));
                                     deadInstrSet.add(binaryInstr);
                                 } else if (binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger1 && constInteger1.getVal() == 1) {
+                                    binaryInstr.replacedBy(new ConstInteger(0));
+                                    deadInstrSet.add(binaryInstr);
+                                }
+                            }
+                            case AND -> {
+                                if (binaryInstr.getOperands().get(0) instanceof ConstInteger constInteger && constInteger.getVal() == 0) {
+                                    binaryInstr.replacedBy(new ConstInteger(0));
+                                    deadInstrSet.add(binaryInstr);
+                                } else if (binaryInstr.getOperands().get(1) instanceof ConstInteger constInteger && constInteger.getVal() == 0) {
                                     binaryInstr.replacedBy(new ConstInteger(0));
                                     deadInstrSet.add(binaryInstr);
                                 }

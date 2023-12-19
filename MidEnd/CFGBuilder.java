@@ -15,8 +15,15 @@ public class CFGBuilder {
     }
 
     public void run() {
+        buildSideEffect();
         buildCFG();
         buildDominateRel();
+    }
+
+    private void buildSideEffect() {
+        for (Function function : module.getFunctionList()) {
+            function.buildSideEffect();
+        }
     }
 
     private void buildCFG() {

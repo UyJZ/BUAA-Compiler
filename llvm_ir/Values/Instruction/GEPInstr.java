@@ -80,7 +80,35 @@ public class GEPInstr extends Instr {
             int off = ((PointerType) type).getElementType().getLen();
             Register r1;
             if (indexs.get(0) instanceof ConstInteger constInteger && constInteger.getVal() == 0) {
-                r1 = Register.ZERO;
+                Register r0;
+                if (ptr.getName().charAt(0) == '@') {
+                    r0 = Register.K0;
+                    LaAsm la = new LaAsm(r0, new LabelAsm("global_" + ptr.getName().substring(1)));
+                    MipsController.getInstance().addAsm(la);
+                } else if (ptr.isUseReg()) {
+                    r0 = ptr.getRegister();
+                } else {
+                    r0 = Register.K0;
+                    MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, r0, Register.SP, ptr.getOffset());
+                    MipsController.getInstance().addAsm(lw);
+                }
+                MoveAsm move = new MoveAsm(tar, r0);
+                MipsController.getInstance().addAsm(move);
+            } else if (indexs.get(0) instanceof ConstInteger constInteger) {
+                Register r0;
+                if (ptr.getName().charAt(0) == '@') {
+                    r0 = Register.K0;
+                    LaAsm la = new LaAsm(r0, new LabelAsm("global_" + ptr.getName().substring(1)));
+                    MipsController.getInstance().addAsm(la);
+                } else if (ptr.isUseReg()) {
+                    r0 = ptr.getRegister();
+                } else {
+                    r0 = Register.K0;
+                    MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, r0, Register.SP, ptr.getOffset());
+                    MipsController.getInstance().addAsm(lw);
+                }
+                AluITAsm add = new AluITAsm(AluITAsm.Op.addiu, tar, r0, constInteger.getVal() * off);
+                MipsController.getInstance().addAsm(add);
             } else {
                 LiAsm li = new LiAsm(Register.K0, off);
                 MipsController.getInstance().addAsm(li);
@@ -100,36 +128,65 @@ public class GEPInstr extends Instr {
                 HLAsm mflo = new HLAsm(HLAsm.Op.mflo, Register.K1);
                 MipsController.getInstance().addAsm(mflo);
                 r1 = Register.K1;
+                Register r0;
+                if (ptr.getName().charAt(0) == '@') {
+                    r0 = Register.K0;
+                    LaAsm la = new LaAsm(r0, new LabelAsm("global_" + ptr.getName().substring(1)));
+                    MipsController.getInstance().addAsm(la);
+                } else if (ptr.isUseReg()) {
+                    r0 = ptr.getRegister();
+                } else {
+                    r0 = Register.K0;
+                    MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, r0, Register.SP, ptr.getOffset());
+                    MipsController.getInstance().addAsm(lw);
+                }
+                AluRTAsm add = new AluRTAsm(AluRTAsm.Op.addu, tar, r0, r1);
+                MipsController.getInstance().addAsm(add);
             }
-            Register r0;
-            if (ptr.getName().charAt(0) == '@') {
-                r0 = Register.K0;
-                LaAsm la = new LaAsm(r0, new LabelAsm("global_" + ptr.getName().substring(1)));
-                MipsController.getInstance().addAsm(la);
-            } else if (ptr.isUseReg()) {
-                r0 = ptr.getRegister();
-            } else {
-                r0 = Register.K0;
-                MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, r0, Register.SP, ptr.getOffset());
-                MipsController.getInstance().addAsm(lw);
+            if (!useReg) {
+                MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, tar, Register.SP, offset);
+                MipsController.getInstance().addAsm(sw);
             }
-            AluRTAsm add = new AluRTAsm(AluRTAsm.Op.addu, tar, r0, r1);
-            MipsController.getInstance().addAsm(add);
         } else {
             int l1 = ((PointerType) ptr.getType()).getElementType().getLen();//通常是0,就不算了
             int l2 = ((ArrayType) ((PointerType) ptr.getType()).getElementType()).getElementType().getLen();
             Register r1;
             Register r2;
             if (indexs.get(1) instanceof ConstInteger constInteger && constInteger.getVal() == 0) {
+                Register r0;
+                if (ptr.getName().charAt(0) == '@') {
+                    r0 = Register.K0;
+                    LaAsm la = new LaAsm(r0, new LabelAsm("global_" + ptr.getName().substring(1)));
+                    MipsController.getInstance().addAsm(la);
+                } else if (ptr.isUseReg()) {
+                    r0 = ptr.getRegister();
+                } else {
+                    r0 = Register.K0;
+                    MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, r0, Register.SP, ptr.getOffset());
+                    MipsController.getInstance().addAsm(lw);
+                }
                 r2 = Register.ZERO;
+                MoveAsm moveAsm = new MoveAsm(tar, r0);
+                MipsController.getInstance().addAsm(moveAsm);
+            } else if (indexs.get(1) instanceof ConstInteger constInteger) {
+                Register r0;
+                if (ptr.getName().charAt(0) == '@') {
+                    r0 = Register.K0;
+                    LaAsm la = new LaAsm(r0, new LabelAsm("global_" + ptr.getName().substring(1)));
+                    MipsController.getInstance().addAsm(la);
+                } else if (ptr.isUseReg()) {
+                    r0 = ptr.getRegister();
+                } else {
+                    r0 = Register.K0;
+                    MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, r0, Register.SP, ptr.getOffset());
+                    MipsController.getInstance().addAsm(lw);
+                }
+                AluITAsm addiu = new AluITAsm(AluITAsm.Op.addiu, tar, r0, constInteger.getVal() * l2);
+                MipsController.getInstance().addAsm(addiu);
             } else {
                 if (indexs.get(1).isUseReg()) {
                     r2 = indexs.get(1).getRegister();
-                } else if (indexs.get(1) instanceof ConstInteger constInteger) {
-                    r2 = Register.K0;
-                    LiAsm li = new LiAsm(r2, constInteger.getVal());
-                    MipsController.getInstance().addAsm(li);
-                } else {
+                }  else {
                     r2 = Register.K0;
                     MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, r2, Register.SP, indexs.get(1).getOffset());
                     MipsController.getInstance().addAsm(lw);
@@ -142,27 +199,27 @@ public class GEPInstr extends Instr {
                 HLAsm mflo = new HLAsm(HLAsm.Op.mflo, Register.K1);
                 MipsController.getInstance().addAsm(mflo);
                 r2 = Register.K1;
+                Register r0;
+                if (ptr.getName().charAt(0) == '@') {
+                    r0 = Register.K0;
+                    LaAsm la = new LaAsm(r0, new LabelAsm("global_" + ptr.getName().substring(1)));
+                    MipsController.getInstance().addAsm(la);
+                } else if (ptr.isUseReg()) {
+                    r0 = ptr.getRegister();
+                } else {
+                    r0 = Register.K0;
+                    MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, r0, Register.SP, ptr.getOffset());
+                    MipsController.getInstance().addAsm(lw);
+                }
+                //把数组的基地址取出来存到K0
+                AluRTAsm add = new AluRTAsm(AluRTAsm.Op.addu, tar, r0, r2);
+                MipsController.getInstance().addAsm(add);
             }
-            //把数组的基地址取出来存到K0
-            if (ptr.getName().charAt(0) == '@') {
-                r1 = Register.K0;
-                LaAsm la = new LaAsm(r1, new LabelAsm("global_" + ptr.getName().substring(1)));
-                MipsController.getInstance().addAsm(la);
-            } else if (ptr.isUseReg()) {
-                r1 = ptr.getRegister();
-            } else {
-                //不可能是常数
-                r1 = Register.K0;
-                MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, r1, Register.SP, ptr.getOffset());
-                MipsController.getInstance().addAsm(lw);
+            //TODO:将K0存进去
+            if (!useReg) {
+                MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, tar, Register.SP, offset);
+                MipsController.getInstance().addAsm(sw);
             }
-            AluRTAsm add = new AluRTAsm(AluRTAsm.Op.addu, tar, r1, r2);
-            MipsController.getInstance().addAsm(add);
-        }
-        //TODO:将K0存进去
-        if (!useReg) {
-            MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, tar, Register.SP, offset);
-            MipsController.getInstance().addAsm(sw);
         }
     }
 

@@ -12,6 +12,7 @@ import llvm_ir.llvmType.LLVMType;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class IRController {
 
@@ -110,5 +111,11 @@ public class IRController {
 
     public void setName() {
         module.setName();
+    }
+
+    public void flush() {
+        for (Map.Entry<Function, Integer> e : virtualRegNumMap.entrySet()) {
+            e.setValue(0);
+        }
     }
 }

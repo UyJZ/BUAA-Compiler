@@ -82,11 +82,17 @@ public class BinaryInstr extends Instr {
                 }
                 LiAsm li = new LiAsm(tar, val);
                 MipsController.getInstance().addAsm(li);
-            } else if ((operand1 instanceof ConstInteger constInteger && constInteger.getVal() != 0 && !AluITAsm.isOutOfRange(constInteger.getVal())) ||
+            } else if (operand1 instanceof ConstInteger constInteger && operand2.isUseReg() && useReg && register == operand2.getRegister() && constInteger.getVal() == 0 && (opcode == op.ADD)) {
+                return;
+            } else if (operand2 instanceof ConstInteger constInteger && operand1.isUseReg() && useReg && register == operand1.getRegister() && constInteger.getVal() == 0 && (opcode == op.ADD || opcode == op.SUB)) {
+                return;
+            }
+
+            else if ((operand1 instanceof ConstInteger constInteger && constInteger.getVal() != 0 && !AluITAsm.isOutOfRange(constInteger.getVal())) ||
                     (operand2 instanceof ConstInteger constInteger1 && constInteger1.getVal() != 0 && !AluITAsm.isOutOfRange(constInteger1.getVal()))) {
                 AluITAsm.Op aluOp = null;
                 switch (opcode) {
-                    case ADD -> aluOp = AluITAsm.Op.addi;
+                    case ADD -> aluOp = AluITAsm.Op.addiu;
                     case SUB -> aluOp = AluITAsm.Op.subiu;
                     case AND -> aluOp = AluITAsm.Op.andi;
                     case OR -> aluOp = AluITAsm.Op.ori;
@@ -116,7 +122,9 @@ public class BinaryInstr extends Instr {
                         MipsController.getInstance().addAsm(aluITAsm);
                     }
                 }
-            } else {
+            }
+
+            else {
                 AluRTAsm.Op aluOp = null;
                 switch (opcode) {
                     case ADD -> aluOp = AluRTAsm.Op.addu;
@@ -159,7 +167,7 @@ public class BinaryInstr extends Instr {
             }
             Register r1;
             Register r2;
-            if (opcode == BinaryInstr.op.SDIV && tasks.isOptimize && operand2 instanceof ConstInteger constInteger && !(operand1 instanceof ConstInteger)) {
+            if (false && opcode == BinaryInstr.op.SDIV && tasks.isOptimize && operand2 instanceof ConstInteger constInteger && !(operand1 instanceof ConstInteger)) {
                 //TODO
                  boolean flag = optimizeDiv(operand1, constInteger.getVal());
                  if (flag) return;

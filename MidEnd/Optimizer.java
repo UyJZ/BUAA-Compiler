@@ -44,12 +44,16 @@ public class Optimizer {
         ssaBuilder.run();
         GlobalForInline globalForInline = new GlobalForInline();
         globalForInline.setModule(module);
+        gvnGcm.run();
+        deadCodeDeletion.run();
         funcInline.run();
         deadCodeDeletion.run();
         cfgBuilder.run();
         gvnGcm.run();
         cfgBuilder.run();
+        mergeBlock.run();
         actAnalysis.run();
+        cfgBuilder.run();
         regAllocatorForSSA.run();
         deSsa.run();
         cfgBuilder.run();

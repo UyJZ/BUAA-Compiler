@@ -132,6 +132,13 @@ public class BasicBlock extends Value {
         }
     }
 
+    public void clearName() {
+        super.clearName();
+        for (Instr instr : instrs) {
+            instr.clearName();
+        }
+    }
+
     public void setInSet(HashSet<Value> set) {
         inSet = set;
     }

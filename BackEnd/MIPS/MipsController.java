@@ -29,6 +29,8 @@ public class MipsController {
 
     private FunctionAsm currentFuncAsm;
 
+    private BasicBlock block;
+
     private int currentConStrNum = 0;
 
     private ArrayList<FunctionAsm> functionArrayList;
@@ -86,6 +88,7 @@ public class MipsController {
     public void addBasicBlock(BasicBlock block) {
         currentBlockAsm = new BlockAsm(currentFuncAsm, block);
         currentFuncAsm.addBasicBlock(currentBlockAsm);
+        this.block = block;
     }
 
     public void addAsm(Asm asm) {
@@ -100,5 +103,13 @@ public class MipsController {
 
     public void addGlobalVar(Data data) {
         dataSegment.add(data);
+    }
+
+    public Function getCurrentFunction() {
+        return currentFunction;
+    }
+
+    public BasicBlock getCurrentBlock() {
+        return block;
     }
 }

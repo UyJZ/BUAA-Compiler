@@ -68,6 +68,10 @@ public class Value {
         this.name = name;
     }
 
+    public void clearName() {
+        if (!(this instanceof ConstInteger)) this.name = "";
+    }
+
     public int getLen() {
         return type.getLen();
     }
@@ -156,6 +160,7 @@ public class Value {
         this.isDistributed = true;
         this.useReg = false;
         this.isMem = true;
+        offset = 4;
     }
 
     public boolean isDistributable() {
@@ -171,7 +176,6 @@ public class Value {
     }
 
     public boolean isDistributedToMem() {
-        offset = 4;
         return isDistributed && isMem;
     }
 

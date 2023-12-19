@@ -47,9 +47,11 @@ public class ActAnalysis {
                 for (BasicBlock block1 : block.getPosBlocks()) {
                     s.addAll(block1.getInSet());
                 }
+                // Out = \cap_{pos} In
                 block.setOutSet(s);
                 HashSet<Value> use_b = new HashSet<>(block.getUseSet());
                 HashSet<Value> Out = new HashSet<>(block.getOutSet());
+                // In = use + (Out - def)
                 Out.removeAll(block.getDefSet());
                 use_b.addAll(Out);
                 block.setInSet(use_b);
@@ -60,6 +62,13 @@ public class ActAnalysis {
                     change = true;
                 }
                 map.put(block, block.getInSet());
+            }
+        }
+        for (BasicBlock block : function.getBlockArrayList()) {
+            System.out.println("\n" + block.hash + ": ");
+            System.out.print("in: ");
+            for (Value value : block.getInSet()) {
+                System.out.print(value.hash + " ");
             }
         }
     }

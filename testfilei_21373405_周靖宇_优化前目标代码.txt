@@ -1,6 +1,6 @@
 .data
 global_N:	.word 	10
-global_a:		.word 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 
+global_a:		.word 	0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
 str_0:	.asciiz   ", "
 str_1:	.asciiz   "\n"
 str_2:	.asciiz   ", "

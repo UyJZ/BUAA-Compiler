@@ -16,4 +16,12 @@ public class RTAsm extends Asm {
         return rd;
     }
 
+    public Register getRs() {
+        return rs;
+    }
+
+    public Register getRt() {
+        return rt;
+    }
+
 }

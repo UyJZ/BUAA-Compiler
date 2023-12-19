@@ -41,8 +41,13 @@ public class BranchInstr extends Instr {
     public void genMIPS() {
         CommentAsm asm = new CommentAsm(this.toString());
         MipsController.getInstance().addAsm(asm);
+        ArrayList<BasicBlock> blocks = new ArrayList<>(MipsController.getInstance().getCurrentFunction().getBlockArrayList());
+        BasicBlock currentBlock = MipsController.getInstance().getCurrentBlock();
         if (operands.size() == 1) {
             BasicBlock label1 = (BasicBlock) operands.get(0);
+            if (blocks.indexOf(currentBlock) + 1 == blocks.indexOf(label1)) {
+                return;
+            }
             JAsm j = new JAsm(label1.getMIPSLabel());
             MipsController.getInstance().addAsm(j);
         } else {
@@ -50,26 +55,40 @@ public class BranchInstr extends Instr {
             BasicBlock label2 = (BasicBlock) operands.get(2);
             Value judge = operands.get(0);
             if (judge.isUseReg() && judge.getRegister() != Register.ZERO) {
-                BranchITAsm bne = new BranchITAsm(BranchITAsm.Op.bne, judge.getRegister(), Register.ZERO, label1.getMIPSLabel());
-                MipsController.getInstance().addAsm(bne);
-                BranchITAsm beq = new BranchITAsm(BranchITAsm.Op.beq, judge.getRegister(), Register.ZERO, label2.getMIPSLabel());
-                MipsController.getInstance().addAsm(beq);
+                if (blocks.indexOf(currentBlock) + 1 != blocks.indexOf(label1)) {
+                    BranchITAsm bne = new BranchITAsm(BranchITAsm.Op.bne, judge.getRegister(), Register.ZERO, label1.getMIPSLabel());
+                    MipsController.getInstance().addAsm(bne);
+                }
+                if (blocks.indexOf(currentBlock) + 1 != blocks.indexOf(label2)) {
+                    BranchITAsm beq = new BranchITAsm(BranchITAsm.Op.beq, judge.getRegister(), Register.ZERO, label2.getMIPSLabel());
+                    MipsController.getInstance().addAsm(beq);
+                }
             } else if (judge instanceof ConstInteger constInteger) {
                 int v = constInteger.getVal();
                 JAsm j;
                 if (v == 0) {
+                    if (blocks.indexOf(currentBlock) + 1 == blocks.indexOf(label2)) {
+                        return;
+                    }
                     j = new JAsm(label2.getMIPSLabel());
                 } else {
+                    if (blocks.indexOf(currentBlock) + 1 == blocks.indexOf(label1)) {
+                        return;
+                    }
                     j = new JAsm(label1.getMIPSLabel());
                 }
                 MipsController.getInstance().addAsm(j);
             } else {
                 MemITAsm lw = new MemITAsm(MemITAsm.Op.lw, Register.K0, Register.SP, judge.getOffset());
                 MipsController.getInstance().addAsm(lw);
-                BranchITAsm bne = new BranchITAsm(BranchITAsm.Op.bne, Register.K0, Register.ZERO, label1.getMIPSLabel());
-                MipsController.getInstance().addAsm(bne);
-                BranchITAsm beq = new BranchITAsm(BranchITAsm.Op.beq, Register.K0, Register.ZERO, label2.getMIPSLabel());
-                MipsController.getInstance().addAsm(beq);
+                if (blocks.indexOf(currentBlock) + 1 != blocks.indexOf(label1)) {
+                    BranchITAsm bne = new BranchITAsm(BranchITAsm.Op.bne, Register.K0, Register.ZERO, label1.getMIPSLabel());
+                    MipsController.getInstance().addAsm(bne);
+                }
+                if (blocks.indexOf(currentBlock) + 1 != blocks.indexOf(label2)) {
+                    BranchITAsm beq = new BranchITAsm(BranchITAsm.Op.beq, Register.K0, Register.ZERO, label2.getMIPSLabel());
+                    MipsController.getInstance().addAsm(beq);
+                }
             }
         }
     }

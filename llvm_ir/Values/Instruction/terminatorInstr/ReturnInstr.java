@@ -39,6 +39,10 @@ public class ReturnInstr extends Instr {
         }
     }
 
+    public void clearName() {
+        name = "";
+    }
+
     @Override
     public void genMIPS() {
         CommentAsm asm = new CommentAsm(this.toString());
