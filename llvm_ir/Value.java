@@ -68,6 +68,10 @@ public class Value {
         this.name = name;
     }
 
+    public void clearName() {
+        if (!(this instanceof ConstInteger)) this.name = "";
+    }
+
     public int getLen() {
         return type.getLen();
     }

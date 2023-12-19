@@ -152,6 +152,15 @@ public class Function extends Value {
         }
     }
 
+    public void clearName() {
+        for (Param p : paramArrayList) {
+            p.clearName();
+        }
+        for (BasicBlock b : blockArrayList) {
+            b.clearName();
+        }
+    }
+
     public void allocSpace(int size) {
         ValOffset += size;
     }

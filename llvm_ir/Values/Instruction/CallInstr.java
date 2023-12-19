@@ -126,6 +126,10 @@ public class CallInstr extends Instr {
         if (type instanceof Integer32Type) this.name = IRController.getInstance().genVirtualRegNum();
     }
 
+    public void clearName() {
+        if (type instanceof Integer32Type) this.name = "";
+    }
+
     public void setConStrName(String name) {
         ConstrName = name;
     }

@@ -52,6 +52,12 @@ public class Module extends Value {
         }
     }
 
+    public void clearName() {
+        for (Function f : functionList) {
+            f.clearName();
+        }
+    }
+
     @Override
     public void genMIPS() {
         for (GlobalVar var : globalVarList) {

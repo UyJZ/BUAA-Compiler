@@ -28,6 +28,12 @@ public class MoveInstr extends Instr {
         }
     }
 
+    public void clearName() {
+        for (Value value : operands) {
+            value.setName("");
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

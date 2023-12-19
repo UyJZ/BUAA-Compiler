@@ -48,16 +48,10 @@ public class CompilerHandler {
                 if (tasks.isOptimize) {
                     Optimizer optimizer = new Optimizer(IRController.getInstance().getModule());
                     optimizer.run();
+                } else {
+                    IRController.getInstance().getModule().setName();
                 }
                 IRController.getInstance().Output(ps);
-                for (Function function : IRController.getInstance().getModule().getFunctionList()) {
-                    for (BasicBlock block : function.getBlockArrayList()) {
-                        System.out.println(block.getName());
-                        for (Value block1 : block.getInSet()) {
-                            System.out.println(block.getName() + " in " + block1.getName());
-                        }
-                    }
-                }
             }
         } else if (tasks.isMIPSoutput) {
             ParserController parserController = new ParserController(lexer.getTokenStream());
