@@ -1,0 +1,245 @@
+.data
+  lhc_str0: .asciiz "\n"
+  lhc_str1: .asciiz "\n"
+  lhc_str2: .asciiz "\n"
+  lhc_str3: .asciiz "t:"
+  lhc_str4: .asciiz "\n"
+.text
+    jal main
+isPrime:
+    sw $a0, -4($sp)
+    li $t0, 2
+    sw $t0, -8($sp)
+    j cond_1
+cond_1:
+    lw $t0, -8($sp)
+    lw $t1, -4($sp)
+    slt $t2, $t0, $t1
+    beq $t2, $zero, end_1
+    j stmt_1
+stmt_1:
+    lw $t0, -4($sp)
+    lw $t1, -8($sp)
+    div $t0, $t1
+    mfhi $t2
+    li $at, 0
+    xor $t3, $t2, $at
+    sltiu $t3, $t3, 1
+    beq $t3, $zero, end_2
+    j stmt_2
+stmt_2:
+    li $t0, 0
+    addu $v0, $t0, $0
+    jr $ra
+    j end_2
+end_2:
+    lw $t0, -8($sp)
+    addi $t1, $t0, 1
+    sw $t1, -8($sp)
+    j forStmt_1
+forStmt_1:
+    j cond_1
+end_1:
+    li $t0, 1
+    addu $v0, $t0, $0
+    jr $ra
+check_group:
+    sw $a0, -4($sp)
+    li $t0, 0
+    sw $t0, -8($sp)
+    j cond_3
+cond_3:
+    lw $t0, -8($sp)
+    slti $t1, $t0, 2
+    beq $t1, $zero, end_3
+    j stmt_3
+stmt_3:
+    lw $t0, -4($sp)
+    lw $t1, -8($sp)
+    addu $t2, $t0, $0
+    addu $at, $t1, $0
+    sll $at, $at, 2
+    addu $t2, $t2, $at
+    lw $t4, 0($t2)
+    sw $t4, -12($sp)
+    lw $t0, -12($sp)
+    sw $t0, -16($sp)
+    sw $ra, -20($sp)
+    addu $a0, $t0, $0
+    addi $sp, $sp, -20
+    jal isPrime
+    lw $ra, 0($sp)
+    addi $sp, $sp, 20
+    addu $t0, $v0, $0
+    sw $t0, -12($sp)
+    lw $t0, -12($sp)
+    addi $v0, $0, 1
+    addu $a0, $t0, $0
+    syscall
+    addi $v0, $0, 4
+    la $a0, lhc_str0
+    syscall
+    lw $t1, -8($sp)
+    addi $t2, $t1, 1
+    sw $t2, -8($sp)
+    j forStmt_3
+forStmt_3:
+    j cond_3
+end_3:
+    jr $ra
+test:
+    sw $a0, -8($sp)
+    lw $t0, -8($sp)
+    addu $t1, $t0, $0
+    addi $t1, $t1, 0
+    addi $t1, $t1, 4
+    lw $t3, 0($t1)
+    li $at, 0
+    xor $t4, $t3, $at
+    sltiu $t4, $t4, 1
+    li $at, 0
+    xor $t5, $t4, $at
+    sltiu $t5, $t5, 1
+    xori $t5, $t5, 1
+    beq $t5, $zero, end_4
+    j stmt_4
+stmt_4:
+    j end_4
+end_4:
+    li $t0, 0
+    addu $v0, $t0, $0
+    jr $ra
+main:
+    li $t0, 30
+    sw $t0, 0($sp)
+    lw $t0, 0($sp)
+    sw $t0, -4($sp)
+    sw $ra, -8($sp)
+    addu $a0, $t0, $0
+    addi $sp, $sp, -8
+    jal isPrime
+    lw $ra, 0($sp)
+    addi $sp, $sp, 8
+    addu $t0, $v0, $0
+    addi $v0, $0, 1
+    addu $a0, $t0, $0
+    syscall
+    addi $v0, $0, 4
+    la $a0, lhc_str1
+    syscall
+    li $t1, 31
+    sw $t1, 0($sp)
+    lw $t0, 0($sp)
+    sw $t0, -8($sp)
+    sw $ra, -12($sp)
+    addu $a0, $t0, $0
+    addi $sp, $sp, -12
+    jal isPrime
+    lw $ra, 0($sp)
+    addi $sp, $sp, 12
+    addu $t0, $v0, $0
+    addi $v0, $0, 1
+    addu $a0, $t0, $0
+    syscall
+    addi $v0, $0, 4
+    la $a0, lhc_str2
+    syscall
+    addi $t1, $sp, -32
+    addi $t1, $t1, 0
+    addi $t1, $t1, 0
+    li $t3, 111
+    sw $t3, 0($t1)
+    addi $t4, $sp, -32
+    addi $t4, $t4, 0
+    addi $t4, $t4, 4
+    li $t6, 2222
+    sw $t6, 0($t4)
+    addi $t7, $sp, -32
+    addi $t7, $t7, 8
+    addi $t7, $t7, 0
+    li $s1, 3
+    sw $s1, 0($t7)
+    addi $s2, $sp, -32
+    addi $s2, $s2, 8
+    addi $s2, $s2, 4
+    li $s4, 4
+    sw $s4, 0($s2)
+    addi $s5, $sp, -32
+    addi $s5, $s5, 16
+    addi $s5, $s5, 0
+    li $s7, 5
+    sw $s7, 0($s5)
+    addi $t9, $sp, -32
+    addi $t9, $t9, 16
+    addi $t9, $t9, 4
+    sw $t9, -36($sp)
+    li $t9, 6
+    lw $t8, -36($sp)
+    sw $t9, 0($t8)
+    addi $t0, $sp, -32
+    addi $t0, $t0, 0
+    addi $t0, $t0, 0
+    sw $t0, -40($sp)
+    sw $ra, -44($sp)
+    addu $a0, $t0, $0
+    addi $sp, $sp, -44
+    jal check_group
+    lw $ra, 0($sp)
+    addi $sp, $sp, 44
+    addi $t0, $sp, -32
+    addi $t0, $t0, 8
+    addi $t0, $t0, 0
+    sw $t0, -44($sp)
+    sw $ra, -48($sp)
+    addu $a0, $t0, $0
+    addi $sp, $sp, -48
+    jal check_group
+    lw $ra, 0($sp)
+    addi $sp, $sp, 48
+    addi $t0, $sp, -32
+    addi $t0, $t0, 16
+    addi $t0, $t0, 0
+    sw $t0, -48($sp)
+    sw $ra, -52($sp)
+    addu $a0, $t0, $0
+    addi $sp, $sp, -52
+    jal check_group
+    lw $ra, 0($sp)
+    addi $sp, $sp, 52
+    li $t0, 1
+    sw $t0, -52($sp)
+    j cond_5
+cond_5:
+    lw $t0, -52($sp)
+    sgt $t1, $t0, 0
+    beq $t1, $zero, end_5
+    j stmt_5
+stmt_5:
+    lw $t0, -52($sp)
+    slti $t1, $t0, 10
+    beq $t1, $zero, end_6
+    j stmt_6
+stmt_6:
+    j end_5
+break_7:
+    j end_6
+end_6:
+    lw $t0, -52($sp)
+    addi $t1, $t0, 1
+    sw $t1, -52($sp)
+    j forStmt_5
+forStmt_5:
+    j cond_5
+end_5:
+    lw $t0, -52($sp)
+    addi $v0, $0, 4
+    la $a0, lhc_str3
+    syscall
+    addi $v0, $0, 1
+    addu $a0, $t0, $0
+    syscall
+    addi $v0, $0, 4
+    la $a0, lhc_str4
+    syscall
+    li $v0, 10
+    syscall
