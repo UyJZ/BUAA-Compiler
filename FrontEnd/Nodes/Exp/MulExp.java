@@ -38,6 +38,9 @@ public class MulExp extends Node {
                 case MOD -> {
                     return a % b;
                 }
+                case BITAND -> {
+                    return a & b;
+                }
                 default -> {
                     return -1;
                 }
@@ -64,6 +67,9 @@ public class MulExp extends Node {
                     case MOD -> {
                         return new ConstInteger(constInteger.getVal() % constInteger1.getVal());
                     }
+                    case BITAND -> {
+                        return new ConstInteger(constInteger.getVal() & constInteger1.getVal());
+                    }
                     default -> {
                         return null;
                     }
@@ -83,6 +89,8 @@ public class MulExp extends Node {
                     return operand1;
                 } else if (constInteger.getVal() == 1 && ((TokenNode) children.get(1)).getTokenType() == tokenType.MOD) {
                     return new ConstInteger(0);
+                } else if (constInteger.getVal() == 0 && ((TokenNode) children.get(1)).getTokenType() == tokenType.MOD) {
+                    return new ConstInteger(0);
                 }
             } else if (operand1 == operand2) {
                 if (((TokenNode) children.get(1)).getTokenType() == tokenType.DIV) {
@@ -100,6 +108,9 @@ public class MulExp extends Node {
                 }
                 case MOD -> {
                     Op = BinaryInstr.op.SREM;
+                }
+                case BITAND -> {
+                    Op = BinaryInstr.op.AND;
                 }
                 default -> {
                     Op = null;

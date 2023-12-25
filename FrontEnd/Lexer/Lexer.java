@@ -119,6 +119,7 @@ public class Lexer {
             case "printf" -> tokenType.PRINTFTK;
             case "return" -> tokenType.RETURNTK;
             case "void" -> tokenType.VOIDTK;
+            case "bitand" -> tokenType.BITAND;
             default -> tokenType.IDENFR;
         };
     }

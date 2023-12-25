@@ -18,6 +18,7 @@ import llvm_ir.Value;
 import llvm_ir.Values.ConstInteger;
 import llvm_ir.Values.GlobalVar;
 import llvm_ir.Values.Instruction.AllocaInst;
+import llvm_ir.Values.Instruction.CallInstr;
 import llvm_ir.Values.Instruction.GEPInstr;
 import llvm_ir.Values.Instruction.StoreInstr;
 import llvm_ir.llvmType.ArrayType;
@@ -33,15 +34,19 @@ public class VarDef extends Node {
 
     private boolean isAssigned;
 
+    private boolean isGetInt;
+
     public VarDef(SyntaxVarType type, ArrayList<Node> children) {
         super(type, children);
         name = ((TokenNode) children.get(0)).getIdentName();
         isAssigned = false;
+        isGetInt = false;
         for (Node child : children) {
             if (child instanceof TokenNode && ((TokenNode) child).getTokenType() == tokenType.ASSIGN) isAssigned = true;
             if (child instanceof ConstExp) {
                 dim++;
             }
+            if (child instanceof TokenNode && ((TokenNode) child).getTokenType() == tokenType.GETINTTK) isGetInt = true;
         }
     }
 
@@ -125,16 +130,23 @@ public class VarDef extends Node {
             } else {
                 assert (symbol.getDim() == 0);
                 if (isAssigned) {
-                    Value value = ((InitVal) children.get(children.size() - 1)).genLLVMir();
-                    if (value instanceof ConstInteger constInteger) {
-                        ArrayList<ArrayList<Integer>> l = new ArrayList<>();
-                        l.add(new ArrayList<>());
-                        l.get(0).add(constInteger.getVal());
-                        symbol.setInitValue(new Initial(0, l));
-                        StoreInstr storeInstr = new StoreInstr(constInteger, allocaInst);
-                        IRController.getInstance().addInstr(storeInstr);
+                    if (!isGetInt) {
+                        Value value = ((InitVal) children.get(children.size() - 1)).genLLVMir();
+                        if (value instanceof ConstInteger constInteger) {
+                            ArrayList<ArrayList<Integer>> l = new ArrayList<>();
+                            l.add(new ArrayList<>());
+                            l.get(0).add(constInteger.getVal());
+                            symbol.setInitValue(new Initial(0, l));
+                            StoreInstr storeInstr = new StoreInstr(constInteger, allocaInst);
+                            IRController.getInstance().addInstr(storeInstr);
+                        } else {
+                            StoreInstr storeInstr = new StoreInstr(value, allocaInst);
+                            IRController.getInstance().addInstr(storeInstr);
+                        }
                     } else {
-                        StoreInstr storeInstr = new StoreInstr(value, allocaInst);
+                        CallInstr callInstr = new CallInstr(new Integer32Type(), SymbolManager.getInstance().getFuncSymbolByFuncName("getint").getLLVMirValue(), new ArrayList<>());
+                        IRController.getInstance().addInstr(callInstr);
+                        StoreInstr storeInstr = new StoreInstr(callInstr, allocaInst);
                         IRController.getInstance().addInstr(storeInstr);
                     }
                 }

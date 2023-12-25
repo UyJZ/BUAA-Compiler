@@ -405,6 +405,21 @@ public class ParserController {
         if (initVal.getType() != SyntaxVarType.ILLEGAL) children.add(initVal);
         else {
             unread(initVal.getSize());
+            read();
+            if (curToken.getType() == tokenType.GETINTTK) {
+                children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
+                read();
+                if (curToken.getType() != tokenType.LPARENT) {
+                    unread();
+                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
+                read();
+                if (curToken.getType() != tokenType.RPARENT) {
+                    unread();
+                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
+                return NodeGenerator.generateNode(SyntaxVarType.VarDef, children);
+            } else unread();
             return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
         }
         return NodeGenerator.generateNode(SyntaxVarType.VarDef, children);
@@ -1074,7 +1089,7 @@ public class ParserController {
         while (true) {
             read();
             switch (curToken.getType()) {
-                case MULT, DIV, MOD -> {
+                case MULT, DIV, MOD , BITAND-> {
                     before = NodeGenerator.generateNode(SyntaxVarType.MulExp, new ArrayList<>(children));
                     children.clear();
                     children.add(before);
