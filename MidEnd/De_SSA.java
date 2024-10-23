@@ -1,26 +1,25 @@
 package MidEnd;
 
 import BackEnd.MIPS.Register;
-import llvm_ir.Module;
-import llvm_ir.Value;
-import llvm_ir.Values.BasicBlock;
-import llvm_ir.Values.ConstInteger;
-import llvm_ir.Values.Function;
-import llvm_ir.Values.Instruction.Instr;
-import llvm_ir.Values.Instruction.MoveInstr;
-import llvm_ir.Values.Instruction.PcopyInstr;
-import llvm_ir.Values.Instruction.PhiInstr;
-import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
-import llvm_ir.Values.TempValue;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Value;
+import Ir_LLVM.LLVM_Values.BasicBlock;
+import Ir_LLVM.LLVM_Values.Function;
+import Ir_LLVM.LLVM_Values.Instr.Instr;
+import Ir_LLVM.LLVM_Values.Instr.MoveInstr;
+import Ir_LLVM.LLVM_Values.Instr.PcopyInstr;
+import Ir_LLVM.LLVM_Values.Instr.PhiInstr;
+import Ir_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
+import Ir_LLVM.LLVM_Values.TempValue;
 
 import java.util.*;
 
 public class De_SSA {
 
-    private Module module;
+    private LLVM_Module LLVMModule;
 
-    public De_SSA(Module module) {
-        this.module = module;
+    public De_SSA(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
     }
 
     public void run() {
@@ -28,7 +27,7 @@ public class De_SSA {
     }
 
     private void SSA_Destruction() {
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             SSA_Phi2Pcopy(function);
             SSA_Pcopy2Move(function);
         }
@@ -104,7 +103,7 @@ public class De_SSA {
                     ArrayList<MoveInstr> seq = new ArrayList<>();
                     while (pcopyInstr.size() > 0) {
                         for (int i = 0; i < pcopyInstr.size(); i++) {
-                            Value dst = pcopyInstr.getDstList().get(i);
+                            LLVM_Value dst = pcopyInstr.getDstList().get(i);
                             if (pcopyInstr.getDstOf(dst) == null) {
                                 seq.add(new MoveInstr(dst, pcopyInstr.getSrcOf(dst)));
                                 pcopyInstr.removeCopy(dst);
@@ -116,7 +115,7 @@ public class De_SSA {
                         }
                     }
                     //解决寄存器冲突
-                    HashMap<Register, Value> conflictMap = new HashMap<>();
+                    HashMap<Register, LLVM_Value> conflictMap = new HashMap<>();
                     for (int i = seq.size() - 1; i >= 0; i--) {
                         block.getInstrs().add(k, seq.get(i));
                     }
@@ -133,7 +132,7 @@ public class De_SSA {
                 phis.add(phiInstr);
             }
         }
-        HashSet<Value> set = new HashSet<>();
+        HashSet<LLVM_Value> set = new HashSet<>();
         return false;
     }
 

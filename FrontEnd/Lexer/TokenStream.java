@@ -1,7 +1,5 @@
 package FrontEnd.Lexer;
 
-import FrontEnd.Parser.ParserController;
-
 import java.util.List;
 
 public class TokenStream {

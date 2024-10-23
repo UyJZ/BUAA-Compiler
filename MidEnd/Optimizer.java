@@ -1,9 +1,9 @@
 package MidEnd;
 
-import llvm_ir.Module;
+import Ir_LLVM.LLVM_Module;
 
 public class Optimizer {
-    private final Module module;
+    private final LLVM_Module LLVMModule;
 
     private final SSABuilder ssaBuilder;
 
@@ -25,25 +25,25 @@ public class Optimizer {
 
     private final De_SSA deSsa;
 
-    public Optimizer(Module module) {
-        this.module = module;
-        this.ssaBuilder = new SSABuilder(module);
-        this.cfgBuilder = new CFGBuilder(module);
-        this.deadCodeDeletion = new DeadCodeDeletion(module);
-        this.funcInline = new FuncInline(module);
-        this.gvnGcm = new GVN_GCM(module);
-        this.mergeBlock = new MergeBlock(module);
-        this.deSsa = new De_SSA(module);
-        this.actAnalysis = new ActAnalysis(module);
-        this.regAllocator = new RegAllocator(module);
-        this.regAllocatorForSSA = new RegAllocatorForSSA(module);
+    public Optimizer(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
+        this.ssaBuilder = new SSABuilder(LLVMModule);
+        this.cfgBuilder = new CFGBuilder(LLVMModule);
+        this.deadCodeDeletion = new DeadCodeDeletion(LLVMModule);
+        this.funcInline = new FuncInline(LLVMModule);
+        this.gvnGcm = new GVN_GCM(LLVMModule);
+        this.mergeBlock = new MergeBlock(LLVMModule);
+        this.deSsa = new De_SSA(LLVMModule);
+        this.actAnalysis = new ActAnalysis(LLVMModule);
+        this.regAllocator = new RegAllocator(LLVMModule);
+        this.regAllocatorForSSA = new RegAllocatorForSSA(LLVMModule);
     }
 
     public void run() {
         cfgBuilder.run();
         ssaBuilder.run();
         GlobalForInline globalForInline = new GlobalForInline();
-        globalForInline.setModule(module);
+        globalForInline.setModule(LLVMModule);
         gvnGcm.run();
         deadCodeDeletion.run();
         funcInline.run();
@@ -59,7 +59,7 @@ public class Optimizer {
         cfgBuilder.run();
         mergeBlock.run();
         cfgBuilder.run();
-        module.setName();
+        LLVMModule.setName();
         //regAllocator.run();
     }
 }

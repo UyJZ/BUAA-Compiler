@@ -1,5 +1,5 @@
-import Config.CompilerHandler;
-import Config.tasks;
+import Config.CompilerDriver;
+import Config.Tasks;
 
 import java.io.*;
 
@@ -18,11 +18,11 @@ public class Compiler {
         -ioe : llvm ir and optimize and error handle
         -moe : mips and optimize and error handle
          */
-        tasks.isMIPSoutput = true;
-        tasks.isOptimize = false;
-        tasks.isLLVMoutput = false;
-        tasks.isErrorHandle = true;
-        CompilerHandler.work();
+        Tasks.isMIPSoutput = true;
+        Tasks.isOptimize = false;
+        Tasks.isLLVMoutput = false;
+        Tasks.isErrorHandle = true;
+        CompilerDriver.work();
         //throw new RuntimeException("Compiler finished");
     }
 }

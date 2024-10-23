@@ -1,7 +1,7 @@
 package BackEnd.MIPS.Assembly;
 
-import BackEnd.MIPS.MipsController;
-import FrontEnd.Symbol.Initial;
+import BackEnd.MIPS.MipsBuilder;
+import Ir_LLVM.InitializedValue;
 
 import java.util.ArrayList;
 
@@ -9,7 +9,7 @@ public class Data extends Asm {
 
     private ArrayList<Integer> lens;
 
-    private Initial initial;
+    private InitializedValue initializedValue;
 
     private String name;
 
@@ -18,16 +18,16 @@ public class Data extends Asm {
 
     private boolean isasciiz;
 
-    public Data(ArrayList<Integer> lens, Initial initial, String name) {
+    public Data(ArrayList<Integer> lens, InitializedValue initializedValue, String name) {
         this.lens = lens;
-        this.initial = initial;
+        this.initializedValue = initializedValue;
         this.name = "global_" + name.substring(1);
         isasciiz = false;
     }
 
     public Data(String st) {
         this.ConString = st;
-        this.name = MipsController.getInstance().genConStrName();
+        this.name = MipsBuilder.getInstance().genConStrName();
         isasciiz = true;
     }
 
@@ -37,12 +37,12 @@ public class Data extends Asm {
         } else {
             StringBuilder sb = new StringBuilder();
             sb.append(this.name).append(":\t");
-            if (initial == null) {
+            if (initializedValue == null) {
                 int space = 4;
                 for (int i : lens) space = space * i;
                 sb.append("\n\t.space ").append(space);
             } else {
-                sb.append(initial.genMIPSData(lens));
+                sb.append(initializedValue.genMIPSData(lens));
             }
             return sb.toString();
         }

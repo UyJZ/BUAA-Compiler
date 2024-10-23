@@ -19,17 +19,17 @@ public class PushMarco {
         for (Register register : operands) {
             RegDispatcher.getInstance().allocSpaceForReg();
             MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, register, Register.SP, RegDispatcher.getInstance().getCurrentOffset());
-            MipsController.getInstance().addAsm(sw);
+            MipsBuilder.getInstance().addAsm(sw);
         }
         AluITAsm addi = new AluITAsm(AluITAsm.Op.addi, Register.SP, Register.SP, RegDispatcher.getInstance().getCurrentOffset());
-        MipsController.getInstance().addAsm(addi);
+        MipsBuilder.getInstance().addAsm(addi);
     }
 
     public void addToMipsControllerOnlyForNormalReg() {
         for (Register register : operands) {
             RegDispatcher.getInstance().allocSpaceForReg();
             MemITAsm sw = new MemITAsm(MemITAsm.Op.sw, register, Register.SP, RegDispatcher.getInstance().getCurrentOffset());
-            MipsController.getInstance().addAsm(sw);
+            MipsBuilder.getInstance().addAsm(sw);
         }
     }
 }

@@ -1,30 +1,30 @@
 package MidEnd;
 
-import llvm_ir.Module;
-import llvm_ir.Value;
-import llvm_ir.Values.BasicBlock;
-import llvm_ir.Values.Function;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Value;
+import Ir_LLVM.LLVM_Values.BasicBlock;
+import Ir_LLVM.LLVM_Values.Function;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
 public class ActAnalysis {
 
-    private final Module module;
+    private final LLVM_Module LLVMModule;
 
-    public ActAnalysis(Module module) {
-        this.module = module;
+    public ActAnalysis(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
     }
 
     public void run() {
         buildDefUseSet();
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             buildInOutSet(function);
         }
     }
 
     private void buildDefUseSet() {
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             for (BasicBlock block : function.getBlockArrayList()) {
                 block.BuildDefUse();
             }
@@ -38,19 +38,19 @@ public class ActAnalysis {
         }
         boolean change = true;
         while (change) {
-            HashMap<BasicBlock, HashSet<Value>> map = new HashMap<>();
+            HashMap<BasicBlock, HashSet<LLVM_Value>> map = new HashMap<>();
             for (BasicBlock block : function.getBlockArrayList()) {
                 map.put(block, new HashSet<>(block.getInSet()));
             }
             for (BasicBlock block : function.getBlockArrayList()) {
-                HashSet<Value> s = new HashSet<>();
+                HashSet<LLVM_Value> s = new HashSet<>();
                 for (BasicBlock block1 : block.getPosBlocks()) {
                     s.addAll(block1.getInSet());
                 }
                 // Out = \cap_{pos} In
                 block.setOutSet(s);
-                HashSet<Value> use_b = new HashSet<>(block.getUseSet());
-                HashSet<Value> Out = new HashSet<>(block.getOutSet());
+                HashSet<LLVM_Value> use_b = new HashSet<>(block.getUseSet());
+                HashSet<LLVM_Value> Out = new HashSet<>(block.getOutSet());
                 // In = use + (Out - def)
                 Out.removeAll(block.getDefSet());
                 use_b.addAll(Out);
@@ -67,8 +67,8 @@ public class ActAnalysis {
         for (BasicBlock block : function.getBlockArrayList()) {
             System.out.println("\n" + block.hash + ": ");
             System.out.print("in: ");
-            for (Value value : block.getInSet()) {
-                System.out.print(value.hash + " ");
+            for (LLVM_Value LLVMValue : block.getInSet()) {
+                System.out.print(LLVMValue.hash + " ");
             }
         }
     }

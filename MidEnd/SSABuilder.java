@@ -1,20 +1,19 @@
 package MidEnd;
 
-import llvm_ir.Module;
-import llvm_ir.Value;
-import llvm_ir.Values.BasicBlock;
-import llvm_ir.Values.Function;
-import llvm_ir.Values.GlobalVar;
-import llvm_ir.Values.Instruction.AllocaInst;
-import llvm_ir.Values.Instruction.PhiInstr;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Value;
+import Ir_LLVM.LLVM_Values.BasicBlock;
+import Ir_LLVM.LLVM_Values.Function;
+import Ir_LLVM.LLVM_Values.Instr.AllocaInst;
+import Ir_LLVM.LLVM_Values.Instr.PhiInstr;
 
 import java.util.*;
 
 public class SSABuilder {
-    private final Module module;
+    private final LLVM_Module LLVMModule;
 
-    public SSABuilder(Module module) {
-        this.module = module;
+    public SSABuilder(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
     }
 
     public void run() {
@@ -22,7 +21,7 @@ public class SSABuilder {
     }
 
     private void insertPhiInstr() {
-        for (Function f : module.getFunctionList()) {
+        for (Function f : LLVMModule.getFunctionList()) {
             ArrayList<AllocaInst> values = f.getValForSSA();
             HashMap<AllocaInst, LinkedHashSet<BasicBlock>> defBlocks = new HashMap<>();
             for (AllocaInst value : values) {
@@ -59,7 +58,7 @@ public class SSABuilder {
             }
             for (AllocaInst v : values) {
                 BasicBlock entry = f.getBlockArrayList().get(0);
-                Stack<Value> reachingDef = new Stack<>();
+                Stack<LLVM_Value> reachingDef = new Stack<>();
                 entry.preOrderForRename(v, reachingDef);
             }
         }

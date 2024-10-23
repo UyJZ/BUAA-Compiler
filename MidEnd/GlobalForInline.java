@@ -1,18 +1,18 @@
 package MidEnd;
 
-import llvm_ir.Module;
-import llvm_ir.Values.GlobalVar;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Values.GlobalVar;
 
 import java.util.ArrayList;
 
 public class GlobalForInline {
     public static ArrayList<GlobalVar> globalVars;
 
-    private Module module;
+    private LLVM_Module LLVMModule;
 
-    public void setModule(Module module) {
-        this.module = module;
-        globalVars = new ArrayList<>(module.getGlobalVarList());
+    public void setModule(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
+        globalVars = new ArrayList<>(LLVMModule.getGlobalVarList());
     }
 
     public ArrayList<GlobalVar> getGlobalVars() {

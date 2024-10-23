@@ -1,0 +1,48 @@
+package FrontEnd.AbsSynTreeNodes.Stmt;
+
+import Enums.ErrorType;
+import Enums.SyntaxVarType;
+import FrontEnd.ErrorProcesser.Error;
+import FrontEnd.ErrorProcesser.ErrorList;
+import FrontEnd.AbsSynTreeNodes.LVal;
+import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.SymbolTable.Symbols.FuncSymbol;
+import FrontEnd.SymbolTable.Symbols.Symbol;
+import FrontEnd.SymbolTable.SymbolTableBuilder;
+import FrontEnd.SymbolTable.Symbols.VarSymbol;
+import Ir_LLVM.LLVM_Value;
+import Ir_LLVM.LLVM_Builder;
+import Ir_LLVM.LLVM_Values.Instr.CallInstr;
+import Ir_LLVM.LLVM_Values.Instr.StoreInstr;
+import Ir_LLVM.LLVM_Types.Integer32Type;
+
+import java.util.ArrayList;
+
+public class GetIntStmt extends Stmt {
+
+    private LVal lVal;
+
+    public GetIntStmt(SyntaxVarType type, ArrayList<Node> children) {
+        super(type, children);
+        for (Node node : children) if (node instanceof LVal) lVal = (LVal) node;
+    }
+
+    @Override
+    public void checkError() {
+        VarSymbol varSymbol = (VarSymbol) SymbolTableBuilder.getInstance().getSymbolByName(lVal.getName());
+        if (varSymbol.isConst()) ErrorList.AddError(new Error(lVal.identLine(), ErrorType.h));
+        super.checkError();
+    }
+
+    @Override
+    public LLVM_Value genLLVMir() {
+        Symbol symbol = SymbolTableBuilder.getInstance().getSymbolByName(lVal.getName());
+        FuncSymbol funcSymbol = SymbolTableBuilder.getInstance().getFuncSymbolByFuncName("getint");
+        CallInstr callInstr = new CallInstr(new Integer32Type(), funcSymbol.getLLVMirValue(), new ArrayList<>());
+        LLVM_Builder.getInstance().addInstr(callInstr);
+        LLVM_Value operand1 = lVal.genLLVMForAssign();
+        StoreInstr instr = new StoreInstr(callInstr, operand1);
+        LLVM_Builder.getInstance().addInstr(instr);
+        return instr;
+    }
+}

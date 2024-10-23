@@ -1,17 +1,17 @@
 package MidEnd;
 
-import llvm_ir.Module;
-import llvm_ir.Values.BasicBlock;
-import llvm_ir.Values.Function;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Values.BasicBlock;
+import Ir_LLVM.LLVM_Values.Function;
 
 import java.util.*;
 
 public class CFGBuilder {
 
-    private final Module module;
+    private final LLVM_Module LLVMModule;
 
-    public CFGBuilder(Module module) {
-        this.module = module;
+    public CFGBuilder(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
     }
 
     public void run() {
@@ -21,13 +21,13 @@ public class CFGBuilder {
     }
 
     private void buildSideEffect() {
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             function.buildSideEffect();
         }
     }
 
     private void buildCFG() {
-        for (Function f : module.getFunctionList()) {
+        for (Function f : LLVMModule.getFunctionList()) {
             for (BasicBlock block : f.getBlockArrayList()) {
                 block.flush();
             }
@@ -39,7 +39,7 @@ public class CFGBuilder {
 
     private void buildDominateRel() {
         //build strict dominate
-        for (Function f : module.getFunctionList()) {
+        for (Function f : LLVMModule.getFunctionList()) {
             if (f.getBlockArrayList().size() == 0) continue;
             BasicBlock entry = f.getBlockArrayList().get(0);
             //删除不可达块
@@ -78,7 +78,7 @@ public class CFGBuilder {
             }
         }
         //build dominate frontier
-        for (Function f : module.getFunctionList()) {
+        for (Function f : LLVMModule.getFunctionList()) {
             for (BasicBlock b : f.getBlockArrayList()) {
                 for (BasicBlock b1 : b.getPosBlocks()) {
                     BasicBlock x = b;

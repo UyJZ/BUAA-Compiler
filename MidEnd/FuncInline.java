@@ -1,12 +1,12 @@
 package MidEnd;
 
-import llvm_ir.Module;
-import llvm_ir.Values.BasicBlock;
-import llvm_ir.Values.Function;
-import llvm_ir.Values.InlinedFunc;
-import llvm_ir.Values.Instruction.CallInstr;
-import llvm_ir.Values.Instruction.Instr;
-import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Values.BasicBlock;
+import Ir_LLVM.LLVM_Values.Function;
+import Ir_LLVM.LLVM_Values.InlinedFunc;
+import Ir_LLVM.LLVM_Values.Instr.CallInstr;
+import Ir_LLVM.LLVM_Values.Instr.Instr;
+import Ir_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,10 +14,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 public class FuncInline {
-    private final Module module;
+    private final LLVM_Module LLVMModule;
 
-    public FuncInline(Module module) {
-        this.module = module;
+    public FuncInline(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
     }
 
     public void run() {
@@ -26,7 +26,7 @@ public class FuncInline {
 
     public void functionInline() {
         LinkedHashSet<Function> inlineFunc = new LinkedHashSet<>();
-        for (Function f : module.getFunctionList()) {
+        for (Function f : LLVMModule.getFunctionList()) {
             if (f.isSysCall() || f.isMainFunc()) {
                 continue;
             }
@@ -50,7 +50,7 @@ public class FuncInline {
                 inlineFunc.add(f);
             }
         }
-        Iterator<Function> iterator = module.getFunctionList().iterator();
+        Iterator<Function> iterator = LLVMModule.getFunctionList().iterator();
         while (iterator.hasNext()) {
             Function f = iterator.next();
             if (inlineFunc.contains(f)) {

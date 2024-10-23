@@ -1,14 +1,14 @@
 package MidEnd;
 
-import llvm_ir.Module;
-import llvm_ir.Values.BasicBlock;
-import llvm_ir.Values.Function;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Values.BasicBlock;
+import Ir_LLVM.LLVM_Values.Function;
 
 public class MergeBlock {
-    private final Module module;
+    private final LLVM_Module LLVMModule;
 
-    public MergeBlock(Module module) {
-        this.module = module;
+    public MergeBlock(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
     }
 
     public void run() {
@@ -16,7 +16,7 @@ public class MergeBlock {
     }
 
     private void Merge() {
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             for (int i = 0; i < function.getBlockArrayList().size(); i++) {
                 for (int j = i + 1; j < function.getBlockArrayList().size(); j++) {
                     if (function.getBlockArrayList().get(i).canMerged(function.getBlockArrayList().get(j))) {

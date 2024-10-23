@@ -1,29 +1,20 @@
 package MidEnd;
 
-import FrontEnd.Nodes.Func.MainFuncDef;
-import llvm_ir.Module;
-import llvm_ir.Value;
-import llvm_ir.Values.BasicBlock;
-import llvm_ir.Values.Function;
-import llvm_ir.Values.GlobalVar;
-import llvm_ir.Values.Instruction.AllocaInst;
-import llvm_ir.Values.Instruction.CallInstr;
-import llvm_ir.Values.Instruction.Instr;
-import llvm_ir.Values.Instruction.StoreInstr;
-import llvm_ir.Values.Instruction.terminatorInstr.BranchInstr;
-import llvm_ir.Values.Instruction.terminatorInstr.ReturnInstr;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Values.BasicBlock;
+import Ir_LLVM.LLVM_Values.Function;
+import Ir_LLVM.LLVM_Values.Instr.Instr;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 public class DeadCodeDeletion {
 
-    private final Module module;
+    private final LLVM_Module LLVMModule;
 
-    public DeadCodeDeletion(Module module) {
-        this.module = module;
+    public DeadCodeDeletion(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
     }
 
     public void run() {
@@ -33,7 +24,7 @@ public class DeadCodeDeletion {
 
     private void deleteDeadFunc() {
         Function mainFunc = null;
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             if (function.isMainFunc()) {
                 mainFunc = function;
             }
@@ -42,18 +33,18 @@ public class DeadCodeDeletion {
             throw new RuntimeException("No main function");
         }
         LinkedHashSet<Function> funcToDelete = new LinkedHashSet<>();
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             if (function != mainFunc && !function.isSysCall() && !mainFunc.getCallFunctions().contains(function)) {
                 funcToDelete.add(function);
             }
         }
         for (Function function : funcToDelete) {
-            module.getFunctionList().remove(function);
+            LLVMModule.getFunctionList().remove(function);
         }
     }
 
     private void deleteDeadCode() {
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             HashSet<Instr> deadInstrSet = new HashSet<>();
             HashSet<Instr> records = new HashSet<>();
             for (BasicBlock block : function.getBlockArrayList()) {

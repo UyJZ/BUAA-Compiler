@@ -1,17 +1,12 @@
 package MidEnd;
 
 import BackEnd.MIPS.Register;
-import llvm_ir.Module;
-import llvm_ir.Value;
-import llvm_ir.Values.Function;
-import llvm_ir.Values.GlobalVar;
-import llvm_ir.Values.Instruction.AllocaInst;
-import llvm_ir.Values.Instruction.BinaryInstr;
-import llvm_ir.Values.Param;
-import llvm_ir.llvmType.ArrayType;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Value;
+import Ir_LLVM.LLVM_Values.Function;
+import Ir_LLVM.LLVM_Values.Instr.AllocaInst;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 
 public class RegDispatcher {
@@ -27,23 +22,23 @@ public class RegDispatcher {
 
     private LinkedHashSet<Register> usedRegs;
 
-    private HashMap<Function, HashMap<Value, Register>> Val2Reg;
+    private HashMap<Function, HashMap<LLVM_Value, Register>> Val2Reg;
 
-    private HashMap<Function, HashMap<Value, Integer>> Val2Offset;
+    private HashMap<Function, HashMap<LLVM_Value, Integer>> Val2Offset;
 
-    private HashMap<Function, HashMap<Register, Value>> Reg2Val;
+    private HashMap<Function, HashMap<Register, LLVM_Value>> Reg2Val;
 
     private HashMap<Function, Integer> OffsetMap;
 
     private int currentOffset;
 
-    private Module module;
+    private LLVM_Module LLVMModule;
 
     public boolean hasFreeReg() {
         return false;
     }
 
-    public Register getRegister(Value value) {
+    public Register getRegister(LLVM_Value LLVMValue) {
         return null;
     }
 
@@ -54,7 +49,7 @@ public class RegDispatcher {
     public RegDispatcher() {
         this.currentFunction = null;
         this.currentOffset = 0;
-        this.module = null;
+        this.LLVMModule = null;
         this.freeRegs = Register.tempRegs();
         this.usedRegs = new LinkedHashSet<>();
         this.freeArgRegs = Register.argsRegs();
@@ -64,8 +59,8 @@ public class RegDispatcher {
         this.OffsetMap = new HashMap<>();
     }
 
-    public void setModule(Module module) {
-        this.module = module;
+    public void setModule(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
     }
 
     public void enterFunc(Function function) {
@@ -95,12 +90,12 @@ public class RegDispatcher {
         ((AllocaInst) v).setElementOffset(currentOffset);
     }
 
-    public void distributeSpaceForVal(Value v) {
+    public void distributeSpaceForVal(LLVM_Value v) {
         currentOffset = currentOffset - v.getLen();
         v.setOffset(currentOffset);
     }
 
-    public void distributeRegFor(Value v) {
+    public void distributeRegFor(LLVM_Value v) {
         //这个条件目前是不确定的，也可以说是待定的，因为之后还有图着色算法，目前还没有确定无法被着色的val是否是isdistributed()
         if (v.isDistributedToReg()) {
             freeRegs.remove(v.getRegister());

@@ -3,13 +3,12 @@ package FrontEnd.Parser;
 
 import Enums.SyntaxVarType;
 import FrontEnd.Lexer.Token;
-import FrontEnd.Nodes.*;
-import FrontEnd.Nodes.Stmt.*;
-import FrontEnd.Nodes.Var.*;
-import FrontEnd.Nodes.Exp.*;
-import FrontEnd.Nodes.Block.*;
-import FrontEnd.Nodes.Func.*;
-import FrontEnd.Nodes.Var.Number;
+import FrontEnd.AbsSynTreeNodes.*;
+import FrontEnd.AbsSynTreeNodes.Stmt.*;
+import FrontEnd.AbsSynTreeNodes.Var.*;
+import FrontEnd.AbsSynTreeNodes.Exp.*;
+import FrontEnd.AbsSynTreeNodes.Func.*;
+import FrontEnd.AbsSynTreeNodes.Var.Number;
 
 import java.util.ArrayList;
 

@@ -27,3 +27,5 @@ replay_pid*
 /.idea/
 /.vscode/
 /out/
+*.txt
+*.asm

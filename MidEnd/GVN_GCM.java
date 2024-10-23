@@ -1,10 +1,10 @@
 package MidEnd;
 
-import llvm_ir.Module;
-import llvm_ir.Values.BasicBlock;
-import llvm_ir.Values.ConstInteger;
-import llvm_ir.Values.Function;
-import llvm_ir.Values.Instruction.*;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Values.BasicBlock;
+import Ir_LLVM.LLVM_Values.ConstInteger;
+import Ir_LLVM.LLVM_Values.Function;
+import Ir_LLVM.LLVM_Values.Instr.*;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -12,12 +12,12 @@ import java.util.LinkedHashSet;
 
 public class GVN_GCM {
 
-    private final Module module;
+    private final LLVM_Module LLVMModule;
 
     HashMap<String, Instr> GVNMap;
 
-    public GVN_GCM(Module module) {
-        this.module = module;
+    public GVN_GCM(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
         GVNMap = new HashMap<>();
     }
 
@@ -28,7 +28,7 @@ public class GVN_GCM {
     }
 
     private void GVN() {
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             BasicBlock entry = function.getBlockArrayList().get(0);
             preOrderForGVN(entry);
         }
@@ -59,7 +59,7 @@ public class GVN_GCM {
     }
 
     public void OptimizedCalc() {
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             for (BasicBlock block : function.getBlockArrayList()) {
                 LinkedHashSet<Instr> deadInstrSet = new LinkedHashSet<>();
                 for (Instr instr : block.getInstrs()) {

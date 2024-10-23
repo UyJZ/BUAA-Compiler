@@ -1,21 +1,21 @@
 package MidEnd;
 
 import BackEnd.MIPS.Register;
-import llvm_ir.Module;
-import llvm_ir.Value;
-import llvm_ir.Values.BasicBlock;
-import llvm_ir.Values.Function;
-import llvm_ir.Values.Instruction.Instr;
-import llvm_ir.Values.Instruction.MoveInstr;
-import llvm_ir.Values.Instruction.PhiInstr;
-import llvm_ir.Values.Instruction.ZextInstr;
+import Ir_LLVM.LLVM_Module;
+import Ir_LLVM.LLVM_Value;
+import Ir_LLVM.LLVM_Values.BasicBlock;
+import Ir_LLVM.LLVM_Values.Function;
+import Ir_LLVM.LLVM_Values.Instr.Instr;
+import Ir_LLVM.LLVM_Values.Instr.MoveInstr;
+import Ir_LLVM.LLVM_Values.Instr.PhiInstr;
+import Ir_LLVM.LLVM_Values.Instr.ZextInstr;
 
 import java.util.*;
 
 public class RegAllocatorForSSA {
-    private final Module module;
+    private final LLVM_Module LLVMModule;
 
-    private final HashMap<Value, Integer> useTimes;
+    private final HashMap<LLVM_Value, Integer> useTimes;
 
     private HashSet<Register> allPhiRegs;
 
@@ -23,8 +23,8 @@ public class RegAllocatorForSSA {
 
     private Function currentFunction;
 
-    public RegAllocatorForSSA(Module module) {
-        this.module = module;
+    public RegAllocatorForSSA(LLVM_Module LLVMModule) {
+        this.LLVMModule = LLVMModule;
         this.useTimes = new HashMap<>();
         this.funcFreeRegs = new HashMap<>();
         this.allPhiRegs = new HashSet<>();
@@ -32,7 +32,7 @@ public class RegAllocatorForSSA {
 
     public void run() {
         buildUseTimes();
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             currentFunction = function;
             LinkedHashSet<Register> regSetForAlloc = Register.tempRegs();
             HashSet<Register> freeRegs = new HashSet<>();
@@ -47,31 +47,31 @@ public class RegAllocatorForSSA {
     }
 
     private void allocRegForBlock(BasicBlock block, LinkedHashSet<Register> freeRegs) {
-        for (Value value : block.getInSet()) {
-            if (value.isUseReg()) {
-                System.out.println(value.hash + " ==> " + value.getRegister() + " (in)" + " " + value.hash);
+        for (LLVM_Value LLVMValue : block.getInSet()) {
+            if (LLVMValue.isUseReg()) {
+                System.out.println(LLVMValue.hash + " ==> " + LLVMValue.getRegister() + " (in)" + " " + LLVMValue.hash);
             }
         }
         for (Register register : freeRegs) {
             System.out.println("free: " + register);
         }
-        HashMap<Register, Value> reg2val = new HashMap<>();
-        for (Value value : block.getInSet()) {
-            if (value.isUseReg())
-                reg2val.put(value.getRegister(), value);
+        HashMap<Register, LLVM_Value> reg2val = new HashMap<>();
+        for (LLVM_Value LLVMValue : block.getInSet()) {
+            if (LLVMValue.isUseReg())
+                reg2val.put(LLVMValue.getRegister(), LLVMValue);
         }
         funcFreeRegs.get(currentFunction).removeAll(reg2val.keySet());
-        HashMap<Value, Instr> lastUse = new HashMap<>();
+        HashMap<LLVM_Value, Instr> lastUse = new HashMap<>();
         for (Instr instr : block.getInstrs()) {
             if (instr instanceof MoveInstr moveInstr) {
                 lastUse.put(moveInstr.getSrc(), instr);
             } else {
-                for (Value value : instr.getOperands()) {
-                    if (value.isDistributable()) {
-                        if (lastUse.containsKey(value)) {
-                            lastUse.replace(value, instr);
+                for (LLVM_Value LLVMValue : instr.getOperands()) {
+                    if (LLVMValue.isDistributable()) {
+                        if (lastUse.containsKey(LLVMValue)) {
+                            lastUse.replace(LLVMValue, instr);
                         } else {
-                            lastUse.put(value, instr);
+                            lastUse.put(LLVMValue, instr);
                         }
                     }
                 }
@@ -80,12 +80,12 @@ public class RegAllocatorForSSA {
         for (Instr instr : block.getInstrs()) {
             //先释放寄存器
             if (!(instr instanceof PhiInstr)) {
-                for (Value value : instr.getOperands()) {
-                    if (value.isDistributedToReg() && lastUse.get(value) == instr && !block.getOutSet().contains(value) && !(value instanceof PhiInstr)) {
+                for (LLVM_Value LLVMValue : instr.getOperands()) {
+                    if (LLVMValue.isDistributedToReg() && lastUse.get(LLVMValue) == instr && !block.getOutSet().contains(LLVMValue) && !(LLVMValue instanceof PhiInstr)) {
                         //释放寄存器
-                        freeRegs.add(value.getRegister());
-                        reg2val.remove(value.getRegister());
-                        System.out.println("lastuse free " + value.hash + " ==> " + value.getRegister());
+                        freeRegs.add(LLVMValue.getRegister());
+                        reg2val.remove(LLVMValue.getRegister());
+                        System.out.println("lastuse free " + LLVMValue.hash + " ==> " + LLVMValue.getRegister());
                     }
                 }
             }
@@ -101,12 +101,12 @@ public class RegAllocatorForSSA {
 
         for (BasicBlock block1 : block.getImmDominatee()) {
             LinkedHashSet<Register> set = Register.tempRegs();
-            for (Value value : block1.getInSet()) {
-                if (value.isUseReg()) {
-                    set.remove(value.getRegister());
+            for (LLVM_Value LLVMValue : block1.getInSet()) {
+                if (LLVMValue.isUseReg()) {
+                    set.remove(LLVMValue.getRegister());
                 }
             }
-            for (Map.Entry<Register, Value> e : reg2val.entrySet()) {
+            for (Map.Entry<Register, LLVM_Value> e : reg2val.entrySet()) {
                 if (e.getValue() instanceof PhiInstr) {
                     set.remove(e.getKey());
                 }
@@ -115,12 +115,12 @@ public class RegAllocatorForSSA {
         }
     }
 
-    private void spill(Value value, HashMap<Register, Value> reg2val, HashSet<Value> inset) {
-        int times = useTimes.get(value);
-        Value minVal = null;
+    private void spill(LLVM_Value LLVMValue, HashMap<Register, LLVM_Value> reg2val, HashSet<LLVM_Value> inset) {
+        int times = useTimes.get(LLVMValue);
+        LLVM_Value minVal = null;
         Register register = null;
         int min = 999999;
-        for (Map.Entry<Register, Value> e : reg2val.entrySet()) {
+        for (Map.Entry<Register, LLVM_Value> e : reg2val.entrySet()) {
             if (useTimes.get(e.getValue()) < min && !inset.contains(e.getValue()) && !(e.getValue() instanceof PhiInstr)) {
                 min = useTimes.get(e.getValue());
                 minVal = e.getValue();
@@ -129,18 +129,18 @@ public class RegAllocatorForSSA {
         }
         if (times > min && minVal != null) {
             minVal.removeDistribute();
-            value.setUseReg(register);
-            reg2val.put(register, value);
-            if (value instanceof PhiInstr) {
+            LLVMValue.setUseReg(register);
+            reg2val.put(register, LLVMValue);
+            if (LLVMValue instanceof PhiInstr) {
                 allPhiRegs.add(register);
             }
             System.out.println("spill free " + minVal.hash + " ==> " + register);
-            System.out.println(value.hash + " ==> " + register);
+            System.out.println(LLVMValue.hash + " ==> " + register);
         }
     }
 
     private void buildUseTimes() {
-        for (Function function : module.getFunctionList()) {
+        for (Function function : LLVMModule.getFunctionList()) {
             for (BasicBlock block : function.getBlockArrayList()) {
                 for (Instr instr : block.getInstrs()) {
                     if (instr instanceof MoveInstr moveInstr) {
@@ -151,11 +151,11 @@ public class RegAllocatorForSSA {
                         }
                         continue;
                     }
-                    for (Value value : instr.getOperands()) {
-                        if (useTimes.containsKey(value)) {
-                            useTimes.put(value, useTimes.get(value) + 1);
+                    for (LLVM_Value LLVMValue : instr.getOperands()) {
+                        if (useTimes.containsKey(LLVMValue)) {
+                            useTimes.put(LLVMValue, useTimes.get(LLVMValue) + 1);
                         } else {
-                            useTimes.put(value, 1);
+                            useTimes.put(LLVMValue, 1);
                         }
                     }
                 }
@@ -163,7 +163,7 @@ public class RegAllocatorForSSA {
         }
     }
 
-    private boolean distributeRegFor(Value v, LinkedHashSet<Register> freeRegs, HashMap<Register, Value> reg2val) {
+    private boolean distributeRegFor(LLVM_Value v, LinkedHashSet<Register> freeRegs, HashMap<Register, LLVM_Value> reg2val) {
         //TODO
         if (!v.isDistributed() && !freeRegs.isEmpty()) {
             Register reg = freeRegs.iterator().next();
