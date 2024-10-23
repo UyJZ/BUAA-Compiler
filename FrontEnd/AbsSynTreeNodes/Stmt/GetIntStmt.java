@@ -1,20 +1,19 @@
 package FrontEnd.AbsSynTreeNodes.Stmt;
 
-import Enums.ErrorType;
-import Enums.SyntaxVarType;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.ErrorProcesser.ErrorType;
 import FrontEnd.ErrorProcesser.Error;
 import FrontEnd.ErrorProcesser.ErrorList;
 import FrontEnd.AbsSynTreeNodes.LVal;
-import FrontEnd.AbsSynTreeNodes.Node;
 import FrontEnd.SymbolTable.Symbols.FuncSymbol;
 import FrontEnd.SymbolTable.Symbols.Symbol;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
 import FrontEnd.SymbolTable.Symbols.VarSymbol;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.Instr.CallInstr;
-import Ir_LLVM.LLVM_Values.Instr.StoreInstr;
-import Ir_LLVM.LLVM_Types.Integer32Type;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.Instr.CallInstr;
+import IR_LLVM.LLVM_Values.Instr.StoreInstr;
+import IR_LLVM.LLVM_Types.Integer32Type;
 
 import java.util.ArrayList;
 
@@ -22,9 +21,9 @@ public class GetIntStmt extends Stmt {
 
     private LVal lVal;
 
-    public GetIntStmt(SyntaxVarType type, ArrayList<Node> children) {
+    public GetIntStmt(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
-        for (Node node : children) if (node instanceof LVal) lVal = (LVal) node;
+        for (SynTreeNode synTreeNode : children) if (synTreeNode instanceof LVal) lVal = (LVal) synTreeNode;
     }
 
     @Override

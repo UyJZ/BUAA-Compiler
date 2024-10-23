@@ -1,14 +1,12 @@
 package FrontEnd.Parser;
 
 import Config.Tasks;
-import Enums.ErrorType;
-import Enums.SyntaxVarType;
-import Enums.tokenType;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.ErrorProcesser.ErrorType;
 import FrontEnd.ErrorProcesser.Error;
 import FrontEnd.ErrorProcesser.ErrorList;
 import FrontEnd.Lexer.Token;
 import FrontEnd.Lexer.TokenStream;
-import FrontEnd.AbsSynTreeNodes.Node;
 
 import java.util.ArrayList;
 
@@ -38,192 +36,192 @@ public class Parser {
         tokenStream.unread(n);
     }
 
-    public Node parse() {
+    public SynTreeNode parse() {
         return Parse_CompUnit();
     }
 
-    public Node Parse_CompUnit() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_CompUnit() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         while (true) {
-            Node decl = Parse_Decl();
-            if (decl.getType() != SyntaxVarType.ILLEGAL) children.add(decl);
+            SynTreeNode decl = Parse_Decl();
+            if (decl.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(decl);
             else {
                 unread(decl.getSize());
                 break;
             }
         }
         while (true) {
-            Node funcDef = Parse_FuncDef();
-            if (funcDef.getType() != SyntaxVarType.ILLEGAL) children.add(funcDef);
+            SynTreeNode funcDef = Parse_FuncDef();
+            if (funcDef.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(funcDef);
             else {
                 unread(funcDef.getSize());
                 break;
             }
         }
-        Node mainFuncDef = Parse_MainFuncDef();
-        if (mainFuncDef.getType() != SyntaxVarType.ILLEGAL) children.add(mainFuncDef);
+        SynTreeNode mainFuncDef = Parse_MainFuncDef();
+        if (mainFuncDef.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(mainFuncDef);
         else {
             unread(mainFuncDef.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.CompUnit, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.CompUnit, children);
     }
 
-    public Node Parse_Decl() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node constDecl = Parse_ConstDecl();
-        if (constDecl.getType() != SyntaxVarType.ILLEGAL) {
+    public SynTreeNode Parse_Decl() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode constDecl = Parse_ConstDecl();
+        if (constDecl.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
             children.add(constDecl);
-            return NodeGenerator.generateNode(SyntaxVarType.Decl, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.Decl, children);
         } else unread(constDecl.getSize());
-        Node varDecl = Parse_VarDecl();
-        if (varDecl.getType() != SyntaxVarType.ILLEGAL) {
+        SynTreeNode varDecl = Parse_VarDecl();
+        if (varDecl.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
             children.add(varDecl);
-            return NodeGenerator.generateNode(SyntaxVarType.Decl, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.Decl, children);
         } else unread(varDecl.getSize());
-        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
     }
 
-    public Node Parse_FuncDef() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node funcType = Parse_FuncType();
-        if (funcType.getType() != SyntaxVarType.ILLEGAL) children.add(funcType);
+    public SynTreeNode Parse_FuncDef() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode funcType = Parse_FuncType();
+        if (funcType.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(funcType);
         else {
             unread(funcType.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        Node ident = Parse_Ident();
-        if (ident.getType() != SyntaxVarType.ILLEGAL) children.add(ident);
+        SynTreeNode ident = Parse_Ident();
+        if (ident.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(ident);
         else {
             unread(ident.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         read();
-        if (curToken.getType() != tokenType.LPARENT) {
+        if (curToken.getType() != Token.TokenType.LPARENT) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        Node funcFParams = Parse_FuncFParams();
-        if (funcFParams.getType() != SyntaxVarType.ILLEGAL) children.add(funcFParams);
+        SynTreeNode funcFParams = Parse_FuncFParams();
+        if (funcFParams.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(funcFParams);
         else unread(funcFParams.getSize());
         read();
-        if (curToken.getType() != tokenType.RPARENT) {
+        if (curToken.getType() != Token.TokenType.RPARENT) {
             unread();
             if (isErrorManager)
                 ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
-            else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        Node block = Parse_Block();
-        if (block.getType() != SyntaxVarType.ILLEGAL) children.add(block);
+        SynTreeNode block = Parse_Block();
+        if (block.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(block);
         else {
             unread(block.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.FuncDef, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.FuncDef, children);
     }
 
-    public Node Parse_MainFuncDef() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_MainFuncDef() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
-        if (curToken.getType() != tokenType.INTTK) {
+        if (curToken.getType() != Token.TokenType.INTTK) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         read();
-        if (curToken.getType() != tokenType.MAINTK) {
+        if (curToken.getType() != Token.TokenType.MAINTK) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         read();
-        if (curToken.getType() != tokenType.LPARENT) {
+        if (curToken.getType() != Token.TokenType.LPARENT) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         read();
-        if (curToken.getType() != tokenType.RPARENT) {
+        if (curToken.getType() != Token.TokenType.RPARENT) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        Node block = Parse_Block();
-        if (block.getType() != SyntaxVarType.ILLEGAL) children.add(block);
+        SynTreeNode block = Parse_Block();
+        if (block.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(block);
         else {
             unread(block.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.MainFuncDef, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.MainFuncDef, children);
     }
 
-    public Node Parse_ConstDecl() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_ConstDecl() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
-        if (curToken.getType() != tokenType.CONSTTK) {
+        if (curToken.getType() != Token.TokenType.CONSTTK) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        Node bType = Parse_BType();
-        if (bType.getType() != SyntaxVarType.ILLEGAL) children.add(bType);
+        SynTreeNode bType = Parse_BType();
+        if (bType.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(bType);
         else {
             unread(bType.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        Node constDef = Parse_ConstDef();
-        if (constDef.getType() != SyntaxVarType.ILLEGAL) children.add(constDef);
+        SynTreeNode constDef = Parse_ConstDef();
+        if (constDef.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(constDef);
         else {
             unread(constDef.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         while (true) {
             read();
-            if (curToken.getType() != tokenType.COMMA) {
+            if (curToken.getType() != Token.TokenType.COMMA) {
                 unread();
                 break;
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             constDef = Parse_ConstDef();
-            if (constDef.getType() != SyntaxVarType.ILLEGAL) children.add(constDef);
+            if (constDef.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(constDef);
             else {
                 unread(constDef.getSize());
                 break;
             }
         }
         read();
-        if (curToken.getType() != tokenType.SEMICN) {
+        if (curToken.getType() != Token.TokenType.SEMICN) {
             unread();
             if (isErrorManager) {
                 ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.i));
-                return NodeGenerator.generateNode(SyntaxVarType.ConstDecl, children);
-            } else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ConstDecl, children);
+            } else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else {
             children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            return NodeGenerator.generateNode(SyntaxVarType.ConstDecl, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ConstDecl, children);
         }
     }
 
-    public Node Parse_VarDecl() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node bType = Parse_BType();
-        if (bType.getType() != SyntaxVarType.ILLEGAL) children.add(bType);
+    public SynTreeNode Parse_VarDecl() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode bType = Parse_BType();
+        if (bType.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(bType);
         else {
             unread(bType.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         int defNum = 0;
-        Node varDef = Parse_VarDef();
-        if (varDef.getType() != SyntaxVarType.ILLEGAL) children.add(varDef);
+        SynTreeNode varDef = Parse_VarDef();
+        if (varDef.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(varDef);
         else {
             unread(varDef.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         defNum++;
         while (true) {
-            ArrayList<Node> list = new ArrayList<>();
+            ArrayList<SynTreeNode> list = new ArrayList<>();
             read();
             //parse ,
-            if (curToken.getType() != tokenType.COMMA) {
+            if (curToken.getType() != Token.TokenType.COMMA) {
                 unread();
                 break;
             } else list.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            Node varDef1 = Parse_VarDef();
-            if (varDef1.getType() != SyntaxVarType.ILLEGAL) list.add(varDef1);
+            SynTreeNode varDef1 = Parse_VarDef();
+            if (varDef1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) list.add(varDef1);
             else {
                 unread(varDef1.getSize());
                 break;
@@ -232,982 +230,982 @@ public class Parser {
             defNum++;
         }
         read();
-        if (curToken.getType() != tokenType.SEMICN) {
-            if (curToken.getType() == tokenType.LPARENT && defNum == 1) {
+        if (curToken.getType() != Token.TokenType.SEMICN) {
+            if (curToken.getType() == Token.TokenType.LPARENT && defNum == 1) {
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
             unread();
             if (isErrorManager) {
                 ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.i));
-                return NodeGenerator.generateNode(SyntaxVarType.VarDecl, children);
-            } else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.VarDecl, children);
+            } else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else {
             children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            return NodeGenerator.generateNode(SyntaxVarType.VarDecl, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.VarDecl, children);
         }
     }
 
-    public Node Parse_BType() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_BType() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
-        if (curToken.getType() != tokenType.INTTK) {
+        if (curToken.getType() != Token.TokenType.INTTK) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        return NodeGenerator.generateNode(SyntaxVarType.BType, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.BType, children);
     }
 
-    public Node Parse_ConstDef() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node ident = Parse_Ident();
-        if (ident.getType() != SyntaxVarType.ILLEGAL) children.add(ident);
+    public SynTreeNode Parse_ConstDef() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode ident = Parse_Ident();
+        if (ident.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(ident);
         else {
             unread(ident.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         while (true) {
             read();
-            if (curToken.getType() != tokenType.LBRACK) {
+            if (curToken.getType() != Token.TokenType.LBRACK) {
                 unread();
                 break;
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            Node constExp = Parse_ConstExp();
-            if (constExp.getType() != SyntaxVarType.ILLEGAL) children.add(constExp);
+            SynTreeNode constExp = Parse_ConstExp();
+            if (constExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(constExp);
             else {
                 unread(constExp.getSize());
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
             read();
-            if (curToken.getType() != tokenType.RBRACK) {
+            if (curToken.getType() != Token.TokenType.RBRACK) {
                 unread();
                 if (isErrorManager)
                     ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
-                else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
         read();
-        if (curToken.getType() != tokenType.ASSIGN) {
+        if (curToken.getType() != Token.TokenType.ASSIGN) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ConstDef, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ConstDef, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        Node constInitVal = Parse_ConstInitVal();
-        if (constInitVal.getType() != SyntaxVarType.ILLEGAL) children.add(constInitVal);
+        SynTreeNode constInitVal = Parse_ConstInitVal();
+        if (constInitVal.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(constInitVal);
         else {
             unread(constInitVal.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.ConstDef, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ConstDef, children);
     }
 
-    public Node Parse_Ident() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_Ident() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
-        if (curToken.getType() != tokenType.IDENFR) {
+        if (curToken.getType() != Token.TokenType.IDENFR) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else return NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint());
     }
 
-    public Node Parse_ConstExp() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node addExp = Parse_AddExp();
-        if (addExp.getType() != SyntaxVarType.ILLEGAL) children.add(addExp);
+    public SynTreeNode Parse_ConstExp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode addExp = Parse_AddExp();
+        if (addExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(addExp);
         else {
             unread(addExp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.ConstExp, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ConstExp, children);
     }
 
-    public Node Parse_ConstInitVal() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node constExp = Parse_ConstExp();
-        if (constExp.getType() != SyntaxVarType.ILLEGAL) children.add(constExp);
+    public SynTreeNode Parse_ConstInitVal() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode constExp = Parse_ConstExp();
+        if (constExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(constExp);
         else {
             unread(constExp.getSize());
             read();
-            if (curToken.getType() != tokenType.LBRACE) {
+            if (curToken.getType() != Token.TokenType.LBRACE) {
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            Node constInitVal = Parse_ConstInitVal();
-            if (constInitVal.getType() != SyntaxVarType.ILLEGAL) {
+            SynTreeNode constInitVal = Parse_ConstInitVal();
+            if (constInitVal.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
                 children.add(constInitVal);
                 while (true) {
                     read();
-                    if (curToken.getType() != tokenType.COMMA) {
+                    if (curToken.getType() != Token.TokenType.COMMA) {
                         unread();
                         break;
                     } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                     constInitVal = Parse_ConstInitVal();
-                    if (constInitVal.getType() != SyntaxVarType.ILLEGAL) children.add(constInitVal);
+                    if (constInitVal.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(constInitVal);
                     else {
                         unread(constInitVal.getSize());
-                        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                     }
                 }
                 read();
-                if (curToken.getType() != tokenType.RBRACE) {
+                if (curToken.getType() != Token.TokenType.RBRACE) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                return NodeGenerator.generateNode(SyntaxVarType.ConstInitVal, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ConstInitVal, children);
             } else {
                 unread(constInitVal.getSize());
                 read();
-                if (curToken.getType() == tokenType.RBRACE) {
+                if (curToken.getType() == Token.TokenType.RBRACE) {
                     children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                    return NodeGenerator.generateNode(SyntaxVarType.ConstInitVal, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ConstInitVal, children);
                 }
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
         }
-        return NodeGenerator.generateNode(SyntaxVarType.ConstInitVal, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ConstInitVal, children);
     }
 
-    public Node Parse_VarDef() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node ident = Parse_Ident();
-        if (ident.getType() != SyntaxVarType.ILLEGAL) children.add(ident);
+    public SynTreeNode Parse_VarDef() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode ident = Parse_Ident();
+        if (ident.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(ident);
         else {
             unread(ident.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         while (true) {
             read();
-            if (curToken.getType() != tokenType.LBRACK) {
+            if (curToken.getType() != Token.TokenType.LBRACK) {
                 unread();
                 break;
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            Node constExp = Parse_ConstExp();
-            if (constExp.getType() != SyntaxVarType.ILLEGAL) children.add(constExp);
+            SynTreeNode constExp = Parse_ConstExp();
+            if (constExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(constExp);
             else {
                 unread(constExp.getSize());
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
             read();
-            if (curToken.getType() != tokenType.RBRACK) {
+            if (curToken.getType() != Token.TokenType.RBRACK) {
                 unread();
                 if (isErrorManager)
                     ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
-                else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
         read();
-        if (curToken.getType() != tokenType.ASSIGN) {
+        if (curToken.getType() != Token.TokenType.ASSIGN) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.VarDef, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.VarDef, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        Node initVal = Parse_InitVal();
-        if (initVal.getType() != SyntaxVarType.ILLEGAL) children.add(initVal);
+        SynTreeNode initVal = Parse_InitVal();
+        if (initVal.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(initVal);
         else {
             unread(initVal.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.VarDef, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.VarDef, children);
     }
 
-    public Node Parse_InitVal() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node exp = Parse_Exp();
-        if (exp.getType() != SyntaxVarType.ILLEGAL) children.add(exp);
+    public SynTreeNode Parse_InitVal() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode exp = Parse_Exp();
+        if (exp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(exp);
         else {
             unread(exp.getSize());
             read();
-            if (curToken.getType() != tokenType.LBRACE) {
+            if (curToken.getType() != Token.TokenType.LBRACE) {
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            Node initVal = Parse_InitVal();
-            if (initVal.getType() != SyntaxVarType.ILLEGAL) {
+            SynTreeNode initVal = Parse_InitVal();
+            if (initVal.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
                 children.add(initVal);
                 while (true) {
                     read();
-                    if (curToken.getType() != tokenType.COMMA) {
+                    if (curToken.getType() != Token.TokenType.COMMA) {
                         unread();
                         break;
                     } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                     initVal = Parse_InitVal();
-                    if (initVal.getType() != SyntaxVarType.ILLEGAL) children.add(initVal);
+                    if (initVal.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(initVal);
                     else {
                         unread(initVal.getSize());
-                        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                     }
                 }
                 read();
-                if (curToken.getType() != tokenType.RBRACE) {
+                if (curToken.getType() != Token.TokenType.RBRACE) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                return NodeGenerator.generateNode(SyntaxVarType.InitVal, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.InitVal, children);
             } else {
                 unread(initVal.getSize());
                 read();
-                if (curToken.getType() == tokenType.RBRACE) {
+                if (curToken.getType() == Token.TokenType.RBRACE) {
                     children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                    return NodeGenerator.generateNode(SyntaxVarType.InitVal, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.InitVal, children);
                 }
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
         }
-        return NodeGenerator.generateNode(SyntaxVarType.InitVal, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.InitVal, children);
     }
 
-    public Node Parse_Exp() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node addExp = Parse_AddExp();
-        if (addExp.getType() != SyntaxVarType.ILLEGAL) children.add(addExp);
+    public SynTreeNode Parse_Exp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode addExp = Parse_AddExp();
+        if (addExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(addExp);
         else {
             unread(addExp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.Exp, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.Exp, children);
     }
 
-    public Node Parse_FuncType() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_FuncType() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
-        if (curToken.getType() == tokenType.VOIDTK || curToken.getType() == tokenType.INTTK)
+        if (curToken.getType() == Token.TokenType.VOIDTK || curToken.getType() == Token.TokenType.INTTK)
             children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         else {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.FuncType, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.FuncType, children);
     }
 
-    public Node Parse_FuncFParams() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node funcFParam = Parse_FuncFParam();
-        if (funcFParam.getType() != SyntaxVarType.ILLEGAL) children.add(funcFParam);
+    public SynTreeNode Parse_FuncFParams() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode funcFParam = Parse_FuncFParam();
+        if (funcFParam.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(funcFParam);
         else {
             unread(funcFParam.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         while (true) {
             read();
-            if (curToken.getType() != tokenType.COMMA) {
+            if (curToken.getType() != Token.TokenType.COMMA) {
                 unread();
                 break;
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             funcFParam = Parse_FuncFParam();
-            if (funcFParam.getType() != SyntaxVarType.ILLEGAL) children.add(funcFParam);
+            if (funcFParam.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(funcFParam);
             else {
                 unread(funcFParam.getSize());
                 break;
             }
         }
-        return NodeGenerator.generateNode(SyntaxVarType.FuncFParams, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.FuncFParams, children);
     }
 
-    public Node Parse_Block() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_Block() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
-        if (curToken.getType() != tokenType.LBRACE) {
+        if (curToken.getType() != Token.TokenType.LBRACE) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         while (true) {
-            Node blockItem = Parse_BlockItem();
-            if (blockItem.getType() != SyntaxVarType.ILLEGAL) children.add(blockItem);
+            SynTreeNode blockItem = Parse_BlockItem();
+            if (blockItem.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(blockItem);
             else {
                 unread(blockItem.getSize());
                 break;
             }
         }
         read();
-        if (curToken.getType() != tokenType.RBRACE) {
+        if (curToken.getType() != Token.TokenType.RBRACE) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        return NodeGenerator.generateNode(SyntaxVarType.Block, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.Block, children);
     }
 
-    public Node Parse_FuncFParam() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node bType = Parse_BType();
-        if (bType.getType() != SyntaxVarType.ILLEGAL) children.add(bType);
+    public SynTreeNode Parse_FuncFParam() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode bType = Parse_BType();
+        if (bType.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(bType);
         else {
             unread(bType.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        Node ident = Parse_Ident();
-        if (ident.getType() != SyntaxVarType.ILLEGAL) children.add(ident);
+        SynTreeNode ident = Parse_Ident();
+        if (ident.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(ident);
         else {
             unread(ident.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         read();
-        if (curToken.getType() != tokenType.LBRACK) {
+        if (curToken.getType() != Token.TokenType.LBRACK) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.FuncFParam, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.FuncFParam, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         read();
-        if (curToken.getType() != tokenType.RBRACK) {
+        if (curToken.getType() != Token.TokenType.RBRACK) {
             unread();
             if (isErrorManager)
                 ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
-            else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         while (true) {
             read();
-            if (curToken.getType() != tokenType.LBRACK) {
+            if (curToken.getType() != Token.TokenType.LBRACK) {
                 unread();
                 break;
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            Node constExp = Parse_ConstExp();
-            if (constExp.getType() != SyntaxVarType.ILLEGAL) children.add(constExp);
+            SynTreeNode constExp = Parse_ConstExp();
+            if (constExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(constExp);
             else {
                 unread(constExp.getSize());
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
             read();
-            if (curToken.getType() != tokenType.RBRACK) {
+            if (curToken.getType() != Token.TokenType.RBRACK) {
                 unread();
                 if (isErrorManager)
                     ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
-                else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
-        return NodeGenerator.generateNode(SyntaxVarType.FuncFParam, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.FuncFParam, children);
     }
 
-    public Node Parse_BlockItem() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node decl = Parse_Decl();
-        if (decl.getType() != SyntaxVarType.ILLEGAL) children.add(decl);
+    public SynTreeNode Parse_BlockItem() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode decl = Parse_Decl();
+        if (decl.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(decl);
         else {
             unread(decl.getSize());
-            Node stmt = Parse_Stmt();
-            if (stmt.getType() != SyntaxVarType.ILLEGAL) children.add(stmt);
+            SynTreeNode stmt = Parse_Stmt();
+            if (stmt.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(stmt);
             else {
                 unread(stmt.getSize());
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
         }
-        return NodeGenerator.generateNode(SyntaxVarType.BlockItem, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.BlockItem, children);
     }
 
-    private Node Parse_SEMICN(ArrayList<Node> children, SyntaxVarType type) {
+    private SynTreeNode Parse_SEMICN(ArrayList<SynTreeNode> children, SynTreeNode.SyntaxVarType type) {
         read();
-        if (curToken.getType() != tokenType.SEMICN) {
+        if (curToken.getType() != Token.TokenType.SEMICN) {
             unread();
             if (isErrorManager) {
                 ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.i));
                 return NodeGenerator.generateNode(type, children);
-            } else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            } else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else {
             children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             return NodeGenerator.generateNode(type, children);
         }
     }
 
-    public Node Parse_Stmt() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_Stmt() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
         switch (curToken.getType()) {
             case SEMICN -> {
                 //Parse ';'
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                return NodeGenerator.generateNode(SyntaxVarType.ExpStmt, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ExpStmt, children);
             }
             case IFTK -> {
                 //Parse 'if' '(' Cond ')' Stmt ['else' Stmt]
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 read();
-                if (curToken.getType() != tokenType.LPARENT) {
+                if (curToken.getType() != Token.TokenType.LPARENT) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node cond = Parse_Cond();
-                if (cond.getType() != SyntaxVarType.ILLEGAL) children.add(cond);
+                SynTreeNode cond = Parse_Cond();
+                if (cond.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(cond);
                 else {
                     unread(cond.getSize());
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 }
                 read();
-                if (curToken.getType() != tokenType.RPARENT) {
+                if (curToken.getType() != Token.TokenType.RPARENT) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node stmt1 = Parse_Stmt();
-                if (stmt1.getType() != SyntaxVarType.ILLEGAL) children.add(stmt1);
+                SynTreeNode stmt1 = Parse_Stmt();
+                if (stmt1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(stmt1);
                 else {
                     unread(stmt1.getSize());
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 }
                 read();
-                if (curToken.getType() != tokenType.ELSETK) {
+                if (curToken.getType() != Token.TokenType.ELSETK) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.IfStmt, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.IfStmt, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node stmt2 = Parse_Stmt();
-                if (stmt2.getType() != SyntaxVarType.ILLEGAL) children.add(stmt2);
+                SynTreeNode stmt2 = Parse_Stmt();
+                if (stmt2.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(stmt2);
                 else {
                     unread(stmt2.getSize());
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 }
-                return NodeGenerator.generateNode(SyntaxVarType.IfStmt, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.IfStmt, children);
             }
             case FORTK -> {
                 //Parse  'for' '(' [ForStmt] ';' [Cond] ';' [forStmt] ')' Stmt
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 read();
-                if (curToken.getType() != tokenType.LPARENT) {
+                if (curToken.getType() != Token.TokenType.LPARENT) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node forStmt1 = Parse_ForStmt();
-                if (forStmt1.getType() != SyntaxVarType.ILLEGAL) children.add(forStmt1);
+                SynTreeNode forStmt1 = Parse_ForStmt();
+                if (forStmt1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(forStmt1);
                 else unread(forStmt1.getSize());
                 read();
-                if (curToken.getType() != tokenType.SEMICN) {
+                if (curToken.getType() != Token.TokenType.SEMICN) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node cond1 = Parse_Cond();
-                if (cond1.getType() != SyntaxVarType.ILLEGAL) children.add(cond1);
+                SynTreeNode cond1 = Parse_Cond();
+                if (cond1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(cond1);
                 else unread(cond1.getSize());
                 read();
-                if (curToken.getType() != tokenType.SEMICN) {
+                if (curToken.getType() != Token.TokenType.SEMICN) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node forStmt2 = Parse_ForStmt();
-                if (forStmt2.getType() != SyntaxVarType.ILLEGAL) children.add(forStmt2);
+                SynTreeNode forStmt2 = Parse_ForStmt();
+                if (forStmt2.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(forStmt2);
                 else unread(forStmt2.getSize());
                 read();
-                if (curToken.getType() != tokenType.RPARENT) {
+                if (curToken.getType() != Token.TokenType.RPARENT) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node stmt3 = Parse_Stmt();
-                if (stmt3.getType() != SyntaxVarType.ILLEGAL) children.add(stmt3);
+                SynTreeNode stmt3 = Parse_Stmt();
+                if (stmt3.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(stmt3);
                 else {
                     unread(stmt3.getSize());
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 }
-                return NodeGenerator.generateNode(SyntaxVarType.ForLoopStmt, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ForLoopStmt, children);
             }
             case BREAKTK -> {
                 // Parse 'break' ';'
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                return Parse_SEMICN(children, SyntaxVarType.BreakStmt);
+                return Parse_SEMICN(children, SynTreeNode.SyntaxVarType.BreakStmt);
             }
             case CONTINUETK -> {
                 // Parse 'continue' ';'
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                return Parse_SEMICN(children, SyntaxVarType.ContinueStmt);
+                return Parse_SEMICN(children, SynTreeNode.SyntaxVarType.ContinueStmt);
             }
             case RETURNTK -> {
                 // Parse 'return' [Exp] ';'
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node exp1 = Parse_Exp();
-                if (exp1.getType() != SyntaxVarType.ILLEGAL) children.add(exp1);
+                SynTreeNode exp1 = Parse_Exp();
+                if (exp1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(exp1);
                 else unread(exp1.getSize());
-                return Parse_SEMICN(children, SyntaxVarType.ReturnStmt);
+                return Parse_SEMICN(children, SynTreeNode.SyntaxVarType.ReturnStmt);
             }
             case PRINTFTK -> {
                 // Parse 'printf' '(' [FormatString] [',' Exp] ')' ';'
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 read();
-                if (curToken.getType() != tokenType.LPARENT) {
+                if (curToken.getType() != Token.TokenType.LPARENT) {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node formatString = Parse_FormatString();
-                if (formatString.getType() != SyntaxVarType.ILLEGAL) children.add(formatString);
+                SynTreeNode formatString = Parse_FormatString();
+                if (formatString.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(formatString);
                 else {
                     unread(formatString.getSize());
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 }
                 while (true) {
                     read();
-                    if (curToken.getType() != tokenType.COMMA) {
+                    if (curToken.getType() != Token.TokenType.COMMA) {
                         unread();
                         break;
                     } else
                         children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                    Node exp2 = Parse_Exp();
-                    if (exp2.getType() != SyntaxVarType.ILLEGAL) children.add(exp2);
+                    SynTreeNode exp2 = Parse_Exp();
+                    if (exp2.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(exp2);
                     else {
                         unread(exp2.getSize());
-                        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                     }
                 }
                 read();
-                if (curToken.getType() != tokenType.RPARENT) {
+                if (curToken.getType() != Token.TokenType.RPARENT) {
                     unread();
                     if (isErrorManager)
                         ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
-                    else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                return Parse_SEMICN(children, SyntaxVarType.PrintfStmt);
+                return Parse_SEMICN(children, SynTreeNode.SyntaxVarType.PrintfStmt);
             }
             default -> unread();
         }
-        Node lVal = Parse_LVal();
-        if (lVal.getType() != SyntaxVarType.ILLEGAL) {
+        SynTreeNode lVal = Parse_LVal();
+        if (lVal.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
             children.add(lVal);
             read();
-            if (curToken.getType() != tokenType.ASSIGN) {
+            if (curToken.getType() != Token.TokenType.ASSIGN) {
                 unread();
-                unread(NodeGenerator.generateNode(SyntaxVarType.Stmt, children).getSize());
+                unread(NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.Stmt, children).getSize());
                 children.clear();
             } else {
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                 read();
-                if (curToken.getType() != tokenType.GETINTTK) {
+                if (curToken.getType() != Token.TokenType.GETINTTK) {
                     //Parse LVal '=' Exp ';'
                     unread();
-                    Node exp3 = Parse_Exp();
-                    if (exp3.getType() != SyntaxVarType.ILLEGAL) {
+                    SynTreeNode exp3 = Parse_Exp();
+                    if (exp3.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
                         children.add(exp3);
-                        return Parse_SEMICN(children, SyntaxVarType.AssignStmt);
+                        return Parse_SEMICN(children, SynTreeNode.SyntaxVarType.AssignStmt);
                     } else {
                         unread(exp3.getSize());
-                        unread(NodeGenerator.generateNode(SyntaxVarType.Stmt, children).getSize());
+                        unread(NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.Stmt, children).getSize());
                         children.clear();
                     }
                 } else {
                     //Parse LVal '=' 'getint' '(' ')' ';'
                     children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                     read();
-                    if (curToken.getType() != tokenType.LPARENT) {
+                    if (curToken.getType() != Token.TokenType.LPARENT) {
                         unread();
-                        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                     }
                     children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
                     read();
-                    if (curToken.getType() != tokenType.RPARENT) {
+                    if (curToken.getType() != Token.TokenType.RPARENT) {
                         unread();
                         if (isErrorManager)
                             ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
-                        else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                        else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                     } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                    return Parse_SEMICN(children, SyntaxVarType.GetIntStmt);
+                    return Parse_SEMICN(children, SynTreeNode.SyntaxVarType.GetIntStmt);
                 }
             }
         }
-        Node block = Parse_Block();
+        SynTreeNode block = Parse_Block();
         //Parse Block
-        if (block.getType() != SyntaxVarType.ILLEGAL) {
+        if (block.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
             children.add(block);
-            return NodeGenerator.generateNode(SyntaxVarType.BlockStmt, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.BlockStmt, children);
         } else unread(block.getSize());
-        Node exp4 = Parse_Exp();
+        SynTreeNode exp4 = Parse_Exp();
         //Parse Exp
-        if (exp4.getType() != SyntaxVarType.ILLEGAL) {
+        if (exp4.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
             children.add(exp4);
-            return Parse_SEMICN(children, SyntaxVarType.ExpStmt);
+            return Parse_SEMICN(children, SynTreeNode.SyntaxVarType.ExpStmt);
         } else unread(exp4.getSize());
-        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
     }
 
-    public Node Parse_LVal() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node ident = Parse_Ident();
-        if (ident.getType() != SyntaxVarType.ILLEGAL) children.add(ident);
+    public SynTreeNode Parse_LVal() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode ident = Parse_Ident();
+        if (ident.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(ident);
         else {
             unread(ident.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         while (true) {
             read();
-            if (curToken.getType() != tokenType.LBRACK) {
+            if (curToken.getType() != Token.TokenType.LBRACK) {
                 unread();
                 break;
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            Node exp = Parse_Exp();
-            if (exp.getType() != SyntaxVarType.ILLEGAL) children.add(exp);
+            SynTreeNode exp = Parse_Exp();
+            if (exp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(exp);
             else {
                 unread(exp.getSize());
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
             read();
-            if (curToken.getType() != tokenType.RBRACK) {
+            if (curToken.getType() != Token.TokenType.RBRACK) {
                 unread();
                 if (isErrorManager)
                     ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.k));
-                else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
         }
-        return NodeGenerator.generateNode(SyntaxVarType.LVal, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.LVal, children);
     }
 
-    public Node Parse_Cond() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node lOrExp = Parse_LOrExp();
-        if (lOrExp.getType() != SyntaxVarType.ILLEGAL) children.add(lOrExp);
+    public SynTreeNode Parse_Cond() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode lOrExp = Parse_LOrExp();
+        if (lOrExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(lOrExp);
         else {
             unread(lOrExp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.Cond, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.Cond, children);
     }
 
-    public Node Parse_ForStmt() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node lVal = Parse_LVal();
-        if (lVal.getType() != SyntaxVarType.ILLEGAL) children.add(lVal);
+    public SynTreeNode Parse_ForStmt() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode lVal = Parse_LVal();
+        if (lVal.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(lVal);
         else {
             unread(lVal.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         read();
-        if (curToken.getType() != tokenType.ASSIGN) {
+        if (curToken.getType() != Token.TokenType.ASSIGN) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        Node exp = Parse_Exp();
-        if (exp.getType() != SyntaxVarType.ILLEGAL) children.add(exp);
+        SynTreeNode exp = Parse_Exp();
+        if (exp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(exp);
         else {
             unread(exp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.ForStmt, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ForStmt, children);
     }
 
-    public Node Parse_FormatString() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_FormatString() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
-        if (curToken.getType() != tokenType.STRCON) {
+        if (curToken.getType() != Token.TokenType.STRCON) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else return NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint());
     }
 
-    public Node Parse_AddExp() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node mulExp = Parse_MulExp();
-        if (mulExp.getType() != SyntaxVarType.ILLEGAL) children.add(mulExp);
+    public SynTreeNode Parse_AddExp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode mulExp = Parse_MulExp();
+        if (mulExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(mulExp);
         else {
             unread(mulExp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        Node before = NodeGenerator.generateNode(SyntaxVarType.AddExp, new ArrayList<>(children));
+        SynTreeNode before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.AddExp, new ArrayList<>(children));
         while (true) {
             read();
             switch (curToken.getType()) {
                 case PLUS, MINU -> {
-                    before = NodeGenerator.generateNode(SyntaxVarType.AddExp, new ArrayList<>(children));
+                    before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.AddExp, new ArrayList<>(children));
                     children.clear();
                     children.add(before);
                     children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                    Node mulExp1 = Parse_MulExp();
-                    if (mulExp1.getType() != SyntaxVarType.ILLEGAL) children.add(mulExp1);
+                    SynTreeNode mulExp1 = Parse_MulExp();
+                    if (mulExp1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(mulExp1);
                     else {
                         unread(mulExp1.getSize());
-                        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                     }
                 }
                 default -> {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.AddExp, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.AddExp, children);
                 }
             }
         }
     }
 
-    public Node Parse_LOrExp() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node landExp = Parse_LAndExp();
-        if (landExp.getType() != SyntaxVarType.ILLEGAL) children.add(landExp);
+    public SynTreeNode Parse_LOrExp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode landExp = Parse_LAndExp();
+        if (landExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(landExp);
         else {
             unread(landExp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        Node before = NodeGenerator.generateNode(SyntaxVarType.LOrExp, new ArrayList<>(children));
+        SynTreeNode before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.LOrExp, new ArrayList<>(children));
         while (true) {
             read();
-            if (curToken.getType() != tokenType.OR) {
+            if (curToken.getType() != Token.TokenType.OR) {
                 unread();
                 break;
             } else {
-                before = NodeGenerator.generateNode(SyntaxVarType.LOrExp, new ArrayList<>(children));
+                before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.LOrExp, new ArrayList<>(children));
                 children.clear();
                 children.add(before);
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
             }
-            Node lAndExp = Parse_LAndExp();
-            if (lAndExp.getType() != SyntaxVarType.ILLEGAL) children.add(lAndExp);
+            SynTreeNode lAndExp = Parse_LAndExp();
+            if (lAndExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(lAndExp);
             else {
                 unread(lAndExp.getSize());
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
         }
-        return NodeGenerator.generateNode(SyntaxVarType.LOrExp, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.LOrExp, children);
     }
 
-    public Node Parse_PrimaryExp() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_PrimaryExp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
-        if (curToken.getType() != tokenType.LPARENT) {
+        if (curToken.getType() != Token.TokenType.LPARENT) {
             unread();
         } else {
             children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            Node exp = Parse_Exp();
-            if (exp.getType() != SyntaxVarType.ILLEGAL) children.add(exp);
+            SynTreeNode exp = Parse_Exp();
+            if (exp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(exp);
             else {
                 unread(exp.getSize());
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
             read();
-            if (curToken.getType() != tokenType.RPARENT) {
+            if (curToken.getType() != Token.TokenType.RPARENT) {
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            return NodeGenerator.generateNode(SyntaxVarType.PrimaryExp, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.PrimaryExp, children);
         }
-        Node lVal = Parse_LVal();
-        if (lVal.getType() != SyntaxVarType.ILLEGAL) {
+        SynTreeNode lVal = Parse_LVal();
+        if (lVal.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
             children.add(lVal);
-            return NodeGenerator.generateNode(SyntaxVarType.PrimaryExp, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.PrimaryExp, children);
         } else {
             unread(lVal.getSize());
         }
-        Node number = Parse_Number();
-        if (number.getType() != SyntaxVarType.ILLEGAL) {
+        SynTreeNode number = Parse_Number();
+        if (number.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
             children.add(number);
-            return NodeGenerator.generateNode(SyntaxVarType.PrimaryExp, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.PrimaryExp, children);
         } else {
             unread(number.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
     }
 
-    public Node Parse_Number() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node intConst = Parse_IntConst();
-        if (intConst.getType() != SyntaxVarType.ILLEGAL) children.add(intConst);
+    public SynTreeNode Parse_Number() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode intConst = Parse_IntConst();
+        if (intConst.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(intConst);
         else {
             unread(intConst.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        return NodeGenerator.generateNode(SyntaxVarType.Number, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.Number, children);
     }
 
-    public Node Parse_IntConst() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_IntConst() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
-        if (curToken.getType() != tokenType.INTCON) {
+        if (curToken.getType() != Token.TokenType.INTCON) {
             unread();
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-        return NodeGenerator.generateNode(SyntaxVarType.IntConst, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.IntConst, children);
     }
 
-    public Node Parse_UnaryExp() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node indent = Parse_Ident();
-        if (indent.getType() != SyntaxVarType.ILLEGAL) {
+    public SynTreeNode Parse_UnaryExp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode indent = Parse_Ident();
+        if (indent.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
             children.add(indent);
             read();
-            if (curToken.getType() != tokenType.LPARENT) {
+            if (curToken.getType() != Token.TokenType.LPARENT) {
                 unread();
-                unread(NodeGenerator.generateNode(SyntaxVarType.UnaryExp, children).getSize());
+                unread(NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.UnaryExp, children).getSize());
                 children.clear();
             } else {
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node funcRParams = Parse_FuncRParams();
-                if (funcRParams.getType() != SyntaxVarType.ILLEGAL) children.add(funcRParams);
+                SynTreeNode funcRParams = Parse_FuncRParams();
+                if (funcRParams.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(funcRParams);
                 else unread(funcRParams.getSize());
                 read();
-                if (curToken.getType() != tokenType.RPARENT) {
+                if (curToken.getType() != Token.TokenType.RPARENT) {
                     unread();
                     if (isErrorManager)
                         ErrorList.AddError(new Error(children.get(children.size() - 1).getEndLine(), ErrorType.j));
-                    else return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    else return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                return NodeGenerator.generateNode(SyntaxVarType.UnaryExp, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.UnaryExp, children);
             }
         } else unread(indent.getSize());
-        Node unaryOp = Parse_UnaryOp();
-        if (unaryOp.getType() != SyntaxVarType.ILLEGAL) {
+        SynTreeNode unaryOp = Parse_UnaryOp();
+        if (unaryOp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
             children.add(unaryOp);
-            Node unaryExp = Parse_UnaryExp();
-            if (unaryExp.getType() != SyntaxVarType.ILLEGAL) children.add(unaryExp);
+            SynTreeNode unaryExp = Parse_UnaryExp();
+            if (unaryExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(unaryExp);
             else {
                 unread(unaryExp.getSize());
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
-            return NodeGenerator.generateNode(SyntaxVarType.UnaryExp, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.UnaryExp, children);
         } else {
             unread(unaryOp.getSize());
         }
-        Node primaryExp = Parse_PrimaryExp();
-        if (primaryExp.getType() != SyntaxVarType.ILLEGAL) {
+        SynTreeNode primaryExp = Parse_PrimaryExp();
+        if (primaryExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) {
             children.add(primaryExp);
-            return NodeGenerator.generateNode(SyntaxVarType.UnaryExp, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.UnaryExp, children);
         } else unread(primaryExp.getSize());
-        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
     }
 
-    public Node Parse_UnaryOp() {
-        ArrayList<Node> children = new ArrayList<>();
+    public SynTreeNode Parse_UnaryOp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
         read();
         switch (curToken.getType()) {
             case PLUS, MINU, NOT -> {
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                return NodeGenerator.generateNode(SyntaxVarType.UnaryOp, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.UnaryOp, children);
             }
             default -> {
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
         }
     }
 
-    public Node Parse_MulExp() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node unaryExp = Parse_UnaryExp();
-        if (unaryExp.getType() != SyntaxVarType.ILLEGAL) children.add(unaryExp);
+    public SynTreeNode Parse_MulExp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode unaryExp = Parse_UnaryExp();
+        if (unaryExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(unaryExp);
         else {
             unread(unaryExp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        Node before;
+        SynTreeNode before;
         while (true) {
             read();
             switch (curToken.getType()) {
                 case MULT, DIV, MOD -> {
-                    before = NodeGenerator.generateNode(SyntaxVarType.MulExp, new ArrayList<>(children));
+                    before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.MulExp, new ArrayList<>(children));
                     children.clear();
                     children.add(before);
                     children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                    Node unaryExp1 = Parse_UnaryExp();
-                    if (unaryExp1.getType() != SyntaxVarType.ILLEGAL) children.add(unaryExp1);
+                    SynTreeNode unaryExp1 = Parse_UnaryExp();
+                    if (unaryExp1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(unaryExp1);
                     else {
                         unread(unaryExp1.getSize());
-                        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                     }
                 }
                 default -> {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.MulExp, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.MulExp, children);
                 }
             }
         }
     }
 
-    public Node Parse_RelExp() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node addExp = Parse_AddExp();
-        if (addExp.getType() != SyntaxVarType.ILLEGAL) children.add(addExp);
+    public SynTreeNode Parse_RelExp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode addExp = Parse_AddExp();
+        if (addExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(addExp);
         else {
             unread(addExp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        Node before = NodeGenerator.generateNode(SyntaxVarType.RelExp, new ArrayList<>(children));
+        SynTreeNode before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.RelExp, new ArrayList<>(children));
         while (true) {
             read();
             switch (curToken.getType()) {
                 case GEQ, GRE, LEQ, LSS -> {
-                    before = NodeGenerator.generateNode(SyntaxVarType.RelExp, new ArrayList<>(children));
+                    before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.RelExp, new ArrayList<>(children));
                     children.clear();
                     children.add(before);
                     children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                    Node addExp1 = Parse_AddExp();
-                    if (addExp1.getType() != SyntaxVarType.ILLEGAL) children.add(addExp1);
+                    SynTreeNode addExp1 = Parse_AddExp();
+                    if (addExp1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(addExp1);
                     else {
                         unread(addExp1.getSize());
-                        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                     }
                 }
                 default -> {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.RelExp, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.RelExp, children);
                 }
             }
         }
     }
 
-    public Node Parse_EqExp() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node relExp = Parse_RelExp();
-        if (relExp.getType() != SyntaxVarType.ILLEGAL) children.add(relExp);
+    public SynTreeNode Parse_EqExp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode relExp = Parse_RelExp();
+        if (relExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(relExp);
         else {
             unread(relExp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        Node before = NodeGenerator.generateNode(SyntaxVarType.EqExp, new ArrayList<>(children));
+        SynTreeNode before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.EqExp, new ArrayList<>(children));
         while (true) {
             read();
             switch (curToken.getType()) {
                 case EQL, NEQ -> {
-                    before = NodeGenerator.generateNode(SyntaxVarType.EqExp, new ArrayList<>(children));
+                    before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.EqExp, new ArrayList<>(children));
                     children.clear();
                     children.add(before);
                     children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                    Node relExp1 = Parse_RelExp();
-                    if (relExp1.getType() != SyntaxVarType.ILLEGAL) children.add(relExp1);
+                    SynTreeNode relExp1 = Parse_RelExp();
+                    if (relExp1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(relExp1);
                     else {
                         unread(relExp1.getSize());
-                        return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                     }
                 }
                 default -> {
                     unread();
-                    return NodeGenerator.generateNode(SyntaxVarType.EqExp, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.EqExp, children);
                 }
             }
         }
     }
 
-    public Node Parse_LAndExp() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node eqExp = Parse_EqExp();
-        if (eqExp.getType() != SyntaxVarType.ILLEGAL) children.add(eqExp);
+    public SynTreeNode Parse_LAndExp() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode eqExp = Parse_EqExp();
+        if (eqExp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(eqExp);
         else {
             unread(eqExp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
-        Node before = NodeGenerator.generateNode(SyntaxVarType.LAndExp, new ArrayList<>(children));
+        SynTreeNode before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.LAndExp, new ArrayList<>(children));
         while (true) {
             read();
-            if (curToken.getType() == tokenType.AND) {
-                before = NodeGenerator.generateNode(SyntaxVarType.LAndExp, new ArrayList<>(children));
+            if (curToken.getType() == Token.TokenType.AND) {
+                before = NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.LAndExp, new ArrayList<>(children));
                 children.clear();
                 children.add(before);
                 children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-                Node eqExp1 = Parse_EqExp();
-                if (eqExp1.getType() != SyntaxVarType.ILLEGAL) children.add(eqExp1);
+                SynTreeNode eqExp1 = Parse_EqExp();
+                if (eqExp1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(eqExp1);
                 else {
                     unread(eqExp1.getSize());
-                    return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                    return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
                 }
             } else {
                 unread();
-                return NodeGenerator.generateNode(SyntaxVarType.LAndExp, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.LAndExp, children);
             }
         }
     }
 
-    public Node Parse_FuncRParams() {
-        ArrayList<Node> children = new ArrayList<>();
-        Node exp = Parse_Exp();
-        if (exp.getType() != SyntaxVarType.ILLEGAL) children.add(exp);
+    public SynTreeNode Parse_FuncRParams() {
+        ArrayList<SynTreeNode> children = new ArrayList<>();
+        SynTreeNode exp = Parse_Exp();
+        if (exp.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(exp);
         else {
             unread(exp.getSize());
-            return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+            return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
         }
         while (true) {
             read();
-            if (curToken.getType() != tokenType.COMMA) {
+            if (curToken.getType() != Token.TokenType.COMMA) {
                 unread();
                 break;
             } else children.add(NodeGenerator.generateToken(curToken, tokenStream.getWatchPoint()));
-            Node exp1 = Parse_Exp();
-            if (exp1.getType() != SyntaxVarType.ILLEGAL) children.add(exp1);
+            SynTreeNode exp1 = Parse_Exp();
+            if (exp1.getType() != SynTreeNode.SyntaxVarType.ILLEGAL) children.add(exp1);
             else {
                 unread(exp1.getSize());
-                return NodeGenerator.generateNode(SyntaxVarType.ILLEGAL, children);
+                return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.ILLEGAL, children);
             }
         }
-        return NodeGenerator.generateNode(SyntaxVarType.FuncRParams, children);
+        return NodeGenerator.generateNode(SynTreeNode.SyntaxVarType.FuncRParams, children);
     }
 
 }

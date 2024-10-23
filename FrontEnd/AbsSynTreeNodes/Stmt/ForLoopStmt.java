@@ -1,18 +1,17 @@
 package FrontEnd.AbsSynTreeNodes.Stmt;
 
-import Enums.SyntaxVarType;
 import FrontEnd.AbsSynTreeNodes.Cond;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
 
 import java.util.ArrayList;
 
 public class ForLoopStmt extends Stmt {
-    public ForLoopStmt(SyntaxVarType type, ArrayList<Node> children) {
+    public ForLoopStmt(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
         for (int i = 0; i < children.size(); i++) {
             if (children.get(i) instanceof ForStmt && i == 2) {

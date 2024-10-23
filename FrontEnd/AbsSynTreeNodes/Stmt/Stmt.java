@@ -1,16 +1,15 @@
 package FrontEnd.AbsSynTreeNodes.Stmt;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
-import Ir_LLVM.LLVM_Values.BasicBlock;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import IR_LLVM.LLVM_Values.BasicBlock;
 
 import java.util.ArrayList;
 
-public class Stmt extends Node {
+public class Stmt extends SynTreeNode {
 
     protected BasicBlock Stmt2Block, NextBlock;
 
-    public Stmt(SyntaxVarType type, ArrayList<Node> children) {
+    public Stmt(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

@@ -1,6 +1,6 @@
 package FrontEnd.SymbolTable.Symbols;
 
-import Enums.SymbolType;
+import FrontEnd.SymbolTable.SymbolType;
 
 import java.util.ArrayList;
 

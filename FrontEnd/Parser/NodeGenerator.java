@@ -1,7 +1,6 @@
 package FrontEnd.Parser;
 
 
-import Enums.SyntaxVarType;
 import FrontEnd.Lexer.Token;
 import FrontEnd.AbsSynTreeNodes.*;
 import FrontEnd.AbsSynTreeNodes.Stmt.*;
@@ -13,7 +12,7 @@ import FrontEnd.AbsSynTreeNodes.Var.Number;
 import java.util.ArrayList;
 
 public class NodeGenerator {
-    public static Node generateNode(SyntaxVarType type, ArrayList<Node> children) {
+    public static SynTreeNode generateNode(SynTreeNode.SyntaxVarType type, ArrayList<SynTreeNode> children) {
         return switch (type) {
             case Block -> new Block(type, children);
             case VarDecl -> new VarDecl(type, children);
@@ -49,7 +48,7 @@ public class NodeGenerator {
             case BType -> new BType(type, children);
             case InitVal -> new InitVal(type, children);
             case ConstExp -> new ConstExp(type, children);
-            case ILLEGAL -> new Node(type, children);
+            case ILLEGAL -> new SynTreeNode(type, children);
             case AssignStmt -> new AssignStmt(type, children);
             case ExpStmt -> new ExpStmt(type, children);
             case IfStmt -> new IfStmt(type, children);
@@ -64,7 +63,7 @@ public class NodeGenerator {
         };
     }
 
-    public static TokenNode generateToken(Token token, int pos) {
-        return new TokenNode(SyntaxVarType.TOKEN, token, pos);
+    public static TokenSynTreeNode generateToken(Token token, int pos) {
+        return new TokenSynTreeNode(SynTreeNode.SyntaxVarType.TOKEN, token, pos);
     }
 }

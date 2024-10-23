@@ -1,17 +1,16 @@
 package FrontEnd.AbsSynTreeNodes.Var;
 
-import Enums.SyntaxVarType;
-import Enums.tokenType;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.AbsSynTreeNodes.TokenSynTreeNode;
+import FrontEnd.Lexer.Token;
 import FrontEnd.AbsSynTreeNodes.Exp.Exp;
-import FrontEnd.AbsSynTreeNodes.Node;
-import FrontEnd.AbsSynTreeNodes.TokenNode;
-import Ir_LLVM.InitializedValue;
-import Ir_LLVM.LLVM_Value;
+import IR_LLVM.InitializedValue;
+import IR_LLVM.LLVM_Value;
 
 import java.util.ArrayList;
 
-public class InitVal extends Node {
-    public InitVal(SyntaxVarType type, ArrayList<Node> children) {
+public class InitVal extends SynTreeNode {
+    public InitVal(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 
@@ -22,11 +21,11 @@ public class InitVal extends Node {
             list.get(0).add(((Exp) children.get(0)).calc());
             return new InitializedValue(0, list);
         } else {
-            if (children.get(0) instanceof TokenNode && children.get(1) instanceof InitVal
-                    && ((TokenNode) children.get(0)).getTokenType() == tokenType.LBRACE &&
+            if (children.get(0) instanceof TokenSynTreeNode && children.get(1) instanceof InitVal
+                    && ((TokenSynTreeNode) children.get(0)).getTokenType() == Token.TokenType.LBRACE &&
                     ((InitVal)children.get(1)).getVal().getDim() == 1) {
                 InitializedValue initializedValue = new InitializedValue(2, list);
-                for (Node n : children) {
+                for (SynTreeNode n : children) {
                     if (n instanceof InitVal) {
                         initializedValue.addInitial(((InitVal) n).getVal());
                     }
@@ -35,7 +34,7 @@ public class InitVal extends Node {
             } else {
                 list.add(new ArrayList<>());
                 InitializedValue initializedValue = new InitializedValue(1, list);
-                for (Node n : children) {
+                for (SynTreeNode n : children) {
                     if (n instanceof InitVal) {
                         initializedValue.addInitial(((InitVal) n).getVal());
                     }
@@ -48,7 +47,7 @@ public class InitVal extends Node {
     public int getDim() {
         if (children.get(0) instanceof Exp) return 0;
         else {
-            for (Node n : children) {
+            for (SynTreeNode n : children) {
                 if (n instanceof InitVal) return n.getDim() + 1;
             }
         }
@@ -58,7 +57,7 @@ public class InitVal extends Node {
     public ArrayList<ArrayList<LLVM_Value>> genLLVMirListFor2Dim() {
         assert (getDim() == 2);
         ArrayList<ArrayList<LLVM_Value>> valuesList = new ArrayList<>();
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n instanceof InitVal) {
                 valuesList.add(((InitVal) n).genLLVMirListFor1Dim());
             }
@@ -69,7 +68,7 @@ public class InitVal extends Node {
     public ArrayList<LLVM_Value> genLLVMirListFor1Dim() {
         assert (getDim() == 1);
         ArrayList<LLVM_Value> LLVMValueArrayList = new ArrayList<>();
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n instanceof InitVal) {
                 LLVMValueArrayList.add( n.genLLVMir());
             }

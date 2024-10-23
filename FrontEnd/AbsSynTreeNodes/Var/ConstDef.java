@@ -1,32 +1,31 @@
 package FrontEnd.AbsSynTreeNodes.Var;
 
-import Enums.ErrorType;
-import Enums.SymbolType;
-import Enums.SyntaxVarType;
-import Enums.tokenType;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.AbsSynTreeNodes.TokenSynTreeNode;
+import FrontEnd.ErrorProcesser.ErrorType;
+import FrontEnd.Lexer.Token;
+import FrontEnd.SymbolTable.SymbolType;
 import FrontEnd.ErrorProcesser.Error;
 import FrontEnd.ErrorProcesser.ErrorList;
 import FrontEnd.ErrorProcesser.ErrorExceptions.RenameException;
 import FrontEnd.AbsSynTreeNodes.Exp.ConstExp;
-import FrontEnd.AbsSynTreeNodes.Node;
-import FrontEnd.AbsSynTreeNodes.TokenNode;
-import Ir_LLVM.InitializedValue;
+import IR_LLVM.InitializedValue;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
 import FrontEnd.SymbolTable.Symbols.VarSymbol;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.ConstInteger;
-import Ir_LLVM.LLVM_Values.GlobalVar;
-import Ir_LLVM.LLVM_Values.Instr.AllocaInst;
-import Ir_LLVM.LLVM_Values.Instr.GEPInstr;
-import Ir_LLVM.LLVM_Values.Instr.StoreInstr;
-import Ir_LLVM.LLVM_Types.ArrayType;
-import Ir_LLVM.LLVM_Types.Integer32Type;
-import Ir_LLVM.LLVM_Types.LLVMType;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.ConstInteger;
+import IR_LLVM.LLVM_Values.GlobalVar;
+import IR_LLVM.LLVM_Values.Instr.AllocaInst;
+import IR_LLVM.LLVM_Values.Instr.GEPInstr;
+import IR_LLVM.LLVM_Values.Instr.StoreInstr;
+import IR_LLVM.LLVM_Types.ArrayType;
+import IR_LLVM.LLVM_Types.Integer32Type;
+import IR_LLVM.LLVM_Types.LLVMType;
 
 import java.util.ArrayList;
 
-public class ConstDef extends Node {
+public class ConstDef extends SynTreeNode {
 
     private int dim = 0;
 
@@ -36,11 +35,11 @@ public class ConstDef extends Node {
 
     private String name;
 
-    public ConstDef(SyntaxVarType type, ArrayList<Node> children) {
+    public ConstDef(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
-        name = ((TokenNode) children.get(0)).getIdentName();
-        for (Node child : children) {
-            if (child instanceof TokenNode && ((TokenNode) child).getTokenType() == tokenType.ASSIGN) isAssigned = true;
+        name = ((TokenSynTreeNode) children.get(0)).getIdentName();
+        for (SynTreeNode child : children) {
+            if (child instanceof TokenSynTreeNode && ((TokenSynTreeNode) child).getTokenType() == Token.TokenType.ASSIGN) isAssigned = true;
             if (child instanceof ConstExp) {
                 dim++;
             }
@@ -53,13 +52,13 @@ public class ConstDef extends Node {
 
     private VarSymbol createSymbol() {
         ArrayList<Integer> lens = new ArrayList<>();
-        for (Node child : children) {
+        for (SynTreeNode child : children) {
             if (child instanceof ConstExp) {
                 lens.add(((ConstExp) child).calc());
             }
         }
         InitializedValue initValue = null;
-        for (Node child : children) {
+        for (SynTreeNode child : children) {
             if (child instanceof ConstInitVal) {
                 initValue = ((ConstInitVal) child).getVal();
             }

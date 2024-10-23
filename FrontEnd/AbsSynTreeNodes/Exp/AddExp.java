@@ -1,25 +1,24 @@
 package FrontEnd.AbsSynTreeNodes.Exp;
 
-import Enums.SyntaxVarType;
-import Enums.tokenType;
-import FrontEnd.AbsSynTreeNodes.Node;
-import FrontEnd.AbsSynTreeNodes.TokenNode;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.ConstInteger;
-import Ir_LLVM.LLVM_Values.Instr.BinaryInstr;
-import Ir_LLVM.LLVM_Types.Integer32Type;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.AbsSynTreeNodes.TokenSynTreeNode;
+import FrontEnd.Lexer.Token;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.ConstInteger;
+import IR_LLVM.LLVM_Values.Instr.BinaryInstr;
+import IR_LLVM.LLVM_Types.Integer32Type;
 
 import java.util.ArrayList;
 
-public class AddExp extends Node {
-    public AddExp(SyntaxVarType type, ArrayList<Node> children) {
+public class AddExp extends SynTreeNode {
+    public AddExp(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 
     @Override
     public int getDim() {
-        for (Node n : children) if (n.getDim() != -1) return n.getDim();
+        for (SynTreeNode n : children) if (n.getDim() != -1) return n.getDim();
         return -1;
     }
 
@@ -28,7 +27,7 @@ public class AddExp extends Node {
         else {
             int a = ((AddExp) children.get(0)).calc();
             int b = ((MulExp) children.get(2)).calc();
-            if (((TokenNode) children.get(1)).getTokenType() == tokenType.PLUS) return a + b;
+            if (((TokenSynTreeNode) children.get(1)).getTokenType() == Token.TokenType.PLUS) return a + b;
             else return a - b;
         }
     }
@@ -41,7 +40,7 @@ public class AddExp extends Node {
             LLVM_Value operand2 = children.get(2).genLLVMir();
             BinaryInstr.op Op;
             if (operand1 instanceof ConstInteger constInteger && operand2 instanceof ConstInteger constInteger1) {
-                switch (((TokenNode) children.get(1)).getTokenType()) {
+                switch (((TokenSynTreeNode) children.get(1)).getTokenType()) {
                     case PLUS -> {
                         return new ConstInteger(constInteger.getVal() + constInteger1.getVal());
                     }
@@ -55,7 +54,7 @@ public class AddExp extends Node {
             } else if (operand2 instanceof ConstInteger constInteger && constInteger.getVal() == 0) {
                 return operand1;
             }
-            switch (((TokenNode) children.get(1)).getTokenType()) {
+            switch (((TokenSynTreeNode) children.get(1)).getTokenType()) {
                 case PLUS -> {
                     Op = BinaryInstr.op.ADD;
                 }

@@ -1,20 +1,19 @@
 package FrontEnd.AbsSynTreeNodes.Stmt;
 
-import Enums.ErrorType;
-import Enums.SyntaxVarType;
+import FrontEnd.ErrorProcesser.ErrorType;
 import FrontEnd.ErrorProcesser.Error;
 import FrontEnd.ErrorProcesser.ErrorList;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
 
 import java.util.ArrayList;
 
 public class BreakStmt extends Stmt {
-    public BreakStmt(SyntaxVarType type, ArrayList<Node> children) {
+    public BreakStmt(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

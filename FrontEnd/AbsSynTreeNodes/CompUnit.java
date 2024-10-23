@@ -1,19 +1,18 @@
 package FrontEnd.AbsSynTreeNodes;
 
-import Enums.FunctionType;
-import Enums.SymbolType;
-import Enums.SyntaxVarType;
+import FrontEnd.Parser.FunctionType;
+import FrontEnd.SymbolTable.SymbolType;
 import FrontEnd.ErrorProcesser.ErrorExceptions.RenameException;
 import FrontEnd.SymbolTable.Symbols.FuncSymbol;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.Function;
-import Ir_LLVM.LLVM_Types.*;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.Function;
+import IR_LLVM.LLVM_Types.*;
 
 import java.util.ArrayList;
 
-public class CompUnit extends Node {
-    public CompUnit(SyntaxVarType type, ArrayList<Node> children) {
+public class CompUnit extends SynTreeNode {
+    public CompUnit(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

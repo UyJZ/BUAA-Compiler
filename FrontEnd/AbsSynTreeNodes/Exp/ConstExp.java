@@ -1,13 +1,12 @@
 package FrontEnd.AbsSynTreeNodes.Exp;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
-import Ir_LLVM.LLVM_Value;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import IR_LLVM.LLVM_Value;
 
 import java.util.ArrayList;
 
-public class ConstExp extends Node {
-    public ConstExp(SyntaxVarType type, ArrayList<Node> children) {
+public class ConstExp extends SynTreeNode {
+    public ConstExp(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

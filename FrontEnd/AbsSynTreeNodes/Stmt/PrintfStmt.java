@@ -1,33 +1,32 @@
 package FrontEnd.AbsSynTreeNodes.Stmt;
 
-import Enums.ErrorType;
-import Enums.SyntaxVarType;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.AbsSynTreeNodes.TokenSynTreeNode;
+import FrontEnd.ErrorProcesser.ErrorType;
 import FrontEnd.ErrorProcesser.Error;
 import FrontEnd.ErrorProcesser.ErrorList;
 import FrontEnd.AbsSynTreeNodes.Exp.Exp;
-import FrontEnd.AbsSynTreeNodes.Node;
-import FrontEnd.AbsSynTreeNodes.TokenNode;
 import FrontEnd.SymbolTable.Symbols.FuncSymbol;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.ConstInteger;
-import Ir_LLVM.LLVM_Values.Instr.CallInstr;
-import Ir_LLVM.LLVM_Types.VoidType;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.ConstInteger;
+import IR_LLVM.LLVM_Values.Instr.CallInstr;
+import IR_LLVM.LLVM_Types.VoidType;
 
 import java.util.ArrayList;
 
 public class PrintfStmt extends Stmt {
 
-    private TokenNode formatStringNode;
+    private TokenSynTreeNode formatStringNode;
 
     private int OutputNums = 0;
 
-    public PrintfStmt(SyntaxVarType type, ArrayList<Node> children) {
+    public PrintfStmt(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
-        for (Node n : children)
-            if (n instanceof TokenNode && ((TokenNode) n).isFormatString())
-                formatStringNode = (TokenNode) n;
+        for (SynTreeNode n : children)
+            if (n instanceof TokenSynTreeNode && ((TokenSynTreeNode) n).isFormatString())
+                formatStringNode = (TokenSynTreeNode) n;
             else if (n instanceof Exp) OutputNums++;
     }
 
@@ -41,7 +40,7 @@ public class PrintfStmt extends Stmt {
     @Override
     public LLVM_Value genLLVMir() {
         ArrayList<LLVM_Value> instrs = new ArrayList<>();
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n instanceof Exp) instrs.add(n.genLLVMir());
         }
         String s = formatStringNode.getValue();

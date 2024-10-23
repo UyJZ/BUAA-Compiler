@@ -1,16 +1,16 @@
 package MidEnd;
 
 import BackEnd.MIPS.Register;
-import Ir_LLVM.LLVM_Module;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.Function;
-import Ir_LLVM.LLVM_Values.Instr.Instr;
-import Ir_LLVM.LLVM_Values.Instr.MoveInstr;
-import Ir_LLVM.LLVM_Values.Instr.PcopyInstr;
-import Ir_LLVM.LLVM_Values.Instr.PhiInstr;
-import Ir_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
-import Ir_LLVM.LLVM_Values.TempValue;
+import IR_LLVM.LLVM_Module;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.Function;
+import IR_LLVM.LLVM_Values.Instr.Instr;
+import IR_LLVM.LLVM_Values.Instr.MoveInstr;
+import IR_LLVM.LLVM_Values.Instr.PcopyInstr;
+import IR_LLVM.LLVM_Values.Instr.PhiInstr;
+import IR_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
+import IR_LLVM.LLVM_Values.TempValue;
 
 import java.util.*;
 

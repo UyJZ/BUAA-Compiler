@@ -1,7 +1,6 @@
 package FrontEnd.ErrorProcesser;
 
-import Enums.ErrorType;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ public class ErrorList {
         }
     }
 
-    public static void AddError(ArrayList<Node> children, ErrorType errorType) {
+    public static void AddError(ArrayList<SynTreeNode> children, ErrorType errorType) {
         errors.add(new Error(children.get(children.size() - 1).getEndLine(), errorType));
     }
 }

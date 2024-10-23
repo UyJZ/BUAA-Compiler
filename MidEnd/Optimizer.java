@@ -1,6 +1,6 @@
 package MidEnd;
 
-import Ir_LLVM.LLVM_Module;
+import IR_LLVM.LLVM_Module;
 
 public class Optimizer {
     private final LLVM_Module LLVMModule;

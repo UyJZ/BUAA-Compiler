@@ -1,25 +1,24 @@
 package FrontEnd.AbsSynTreeNodes.Exp;
 
-import Enums.SyntaxVarType;
-import Enums.tokenType;
-import FrontEnd.AbsSynTreeNodes.Node;
-import FrontEnd.AbsSynTreeNodes.TokenNode;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.ConstBool;
-import Ir_LLVM.LLVM_Values.ConstInteger;
-import Ir_LLVM.LLVM_Values.Instr.IcmpInstr;
-import Ir_LLVM.LLVM_Values.Instr.ZextInstr;
-import Ir_LLVM.LLVM_Types.Integer32Type;
+import FrontEnd.Lexer.Token;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.AbsSynTreeNodes.TokenSynTreeNode;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.ConstBool;
+import IR_LLVM.LLVM_Values.ConstInteger;
+import IR_LLVM.LLVM_Values.Instr.IcmpInstr;
+import IR_LLVM.LLVM_Values.Instr.ZextInstr;
+import IR_LLVM.LLVM_Types.Integer32Type;
 
 import java.util.ArrayList;
 
-public class EqExp extends Node {
+public class EqExp extends SynTreeNode {
 
     private BasicBlock newBasicBlock, trueBlock, falseBlock;
 
-    public EqExp(SyntaxVarType type, ArrayList<Node> children) {
+    public EqExp(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 
@@ -37,7 +36,7 @@ public class EqExp extends Node {
             return children.get(0).genLLVMir();
         } else {
             LLVM_Value left = children.get(0).genLLVMir();
-            IcmpInstr.CmpOp cmpOp = ((TokenNode) children.get(1)).getTokenType() == tokenType.EQL ? IcmpInstr.CmpOp.eq : IcmpInstr.CmpOp.ne;
+            IcmpInstr.CmpOp cmpOp = ((TokenSynTreeNode) children.get(1)).getTokenType() == Token.TokenType.EQL ? IcmpInstr.CmpOp.eq : IcmpInstr.CmpOp.ne;
             LLVM_Value right = children.get(2).genLLVMir();
             if (left instanceof ConstBool constBool && right instanceof ConstBool constBool1) {
                 boolean ans = false;

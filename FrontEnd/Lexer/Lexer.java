@@ -1,7 +1,5 @@
 package FrontEnd.Lexer;
 
-import Enums.tokenType;
-
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,32 +14,32 @@ public class Lexer {
 
     private final TokenStream tokenStream;
 
-    private static final Map<String, tokenType> OPERATOR_MAP = new LinkedHashMap<>();
+    private static final Map<String, Token.TokenType> OPERATOR_MAP = new LinkedHashMap<>();
 
     static {
-        OPERATOR_MAP.put("&&", tokenType.AND);
-        OPERATOR_MAP.put("||", tokenType.OR);
-        OPERATOR_MAP.put("<=", tokenType.LEQ);
-        OPERATOR_MAP.put(">=", tokenType.GEQ);
-        OPERATOR_MAP.put("==", tokenType.EQL);
-        OPERATOR_MAP.put("!=", tokenType.NEQ);
-        OPERATOR_MAP.put("!", tokenType.NOT);
-        OPERATOR_MAP.put("+", tokenType.PLUS);
-        OPERATOR_MAP.put("-", tokenType.MINU);
-        OPERATOR_MAP.put("*", tokenType.MULT);
-        OPERATOR_MAP.put("/", tokenType.DIV);
-        OPERATOR_MAP.put("%", tokenType.MOD);
-        OPERATOR_MAP.put("<", tokenType.LSS);
-        OPERATOR_MAP.put(">", tokenType.GRE);
-        OPERATOR_MAP.put("=", tokenType.ASSIGN);
-        OPERATOR_MAP.put(";", tokenType.SEMICN);
-        OPERATOR_MAP.put(",", tokenType.COMMA);
-        OPERATOR_MAP.put("(", tokenType.LPARENT);
-        OPERATOR_MAP.put(")", tokenType.RPARENT);
-        OPERATOR_MAP.put("[", tokenType.LBRACK);
-        OPERATOR_MAP.put("]", tokenType.RBRACK);
-        OPERATOR_MAP.put("{", tokenType.LBRACE);
-        OPERATOR_MAP.put("}", tokenType.RBRACE);
+        OPERATOR_MAP.put("&&", Token.TokenType.AND);
+        OPERATOR_MAP.put("||", Token.TokenType.OR);
+        OPERATOR_MAP.put("<=", Token.TokenType.LEQ);
+        OPERATOR_MAP.put(">=", Token.TokenType.GEQ);
+        OPERATOR_MAP.put("==", Token.TokenType.EQL);
+        OPERATOR_MAP.put("!=", Token.TokenType.NEQ);
+        OPERATOR_MAP.put("!", Token.TokenType.NOT);
+        OPERATOR_MAP.put("+", Token.TokenType.PLUS);
+        OPERATOR_MAP.put("-", Token.TokenType.MINU);
+        OPERATOR_MAP.put("*", Token.TokenType.MULT);
+        OPERATOR_MAP.put("/", Token.TokenType.DIV);
+        OPERATOR_MAP.put("%", Token.TokenType.MOD);
+        OPERATOR_MAP.put("<", Token.TokenType.LSS);
+        OPERATOR_MAP.put(">", Token.TokenType.GRE);
+        OPERATOR_MAP.put("=", Token.TokenType.ASSIGN);
+        OPERATOR_MAP.put(";", Token.TokenType.SEMICN);
+        OPERATOR_MAP.put(",", Token.TokenType.COMMA);
+        OPERATOR_MAP.put("(", Token.TokenType.LPARENT);
+        OPERATOR_MAP.put(")", Token.TokenType.RPARENT);
+        OPERATOR_MAP.put("[", Token.TokenType.LBRACK);
+        OPERATOR_MAP.put("]", Token.TokenType.RBRACK);
+        OPERATOR_MAP.put("{", Token.TokenType.LBRACE);
+        OPERATOR_MAP.put("}", Token.TokenType.RBRACE);
     }
 
     private int pos;
@@ -100,32 +98,32 @@ public class Lexer {
         }
     }
 
-    private tokenType recognizeKeyWords(String s) {
+    private Token.TokenType recognizeKeyWords(String s) {
         Pattern patternIdent = Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*");
         Matcher matcherIdent = patternIdent.matcher(s);
         if (!matcherIdent.matches()) {
             System.out.println("ERROR!");
         }
         return switch (s) {
-            case "const" -> tokenType.CONSTTK;
-            case "main" -> tokenType.MAINTK;
-            case "int" -> tokenType.INTTK;
-            case "break" -> tokenType.BREAKTK;
-            case "continue" -> tokenType.CONTINUETK;
-            case "if" -> tokenType.IFTK;
-            case "else" -> tokenType.ELSETK;
-            case "for" -> tokenType.FORTK;
-            case "getint" -> tokenType.GETINTTK;
-            case "printf" -> tokenType.PRINTFTK;
-            case "return" -> tokenType.RETURNTK;
-            case "void" -> tokenType.VOIDTK;
-            default -> tokenType.IDENFR;
+            case "const" -> Token.TokenType.CONSTTK;
+            case "main" -> Token.TokenType.MAINTK;
+            case "int" -> Token.TokenType.INTTK;
+            case "break" -> Token.TokenType.BREAKTK;
+            case "continue" -> Token.TokenType.CONTINUETK;
+            case "if" -> Token.TokenType.IFTK;
+            case "else" -> Token.TokenType.ELSETK;
+            case "for" -> Token.TokenType.FORTK;
+            case "getint" -> Token.TokenType.GETINTTK;
+            case "printf" -> Token.TokenType.PRINTFTK;
+            case "return" -> Token.TokenType.RETURNTK;
+            case "void" -> Token.TokenType.VOIDTK;
+            default -> Token.TokenType.IDENFR;
         };
     }
 
     private Token recognizeSymbol() {
         String s = source.substring(pos);
-        for (Map.Entry<String, tokenType> entry : OPERATOR_MAP.entrySet()) {
+        for (Map.Entry<String, Token.TokenType> entry : OPERATOR_MAP.entrySet()) {
             if (s.startsWith(entry.getKey())) {
                 pos += entry.getKey().length();
                 return new Token(entry.getKey(), entry.getValue(), curLine);
@@ -164,7 +162,7 @@ public class Lexer {
                 l--;
                 String s = source.substring(pos, pos + l);
                 pos = pos + l;
-                return new Token(s, tokenType.INTCON, curLine);
+                return new Token(s, Token.TokenType.INTCON, curLine);
             }
             l++;
         }
@@ -175,7 +173,7 @@ public class Lexer {
         int l = 1;
         while (pos + l <= source.length()) {
             if (source.charAt(pos + l) == '"') {
-                Token token = new Token(source.substring(pos, pos + l + 1), tokenType.STRCON, curLine);
+                Token token = new Token(source.substring(pos, pos + l + 1), Token.TokenType.STRCON, curLine);
                 pos = pos + l + 1;
                 return token;
             }

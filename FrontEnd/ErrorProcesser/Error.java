@@ -1,7 +1,5 @@
 package FrontEnd.ErrorProcesser;
 
-import Enums.ErrorType;
-
 public class Error implements Comparable<Object>{
     private final int line;
 

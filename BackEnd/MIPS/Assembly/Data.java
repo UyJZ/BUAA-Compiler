@@ -1,7 +1,7 @@
 package BackEnd.MIPS.Assembly;
 
 import BackEnd.MIPS.MipsBuilder;
-import Ir_LLVM.InitializedValue;
+import IR_LLVM.InitializedValue;
 
 import java.util.ArrayList;
 

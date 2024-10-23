@@ -1,8 +1,7 @@
 package FrontEnd.AbsSynTreeNodes;
 
-import Enums.ErrorType;
-import Enums.SyntaxVarType;
-import Enums.tokenType;
+import FrontEnd.ErrorProcesser.ErrorType;
+import FrontEnd.Lexer.Token;
 import FrontEnd.ErrorProcesser.Error;
 import FrontEnd.ErrorProcesser.ErrorList;
 import FrontEnd.AbsSynTreeNodes.Var.Number;
@@ -10,21 +9,21 @@ import FrontEnd.SymbolTable.Symbols.Symbol;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
 import FrontEnd.AbsSynTreeNodes.Exp.Exp;
 import FrontEnd.SymbolTable.Symbols.VarSymbol;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.ConstInteger;
-import Ir_LLVM.LLVM_Values.Instr.*;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.ConstInteger;
+import IR_LLVM.LLVM_Values.Instr.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LVal extends Node {
+public class LVal extends SynTreeNode {
 
     private final String name;
 
-    public LVal(SyntaxVarType type, ArrayList<Node> children) {
+    public LVal(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
-        name = ((TokenNode) children.get(0)).getIdentName();
+        name = ((TokenSynTreeNode) children.get(0)).getIdentName();
     }
 
     public int identLine() {
@@ -38,26 +37,26 @@ public class LVal extends Node {
     @Override
     public int getDim() {
         int dim = SymbolTableBuilder.getInstance().getDimByName(name);
-        for (Node child : children) if (child instanceof Exp || child instanceof Number) dim--;
+        for (SynTreeNode child : children) if (child instanceof Exp || child instanceof Number) dim--;
         return dim;
     }
 
     @Override
     public void checkError() {
-        if (children.get(0) instanceof TokenNode && ((TokenNode) children.get(0)).getTokenType() == tokenType.IDENFR)
-            if (!SymbolTableBuilder.getInstance().isVarDefined(((TokenNode) children.get(0)).getIdentName()))
+        if (children.get(0) instanceof TokenSynTreeNode && ((TokenSynTreeNode) children.get(0)).getTokenType() == Token.TokenType.IDENFR)
+            if (!SymbolTableBuilder.getInstance().isVarDefined(((TokenSynTreeNode) children.get(0)).getIdentName()))
                 ErrorList.AddError(new Error(identLine(), ErrorType.c));
         super.checkError();
     }
 
     public int calc() {
-        String name = ((TokenNode) children.get(0)).getIdentName();
+        String name = ((TokenSynTreeNode) children.get(0)).getIdentName();
         Symbol symbol = SymbolTableBuilder.getInstance().getSymbolByName(name);
         if (symbol == null) return -1;
         else {
             VarSymbol varSymbol = (VarSymbol) symbol;
             List<Integer> pos = new ArrayList<>();
-            for (Node n : children) {
+            for (SynTreeNode n : children) {
                 if (n instanceof Exp) pos.add(((Exp) n).calc());
             }
             return varSymbol.getValue(pos);
@@ -81,7 +80,7 @@ public class LVal extends Node {
             }
         } else if (symbol.getDim() == 1) {
             ArrayList<LLVM_Value> LLVMValues = new ArrayList<>();
-            for (Node n : children) if (n instanceof Exp) LLVMValues.add(n.genLLVMir());
+            for (SynTreeNode n : children) if (n instanceof Exp) LLVMValues.add(n.genLLVMir());
             if (LLVMValues.size() == 0) {
                 LLVM_Value rootPtr = symbol.getLLVMirValue();
                 if (symbol.isParam()) {
@@ -118,7 +117,7 @@ public class LVal extends Node {
             }
         } else if (symbol.getDim() == 2) {
             ArrayList<LLVM_Value> LLVMValues = new ArrayList<>();
-            for (Node n : children) {
+            for (SynTreeNode n : children) {
                 if (n instanceof Exp) {
                     LLVMValues.add(n.genLLVMir());
                 }
@@ -188,7 +187,7 @@ public class LVal extends Node {
             return symbol.getLLVMirValue();
         } else if (symbol.getDim() == 1) {
             ArrayList<LLVM_Value> LLVMValues = new ArrayList<>();
-            for (Node n : children) {
+            for (SynTreeNode n : children) {
                 if (n instanceof Exp) {
                     LLVMValues.add(n.genLLVMir());
                 }
@@ -208,7 +207,7 @@ public class LVal extends Node {
             }
         } else if (symbol.getDim() == 2) {
             ArrayList<LLVM_Value> LLVMValues = new ArrayList<>();
-            for (Node n : children) {
+            for (SynTreeNode n : children) {
                 if (n instanceof Exp) {
                     LLVMValues.add(n.genLLVMir());
                 }

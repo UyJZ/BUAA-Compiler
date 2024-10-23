@@ -1,20 +1,19 @@
 package FrontEnd.AbsSynTreeNodes.Exp;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
-import FrontEnd.AbsSynTreeNodes.TokenNode;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.ConstBool;
-import Ir_LLVM.LLVM_Values.ConstInteger;
-import Ir_LLVM.LLVM_Values.Instr.IcmpInstr;
-import Ir_LLVM.LLVM_Values.Instr.ZextInstr;
-import Ir_LLVM.LLVM_Types.Integer32Type;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.AbsSynTreeNodes.TokenSynTreeNode;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.ConstBool;
+import IR_LLVM.LLVM_Values.ConstInteger;
+import IR_LLVM.LLVM_Values.Instr.IcmpInstr;
+import IR_LLVM.LLVM_Values.Instr.ZextInstr;
+import IR_LLVM.LLVM_Types.Integer32Type;
 
 import java.util.ArrayList;
 
-public class RelExp extends Node {
-    public RelExp(SyntaxVarType type, ArrayList<Node> children) {
+public class RelExp extends SynTreeNode {
+    public RelExp(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 
@@ -24,7 +23,7 @@ public class RelExp extends Node {
             return children.get(0).genLLVMir();
         } else {
             IcmpInstr.CmpOp cmpOp;
-            switch (((TokenNode) children.get(1)).getTokenType()) {
+            switch (((TokenSynTreeNode) children.get(1)).getTokenType()) {
                 case LSS -> {
                     cmpOp = IcmpInstr.CmpOp.slt;
                 }

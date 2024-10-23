@@ -1,11 +1,9 @@
 package FrontEnd.AbsSynTreeNodes;
 
-import Enums.SyntaxVarType;
-
 import java.util.ArrayList;
 
-public class Decl extends Node{
-    public Decl(SyntaxVarType type, ArrayList<Node> children){
+public class Decl extends SynTreeNode {
+    public Decl(SyntaxVarType type, ArrayList<SynTreeNode> children){
         super(type, children);
     }
 }

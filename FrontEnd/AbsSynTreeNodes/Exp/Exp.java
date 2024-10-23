@@ -1,18 +1,17 @@
 package FrontEnd.AbsSynTreeNodes.Exp;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
-import Ir_LLVM.LLVM_Value;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import IR_LLVM.LLVM_Value;
 
 import java.util.ArrayList;
 
-public class Exp extends Node {
-    public Exp(SyntaxVarType type, ArrayList<Node> children) {
+public class Exp extends SynTreeNode {
+    public Exp(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 
     public int getDim() {
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n.getDim() != -1) return n.getDim();
         }
         return -1;

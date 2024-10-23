@@ -1,22 +1,21 @@
 package FrontEnd.AbsSynTreeNodes.Exp;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.ConstInteger;
-import Ir_LLVM.LLVM_Values.Instr.IcmpInstr;
-import Ir_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
-import Ir_LLVM.LLVM_Types.BoolType;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.ConstInteger;
+import IR_LLVM.LLVM_Values.Instr.IcmpInstr;
+import IR_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
+import IR_LLVM.LLVM_Types.BoolType;
 
 import java.util.ArrayList;
 
-public class LAndExp extends Node {
+public class LAndExp extends SynTreeNode {
 
     private BasicBlock newBasicBlock, trueBlock, falseBlock;
 
-    public LAndExp(SyntaxVarType type, ArrayList<Node> children) {
+    public LAndExp(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

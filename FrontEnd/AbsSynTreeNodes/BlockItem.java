@@ -1,13 +1,12 @@
 package FrontEnd.AbsSynTreeNodes;
 
-import Enums.FunctionType;
-import Enums.SyntaxVarType;
+import FrontEnd.Parser.FunctionType;
 import FrontEnd.AbsSynTreeNodes.Stmt.ReturnStmt;
 
 import java.util.ArrayList;
 
-public class BlockItem extends Node{
-    public BlockItem(SyntaxVarType type, ArrayList<Node> children) {
+public class BlockItem extends SynTreeNode {
+    public BlockItem(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

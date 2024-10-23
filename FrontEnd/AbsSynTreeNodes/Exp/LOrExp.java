@@ -1,17 +1,16 @@
 package FrontEnd.AbsSynTreeNodes.Exp;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.BasicBlock;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.BasicBlock;
 
 import java.util.ArrayList;
 
-public class LOrExp extends Node {
+public class LOrExp extends SynTreeNode {
 
     private BasicBlock trueBlock, falseBlock;
 
-    public LOrExp(SyntaxVarType type, ArrayList<Node> children) {
+    public LOrExp(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

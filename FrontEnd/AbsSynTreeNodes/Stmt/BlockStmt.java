@@ -1,12 +1,11 @@
 package FrontEnd.AbsSynTreeNodes.Stmt;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 
 import java.util.ArrayList;
 
 public class BlockStmt extends Stmt {
-    public BlockStmt(SyntaxVarType type, ArrayList<Node> children) {
+    public BlockStmt(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 }

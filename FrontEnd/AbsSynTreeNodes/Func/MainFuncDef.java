@@ -1,26 +1,25 @@
 package FrontEnd.AbsSynTreeNodes.Func;
 
-import Enums.ErrorType;
-import Enums.FunctionType;
-import Enums.SymbolType;
-import Enums.SyntaxVarType;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.ErrorProcesser.ErrorType;
+import FrontEnd.Parser.FunctionType;
+import FrontEnd.SymbolTable.SymbolType;
 import FrontEnd.ErrorProcesser.Error;
 import FrontEnd.ErrorProcesser.ErrorList;
 import FrontEnd.ErrorProcesser.ErrorExceptions.RenameException;
 import FrontEnd.AbsSynTreeNodes.Block;
-import FrontEnd.AbsSynTreeNodes.Node;
 import FrontEnd.SymbolTable.Symbols.FuncSymbol;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.Function;
-import Ir_LLVM.LLVM_Types.Integer32Type;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.Function;
+import IR_LLVM.LLVM_Types.Integer32Type;
 
 import java.util.ArrayList;
 
-public class MainFuncDef extends Node {
-    public MainFuncDef(SyntaxVarType type, ArrayList<Node> children) {
+public class MainFuncDef extends SynTreeNode {
+    public MainFuncDef(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

@@ -1,18 +1,17 @@
 package FrontEnd.AbsSynTreeNodes.Stmt;
 
-import Enums.ErrorType;
-import Enums.SyntaxVarType;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.ErrorProcesser.ErrorType;
 import FrontEnd.ErrorProcesser.Error;
 import FrontEnd.ErrorProcesser.ErrorList;
 import FrontEnd.AbsSynTreeNodes.Exp.Exp;
 import FrontEnd.AbsSynTreeNodes.LVal;
-import FrontEnd.AbsSynTreeNodes.Node;
 import FrontEnd.SymbolTable.*;
 import FrontEnd.SymbolTable.Symbols.VarSymbol;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.ConstInteger;
-import Ir_LLVM.LLVM_Values.Instr.StoreInstr;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.ConstInteger;
+import IR_LLVM.LLVM_Values.Instr.StoreInstr;
 
 import java.util.ArrayList;
 
@@ -22,11 +21,11 @@ public class AssignStmt extends Stmt {
 
     private Exp expr;
 
-    public AssignStmt(SyntaxVarType type, ArrayList<Node> children) {
+    public AssignStmt(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
-        for (Node node : children) {
-            if (node instanceof LVal) lVal = (LVal) node;
-            else if (node instanceof Exp) expr = (Exp) node;
+        for (SynTreeNode synTreeNode : children) {
+            if (synTreeNode instanceof LVal) lVal = (LVal) synTreeNode;
+            else if (synTreeNode instanceof Exp) expr = (Exp) synTreeNode;
         }
     }
 

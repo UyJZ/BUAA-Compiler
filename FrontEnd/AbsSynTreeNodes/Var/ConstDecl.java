@@ -1,11 +1,10 @@
 package FrontEnd.AbsSynTreeNodes.Var;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 
 import java.util.ArrayList;
 
-public class ConstDecl extends Node {
+public class ConstDecl extends SynTreeNode {
 
     private int dim = 0;
 
@@ -13,10 +12,10 @@ public class ConstDecl extends Node {
 
     private String name;
 
-    public ConstDecl(SyntaxVarType type, ArrayList<Node> children) {
+    public ConstDecl(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
         name = ((ConstDef) children.get(2)).getName();
-        for (Node child : children) {
+        for (SynTreeNode child : children) {
             if (child instanceof ConstDecl) {
                 dim++;
             }

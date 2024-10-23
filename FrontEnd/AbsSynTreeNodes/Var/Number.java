@@ -1,14 +1,13 @@
 package FrontEnd.AbsSynTreeNodes.Var;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.ConstInteger;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.ConstInteger;
 
 import java.util.ArrayList;
 
-public class Number extends Node {
-    public Number(SyntaxVarType type, ArrayList<Node> children) {
+public class Number extends SynTreeNode {
+    public Number(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

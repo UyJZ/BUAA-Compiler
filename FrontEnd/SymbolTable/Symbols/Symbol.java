@@ -1,7 +1,7 @@
 package FrontEnd.SymbolTable.Symbols;
 
-import Enums.SymbolType;
-import Ir_LLVM.LLVM_Value;
+import FrontEnd.SymbolTable.SymbolType;
+import IR_LLVM.LLVM_Value;
 
 public class Symbol {
 

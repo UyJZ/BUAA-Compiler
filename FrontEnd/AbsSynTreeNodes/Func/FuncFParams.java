@@ -1,17 +1,16 @@
 package FrontEnd.AbsSynTreeNodes.Func;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 
 import java.util.ArrayList;
 
-public class FuncFParams extends Node {
+public class FuncFParams extends SynTreeNode {
 
     private final ArrayList<FuncFParam> paramList = new ArrayList<>();
 
-    public FuncFParams(SyntaxVarType type, ArrayList<Node> children) {
+    public FuncFParams(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
-        for (Node child : children) {
+        for (SynTreeNode child : children) {
             if (child instanceof FuncFParam) {
                 paramList.add((FuncFParam) child);
             }
@@ -23,7 +22,7 @@ public class FuncFParams extends Node {
     }
 
     public void setParamLLVMForFunc() {
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n instanceof FuncFParam) {
                 ((FuncFParam) n).setParamLLVMForFunc();
             }

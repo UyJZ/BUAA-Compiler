@@ -1,29 +1,28 @@
 package FrontEnd.AbsSynTreeNodes.Func;
 
-import Enums.ErrorType;
-import Enums.FunctionType;
-import Enums.SymbolType;
-import Enums.SyntaxVarType;
+import FrontEnd.ErrorProcesser.ErrorType;
+import FrontEnd.Parser.FunctionType;
+import FrontEnd.SymbolTable.SymbolType;
 import FrontEnd.ErrorProcesser.Error;
 import FrontEnd.ErrorProcesser.ErrorList;
 import FrontEnd.ErrorProcesser.ErrorExceptions.RenameException;
 import FrontEnd.AbsSynTreeNodes.Block;
-import FrontEnd.AbsSynTreeNodes.Node;
-import FrontEnd.AbsSynTreeNodes.TokenNode;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.AbsSynTreeNodes.TokenSynTreeNode;
 import FrontEnd.SymbolTable.Symbols.FuncSymbol;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.Function;
-import Ir_LLVM.LLVM_Values.Instr.terminatorInstr.ReturnInstr;
-import Ir_LLVM.LLVM_Types.Integer32Type;
-import Ir_LLVM.LLVM_Types.LLVMType;
-import Ir_LLVM.LLVM_Types.VoidType;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.Function;
+import IR_LLVM.LLVM_Values.Instr.terminatorInstr.ReturnInstr;
+import IR_LLVM.LLVM_Types.Integer32Type;
+import IR_LLVM.LLVM_Types.LLVMType;
+import IR_LLVM.LLVM_Types.VoidType;
 
 import java.util.ArrayList;
 
-public class FuncDef extends Node {
+public class FuncDef extends SynTreeNode {
 
     private String funcName;
 
@@ -31,12 +30,12 @@ public class FuncDef extends Node {
 
     private final ArrayList<FuncFParam> funcFParams = new ArrayList<>();
 
-    public FuncDef(SyntaxVarType type, ArrayList<Node> children) {
+    public FuncDef(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
         //TODO: fill the funcFParams
-        funcName = ((TokenNode) (children.get(1))).getIdentName();
+        funcName = ((TokenSynTreeNode) (children.get(1))).getIdentName();
         functionType = ((FrontEnd.AbsSynTreeNodes.Func.FuncType) children.get(0)).getValue().equals("void") ? FunctionType.FUNC_VOID : FunctionType.FUNC_INT;
-        for (Node child : children) {
+        for (SynTreeNode child : children) {
             if (child instanceof FuncFParams) {
                 funcFParams.addAll(((FuncFParams) child).getParamList());
             }
@@ -65,9 +64,9 @@ public class FuncDef extends Node {
                 for (Integer i : list1) ErrorList.AddError(new Error(i, ErrorType.f));
             }
         }
-        for (Node node : children) {
-            if (node instanceof Block) ((Block) node).checkErrorInFunc();
-            else node.checkError();
+        for (SynTreeNode synTreeNode : children) {
+            if (synTreeNode instanceof Block) ((Block) synTreeNode).checkErrorInFunc();
+            else synTreeNode.checkError();
         }
         if (isleave)
             SymbolTableBuilder.getInstance().leaveBlock();
@@ -90,7 +89,7 @@ public class FuncDef extends Node {
             ErrorList.AddError(new Error(children.get(1).getEndLine(), ErrorType.b));
         }
         boolean hasParam = false;
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n instanceof FuncFParams) {
                 hasParam = true;
             }
@@ -98,14 +97,14 @@ public class FuncDef extends Node {
         Function function = new Function(functionType == FunctionType.FUNC_INT ? new Integer32Type() : new VoidType(), funcName, hasParam);
         symbol.setLlvmValue(function);
         LLVM_Builder.getInstance().addFunction(function);
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n instanceof FuncFParams) n.genLLVMir();
         }
         LLVM_Builder.getInstance().addNewBasicBlock(new BasicBlock());
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n instanceof FuncFParams) ((FuncFParams) n).setParamLLVMForFunc();
         }
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (!(n instanceof FuncFParams)) n.genLLVMir();
         }
         if (function.getType() instanceof VoidType && !function.isLastInstrReturnVoid()) {

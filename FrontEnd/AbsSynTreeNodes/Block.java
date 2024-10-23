@@ -1,15 +1,14 @@
 package FrontEnd.AbsSynTreeNodes;
 
-import Enums.FunctionType;
-import Enums.SyntaxVarType;
+import FrontEnd.Parser.FunctionType;
 import FrontEnd.AbsSynTreeNodes.Stmt.Stmt;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
-import Ir_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Value;
 
 import java.util.ArrayList;
 
 public class Block extends Stmt {
-    public Block(SyntaxVarType type, ArrayList<Node> children) {
+    public Block(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 
@@ -25,7 +24,7 @@ public class Block extends Stmt {
     }
 
     public boolean isReturnIntInFunc() {
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n instanceof BlockItem && ((BlockItem) n).getReturnType() == FunctionType.FUNC_INT) return true;
         }
         return false;
@@ -33,7 +32,7 @@ public class Block extends Stmt {
 
     public ArrayList<Integer> getReturnIntLine() {
         ArrayList<Integer> ret = new ArrayList<>();
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n instanceof BlockItem && ((BlockItem) n).getReturnType() == FunctionType.FUNC_INT) ret.add(n.getStartLine());
         }
         return ret;

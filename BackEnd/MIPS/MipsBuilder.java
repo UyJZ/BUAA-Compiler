@@ -4,10 +4,10 @@ import BackEnd.MIPS.Assembly.Asm;
 import BackEnd.MIPS.Assembly.BlockAsm;
 import BackEnd.MIPS.Assembly.Data;
 import BackEnd.MIPS.Assembly.FunctionAsm;
-import Ir_LLVM.LLVM_Module;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.Function;
+import IR_LLVM.LLVM_Module;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.Function;
 
 import java.io.PrintStream;
 import java.util.ArrayList;

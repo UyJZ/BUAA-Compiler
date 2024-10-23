@@ -1,18 +1,17 @@
 package FrontEnd.AbsSynTreeNodes.Stmt;
 
-import Enums.SyntaxVarType;
 import FrontEnd.AbsSynTreeNodes.Exp.Exp;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 
 import java.util.ArrayList;
 
 public class ExpStmt extends Stmt {
     private Exp exp;
 
-    public ExpStmt(SyntaxVarType type, ArrayList<Node> children) {
+    public ExpStmt(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
-        for (Node node : children) {
-            if (node instanceof Exp) exp = (Exp) node;
+        for (SynTreeNode synTreeNode : children) {
+            if (synTreeNode instanceof Exp) exp = (Exp) synTreeNode;
         }
     }
 }

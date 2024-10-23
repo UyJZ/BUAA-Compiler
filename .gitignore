@@ -29,3 +29,4 @@ replay_pid*
 /out/
 *.txt
 *.asm
+/META-INF/

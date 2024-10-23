@@ -1,25 +1,24 @@
 package FrontEnd.AbsSynTreeNodes.Exp;
 
-import Enums.SyntaxVarType;
-import Enums.tokenType;
-import FrontEnd.AbsSynTreeNodes.Node;
-import FrontEnd.AbsSynTreeNodes.TokenNode;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.ConstInteger;
-import Ir_LLVM.LLVM_Values.Instr.BinaryInstr;
-import Ir_LLVM.LLVM_Types.Integer32Type;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.AbsSynTreeNodes.TokenSynTreeNode;
+import FrontEnd.Lexer.Token;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.ConstInteger;
+import IR_LLVM.LLVM_Values.Instr.BinaryInstr;
+import IR_LLVM.LLVM_Types.Integer32Type;
 
 import java.util.ArrayList;
 
-public class MulExp extends Node {
-    public MulExp(SyntaxVarType type, ArrayList<Node> children) {
+public class MulExp extends SynTreeNode {
+    public MulExp(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 
     @Override
     public int getDim() {
-        for (Node n : children) if (n.getDim() != -1) return n.getDim();
+        for (SynTreeNode n : children) if (n.getDim() != -1) return n.getDim();
         return -1;
     }
 
@@ -28,7 +27,7 @@ public class MulExp extends Node {
         else {
             int a = ((MulExp) children.get(0)).calc();
             int b = ((UnaryExp) children.get(2)).calc();
-            switch (((TokenNode) children.get(1)).getTokenType()) {
+            switch (((TokenSynTreeNode) children.get(1)).getTokenType()) {
                 case MULT -> {
                     return a * b;
                 }
@@ -54,7 +53,7 @@ public class MulExp extends Node {
             LLVM_Value operand2 = children.get(2).genLLVMir();
             BinaryInstr.op Op;
             if (operand1 instanceof ConstInteger constInteger && operand2 instanceof ConstInteger constInteger1) {
-                switch (((TokenNode) children.get(1)).getTokenType()) {
+                switch (((TokenSynTreeNode) children.get(1)).getTokenType()) {
                     case MULT -> {
                         return new ConstInteger(constInteger.getVal() * constInteger1.getVal());
                     }
@@ -69,29 +68,29 @@ public class MulExp extends Node {
                     }
                 }
             } else if (operand1 instanceof ConstInteger constInteger) {
-                if (constInteger.getVal() == 1 && ((TokenNode) children.get(1)).getTokenType() == tokenType.MULT) {
+                if (constInteger.getVal() == 1 && ((TokenSynTreeNode) children.get(1)).getTokenType() == Token.TokenType.MULT) {
                     return operand2;
                 } else if (constInteger.getVal() == 0) {
                     return new ConstInteger(0);
                 }
             } else if (operand2 instanceof ConstInteger constInteger) {
-                if (constInteger.getVal() == 1 && ((TokenNode) children.get(1)).getTokenType() == tokenType.MULT) {
+                if (constInteger.getVal() == 1 && ((TokenSynTreeNode) children.get(1)).getTokenType() == Token.TokenType.MULT) {
                     return operand1;
-                } else if (constInteger.getVal() == 0 && ((TokenNode) children.get(1)).getTokenType() == tokenType.MULT) {
+                } else if (constInteger.getVal() == 0 && ((TokenSynTreeNode) children.get(1)).getTokenType() == Token.TokenType.MULT) {
                     return new ConstInteger(0);
-                } else if (constInteger.getVal() == 1 && ((TokenNode) children.get(1)).getTokenType() == tokenType.DIV) {
+                } else if (constInteger.getVal() == 1 && ((TokenSynTreeNode) children.get(1)).getTokenType() == Token.TokenType.DIV) {
                     return operand1;
-                } else if (constInteger.getVal() == 1 && ((TokenNode) children.get(1)).getTokenType() == tokenType.MOD) {
+                } else if (constInteger.getVal() == 1 && ((TokenSynTreeNode) children.get(1)).getTokenType() == Token.TokenType.MOD) {
                     return new ConstInteger(0);
                 }
             } else if (operand1 == operand2) {
-                if (((TokenNode) children.get(1)).getTokenType() == tokenType.DIV) {
+                if (((TokenSynTreeNode) children.get(1)).getTokenType() == Token.TokenType.DIV) {
                     return new ConstInteger(1);
-                } else if (((TokenNode) children.get(1)).getTokenType() == tokenType.MOD) {
+                } else if (((TokenSynTreeNode) children.get(1)).getTokenType() == Token.TokenType.MOD) {
                     return new ConstInteger(0);
                 }
             }
-            switch (((TokenNode) children.get(1)).getTokenType()) {
+            switch (((TokenSynTreeNode) children.get(1)).getTokenType()) {
                 case MULT -> {
                     Op = BinaryInstr.op.MUL;
                 }

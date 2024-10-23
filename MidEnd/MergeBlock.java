@@ -1,8 +1,8 @@
 package MidEnd;
 
-import Ir_LLVM.LLVM_Module;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.Function;
+import IR_LLVM.LLVM_Module;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.Function;
 
 public class MergeBlock {
     private final LLVM_Module LLVMModule;

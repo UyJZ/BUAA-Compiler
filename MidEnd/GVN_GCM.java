@@ -1,10 +1,10 @@
 package MidEnd;
 
-import Ir_LLVM.LLVM_Module;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.ConstInteger;
-import Ir_LLVM.LLVM_Values.Function;
-import Ir_LLVM.LLVM_Values.Instr.*;
+import IR_LLVM.LLVM_Module;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.ConstInteger;
+import IR_LLVM.LLVM_Values.Function;
+import IR_LLVM.LLVM_Values.Instr.*;
 
 import java.util.HashMap;
 import java.util.Iterator;

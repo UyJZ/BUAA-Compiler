@@ -1,25 +1,24 @@
 package FrontEnd.AbsSynTreeNodes.Stmt;
 
-import Enums.FunctionType;
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.Parser.FunctionType;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 import FrontEnd.AbsSynTreeNodes.Exp.Exp;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.Instr.terminatorInstr.ReturnInstr;
-import Ir_LLVM.LLVM_Types.Integer32Type;
-import Ir_LLVM.LLVM_Types.VoidType;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.Instr.terminatorInstr.ReturnInstr;
+import IR_LLVM.LLVM_Types.Integer32Type;
+import IR_LLVM.LLVM_Types.VoidType;
 
 import java.util.ArrayList;
 
 public class ReturnStmt extends Stmt {
-    public ReturnStmt(SyntaxVarType type, ArrayList<Node> children) {
+    public ReturnStmt(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 
     public FunctionType getReturnType() {
-        for (Node n : children) {
+        for (SynTreeNode n : children) {
             if (n instanceof Exp) {
                 return FunctionType.FUNC_INT;
             }

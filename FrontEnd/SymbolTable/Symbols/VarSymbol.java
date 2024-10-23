@@ -1,12 +1,12 @@
 package FrontEnd.SymbolTable.Symbols;
 
-import Enums.SymbolType;
+import FrontEnd.SymbolTable.SymbolType;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
-import Ir_LLVM.InitializedValue;
-import Ir_LLVM.LLVM_Types.ArrayType;
-import Ir_LLVM.LLVM_Types.Integer32Type;
-import Ir_LLVM.LLVM_Types.LLVMType;
-import Ir_LLVM.LLVM_Types.PointerType;
+import IR_LLVM.InitializedValue;
+import IR_LLVM.LLVM_Types.ArrayType;
+import IR_LLVM.LLVM_Types.Integer32Type;
+import IR_LLVM.LLVM_Types.LLVMType;
+import IR_LLVM.LLVM_Types.PointerType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +38,7 @@ public class VarSymbol extends Symbol {
         this.isConst = isConst;
         this.dim = dim;
         this.isGlobal = SymbolTableBuilder.getInstance().isGlobal();
-        this.type = symbolType == SymbolType.SYMBOL_VAR ? new Ir_LLVM.LLVM_Types.Integer32Type() : new Ir_LLVM.LLVM_Types.VoidType();
+        this.type = symbolType == SymbolType.SYMBOL_VAR ? new IR_LLVM.LLVM_Types.Integer32Type() : new IR_LLVM.LLVM_Types.VoidType();
         isCalcAble = false;
     }
 

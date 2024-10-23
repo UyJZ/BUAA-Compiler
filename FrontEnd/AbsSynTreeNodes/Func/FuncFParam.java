@@ -1,42 +1,41 @@
 package FrontEnd.AbsSynTreeNodes.Func;
 
-import Enums.ErrorType;
-import Enums.SymbolType;
-import Enums.SyntaxVarType;
-import Enums.tokenType;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import FrontEnd.AbsSynTreeNodes.TokenSynTreeNode;
+import FrontEnd.ErrorProcesser.ErrorType;
+import FrontEnd.Lexer.Token;
+import FrontEnd.SymbolTable.SymbolType;
 import FrontEnd.ErrorProcesser.Error;
 import FrontEnd.ErrorProcesser.ErrorList;
 import FrontEnd.ErrorProcesser.ErrorExceptions.RenameException;
 import FrontEnd.AbsSynTreeNodes.Exp.ConstExp;
-import FrontEnd.AbsSynTreeNodes.Node;
-import FrontEnd.AbsSynTreeNodes.TokenNode;
 import FrontEnd.SymbolTable.Symbols.Symbol;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
 import FrontEnd.SymbolTable.Symbols.VarSymbol;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.Instr.AllocaInst;
-import Ir_LLVM.LLVM_Values.Instr.StoreInstr;
-import Ir_LLVM.LLVM_Types.LLVMType;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.Instr.AllocaInst;
+import IR_LLVM.LLVM_Values.Instr.StoreInstr;
+import IR_LLVM.LLVM_Types.LLVMType;
 
 import java.util.ArrayList;
 
-public class FuncFParam extends Node {
+public class FuncFParam extends SynTreeNode {
 
-    public FuncFParam(SyntaxVarType type, ArrayList<Node> children) {
+    public FuncFParam(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 
     public String getName() {
-        return ((TokenNode) children.get(1)).getIdentName();
+        return ((TokenSynTreeNode) children.get(1)).getIdentName();
     }
 
     public int getDim() {
         int dim = 0;
         if (children.size() == 2) return dim;
-        if (children.get(2) instanceof TokenNode && ((TokenNode) children.get(2)).getTokenType() == tokenType.LBRACK)
+        if (children.get(2) instanceof TokenSynTreeNode && ((TokenSynTreeNode) children.get(2)).getTokenType() == Token.TokenType.LBRACK)
             dim++;
-        for (Node n : children) if (n instanceof ConstExp) dim++;
+        for (SynTreeNode n : children) if (n instanceof ConstExp) dim++;
         return dim;
     }
 
@@ -54,7 +53,7 @@ public class FuncFParam extends Node {
     public LLVM_Value genLLVMir() {
         try {
             int width = 0;
-            for (Node n : children) {
+            for (SynTreeNode n : children) {
                 if (n instanceof ConstExp) width = ((ConstExp) n).calc();
             }
             VarSymbol symbol = new VarSymbol(getName(), SymbolType.SYMBOL_VAR, getDim(), false, width);

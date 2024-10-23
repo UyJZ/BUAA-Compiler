@@ -1,12 +1,11 @@
 package FrontEnd.AbsSynTreeNodes.Var;
 
-import Enums.SyntaxVarType;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 
 import java.util.ArrayList;
 
-public class VarDecl extends Node {
-    public VarDecl(SyntaxVarType type, ArrayList<Node> children) {
+public class VarDecl extends SynTreeNode {
+    public VarDecl(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 }

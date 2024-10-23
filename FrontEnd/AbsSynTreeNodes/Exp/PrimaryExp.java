@@ -1,20 +1,19 @@
 package FrontEnd.AbsSynTreeNodes.Exp;
 
-import Enums.SyntaxVarType;
 import FrontEnd.AbsSynTreeNodes.LVal;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 import FrontEnd.AbsSynTreeNodes.Var.Number;
-import Ir_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Value;
 
 import java.util.ArrayList;
 
-public class PrimaryExp extends Node {
-    public PrimaryExp(SyntaxVarType type, ArrayList<Node> children) {
+public class PrimaryExp extends SynTreeNode {
+    public PrimaryExp(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 
     public int getDim() {
-        for (Node n : children) if (n.getDim() != -1) return n.getDim();
+        for (SynTreeNode n : children) if (n.getDim() != -1) return n.getDim();
         return -1;
     }
 

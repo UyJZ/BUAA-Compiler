@@ -1,9 +1,9 @@
 package MidEnd;
 
-import Ir_LLVM.LLVM_Module;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.Function;
+import IR_LLVM.LLVM_Module;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.Function;
 
 import java.util.HashMap;
 import java.util.HashSet;

@@ -1,17 +1,16 @@
 package FrontEnd.AbsSynTreeNodes.Stmt;
 
-import Enums.SyntaxVarType;
 import FrontEnd.AbsSynTreeNodes.Cond;
-import FrontEnd.AbsSynTreeNodes.Node;
-import Ir_LLVM.LLVM_Builder;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.BasicBlock;
-import Ir_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
+import IR_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.Instr.terminatorInstr.BranchInstr;
 
 import java.util.ArrayList;
 
 public class IfStmt extends Stmt {
-    public IfStmt(SyntaxVarType type, ArrayList<Node> children) {
+    public IfStmt(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

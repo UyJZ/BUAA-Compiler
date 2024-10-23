@@ -1,6 +1,6 @@
 package BackEnd.MIPS.Assembly;
 
-import Ir_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Values.BasicBlock;
 
 import java.util.ArrayList;
 

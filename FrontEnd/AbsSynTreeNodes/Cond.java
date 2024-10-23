@@ -1,17 +1,16 @@
 package FrontEnd.AbsSynTreeNodes;
 
-import Enums.SyntaxVarType;
 import FrontEnd.AbsSynTreeNodes.Exp.LOrExp;
-import Ir_LLVM.LLVM_Value;
-import Ir_LLVM.LLVM_Values.BasicBlock;
+import IR_LLVM.LLVM_Value;
+import IR_LLVM.LLVM_Values.BasicBlock;
 
 import java.util.ArrayList;
 
-public class Cond extends Node {
+public class Cond extends SynTreeNode {
 
     private BasicBlock trueBlock, falseBlock;
 
-    public Cond(SyntaxVarType type, ArrayList<Node> children) {
+    public Cond(SyntaxVarType type, ArrayList<SynTreeNode> children) {
         super(type, children);
     }
 

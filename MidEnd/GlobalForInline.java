@@ -1,7 +1,7 @@
 package MidEnd;
 
-import Ir_LLVM.LLVM_Module;
-import Ir_LLVM.LLVM_Values.GlobalVar;
+import IR_LLVM.LLVM_Module;
+import IR_LLVM.LLVM_Values.GlobalVar;
 
 import java.util.ArrayList;
 

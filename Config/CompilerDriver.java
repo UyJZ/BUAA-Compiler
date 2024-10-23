@@ -4,11 +4,11 @@ import BackEnd.MIPS.MipsBuilder;
 import FrontEnd.ErrorProcesser.ErrorList;
 import FrontEnd.Lexer.Lexer;
 import FrontEnd.Lexer.Token;
-import FrontEnd.AbsSynTreeNodes.Node;
+import FrontEnd.AbsSynTreeNodes.SynTreeNode;
 import FrontEnd.Parser.Parser;
 import FrontEnd.SymbolTable.SymbolTableBuilder;
 import MidEnd.Optimizer;
-import Ir_LLVM.LLVM_Builder;
+import IR_LLVM.LLVM_Builder;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -36,7 +36,7 @@ public class CompilerDriver {
         } else if (Tasks.isLLVMoutput) {
             assert (Tasks.getOutputPath().equals("llvm_ir.txt"));
             Parser parser = new Parser(lexer.getTokenStream());
-            Node c = parser.parse();
+            SynTreeNode c = parser.parse();
             c.checkError();
             ErrorList.showErrorMsg(new PrintStream(new FileOutputStream("error.txt")));
             if (ErrorList.getErrors().size() == 0) {
@@ -52,7 +52,7 @@ public class CompilerDriver {
             }
         } else if (Tasks.isMIPSoutput) {
             Parser parser = new Parser(lexer.getTokenStream());
-            Node c = parser.parse();
+            SynTreeNode c = parser.parse();
             if (Tasks.isErrorHandle) {
                 c.checkError();
                 ErrorList.showErrorMsg(new PrintStream(new FileOutputStream("error.txt")));
