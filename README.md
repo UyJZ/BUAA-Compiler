@@ -1,7 +1,7 @@
 # BUAA-Compiler
 My SysyCompiler
 
-中间代码为 llvm（支持`phi`指令），中间代码为四元式的可以参考https://github.com/MarSeventh/SysY-Compiler🥰🥰🥰
+中间代码为 llvm（支持`phi`指令），中间代码为四元式的可以参考https://github.com/MarSeventh/SysY-Compiler 🥰🥰🥰
 
 目标代码为MIPS
 
